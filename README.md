@@ -84,9 +84,9 @@ skills/
 
 ### Access Control Check
 
-/evidence/access-control-audit-report-v2.md
+/Evidence/access-control-audit-report-v2.md
 
-![image-20260420162019409](/Users/test/Library/Application Support/typora-user-images/image-20260420162019409.png)
+![Access_proof](./Images/Access_proof.png)
 
 ---
 
