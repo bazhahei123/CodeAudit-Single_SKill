@@ -90,6 +90,6 @@ skills/
 
 ---
 
-## Need YouR Help
+## Need Your Help
 
-still developing，please give a star if it helps. Most of this project was completed with the help of AI, so  if it succeeds or fails, please file an issue for me.
+Still developing，please give a **star**🌟 if it helps. Most of this project was completed with the help of AI, so  if it succeeds or fails, please file an issue for me.
