@@ -94,7 +94,6 @@ Then load the matching reference file from `references/`:
 - Java → `references/java-cases.md`
 - Python → `references/python-cases.md`
 - PHP → `references/php-cases.md`
-- JavaScript / TypeScript → `references/javascript-cases.md`
 
 Also load `references/common-cases.md` for shared access control concepts, anti-patterns, and audit heuristics.
 
