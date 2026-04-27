@@ -1,73 +1,102 @@
-# AI Code Audit Source Skills Summary
+# AI Code Audit Skills Summary
 
-## 1. Overall Architecture
+## Description
+
+This repository contains two parallel audit skill sets:
+
+- `Sink_Audit_SKILL/`: sink-oriented vulnerability audit skills. These help verify whether untrusted data reaches dangerous operations without the required controls.
+- `Source_Audit_SKILL/`: source-oriented audit skills. These help discover where security-relevant values enter the application, who controls them, how trusted they are, and which downstream sink or control should be audited next.
+
+The source skills do not directly confirm vulnerabilities. They create structured source point inventories that can guide later sink-side validation.
+
+## 1. Current Repository Architecture
 
 ```text
-Source_Audit_SKILL/
-├── access-control-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── java-cases.md
-│       ├── python-cases.md
-│       └── php-cases.md
-├── bussiness-logic-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── authentication-cases.md
-│       ├── common-cases.md
-│       ├── payment-cases.md
-│       ├── promotion-cases.md
-│       ├── rate-limit-cases.md
-│       ├── resource-consumption-cases.md
-│       ├── third-party-integration-cases.md
-│       └── workflow-cases.md
-├── deserialization-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── java-cases.md
-│       ├── php-cases.md
-│       └── python-cases.md
-├── file-path-handling-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── java-cases.md
-│       ├── php-cases.md
-│       └── python-cases.md
-├── rce-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── java-cases.md
-│       ├── php-cases.md
-│       └── python-cases.md
-├── sql-injection-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── java-sql-cases.md
-│       ├── php-sql-cases.md
-│       └── python-sql-cases.md
-├── ssrf-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── java-cases.md
-│       ├── php-cases.md
-│       └── python-cases.md
-└── xss-check/
-    ├── SKILL.md
-    └── references/
-        ├── common-cases.md
-        ├── javascript-cases.md
-        ├── java-cases.md
-        ├── php-cases.md
-        └── python-cases.md
+CodeAudit-Single_SKill/
+├── Sink_Audit_SKILL/
+│   ├── access-control-check/
+│   ├── bussiness-logic-check/
+│   ├── deserialization-check/
+│   ├── file-path-handling-check/
+│   ├── rce-check/
+│   ├── sql-injection-check/
+│   ├── ssrf-check/
+│   └── xss-check/
+├── Source_Audit_SKILL/
+│   ├── access-control-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
+│   ├── bussiness-logic-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── authentication-cases.md
+│   │       ├── common-cases.md
+│   │       ├── payment-cases.md
+│   │       ├── promotion-cases.md
+│   │       ├── rate-limit-cases.md
+│   │       ├── resource-consumption-cases.md
+│   │       ├── third-party-integration-cases.md
+│   │       └── workflow-cases.md
+│   ├── deserialization-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
+│   ├── file-path-handling-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
+│   ├── rce-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
+│   ├── sql-injection-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-sql-cases.md
+│   │       ├── php-sql-cases.md
+│   │       └── python-sql-cases.md
+│   ├── ssrf-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
+│   └── xss-check/
+│       ├── SKILL.md
+│       └── references/
+│           ├── common-cases.md
+│           ├── javascript-cases.md
+│           ├── java-cases.md
+│           ├── php-cases.md
+│           └── python-cases.md
+├── Evidence/
+├── Images/
+└── README.md
 ```
 
-## 2. Skill Coverage Summary
+## 2. Source Skill Summary
+
+Each source skill mirrors the corresponding sink skill name under `Sink_Audit_SKILL/`, but changes the audit perspective:
+
+```text
+sink audit:   Can this value reach a dangerous operation without enough protection?
+source audit: Where does this relevant value originate, who controls it, and what downstream sink or control should be checked next?
+```
 
 | Skill | Main Goal | Core Source Content |
 |---|---|---|
