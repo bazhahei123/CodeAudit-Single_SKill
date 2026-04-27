@@ -1,0 +1,413 @@
+# XSS Source Common Cases
+
+## Purpose
+
+This file defines shared XSS source concepts, source classification logic, rendering contexts, propagation patterns, false-positive controls, and evidence standards that apply across languages, templates, and rendering frameworks.
+
+Use this file as the base reference for XSS source review before loading any language-specific reference.
+
+This file explains:
+- what a rendering-relevant source point is,
+- how to distinguish source, propagation, rendering boundary, browser context, sink, and control from a source-review perspective,
+- how to classify trust boundaries,
+- how to reason about reflected, stored, DOM, rich-text, markdown, API-delivered, and cross-layer rendering sources,
+- when to record `Confirmed source`, `Suspected source`, `Not enough evidence`, or `Probably irrelevant`.
+
+This reference is guidance, not proof. Do not report a vulnerability only because code contains a source described here. Always verify the real source origin, real propagation path, and real downstream rendering relevance in the target code.
+
+---
+
+# 1. Core Concepts
+
+## 1.1 Rendering-relevant source point
+
+A rendering-relevant source point is where data that may later influence browser-visible content, browser-interpreted markup, client-side HTML insertion, script data, attribute values, URL values, rich text, markdown, or raw HTML enters or becomes available to the application.
+
+Examples:
+- `q` query parameter shown on a search page
+- `displayName` stored in a user profile
+- comment body displayed in a thread
+- CMS article body rendered as rich text
+- markdown submitted to a preview endpoint
+- backend API `bodyHtml` field consumed by a frontend component
+- `location.hash` read by browser-side routing logic
+- `postMessage` payload displayed in a panel
+- value named `safeHtml` passed into a raw HTML component
+
+A source point is an audit starting point, not proof of a vulnerability.
+
+## 1.2 Source, propagation, rendering boundary, sink, and context
+
+### Source
+The origin of data that may be copied, normalized, serialized, escaped, sanitized, marked safe, stored, reloaded, or passed toward rendering behavior.
+
+Examples:
+- request query parameter
+- request body field
+- uploaded filename
+- profile field
+- stored comment
+- markdown body
+- API response field
+- `location.hash`
+- localStorage value
+- `postMessage` payload
+
+### Propagation
+The way a source is copied, transformed, concatenated, serialized, sanitized, marked trusted, stored, or passed through helper functions before rendering.
+
+Examples:
+- controller request value to template model
+- database field to API JSON
+- markdown to HTML conversion
+- sanitizer output to raw HTML component
+- browser-side API field to `innerHTML`
+- profile field to admin dashboard
+
+### Rendering boundary
+The point where application data begins influencing browser interpretation or visible output.
+
+Examples:
+- adding a value to a template model
+- building an HTML response string
+- passing HTML to a raw render helper
+- serializing data into a script block
+- placing a value in `href`, `src`, `style`, or event handler contexts
+- assigning data to a frontend component prop
+- passing data to a DOM insertion helper
+
+### Sink
+The API, template construct, component, or browser operation that actually renders the data.
+
+Examples:
+- server-side template output
+- raw HTML rendering
+- DOM HTML insertion
+- inline script data
+- event handler attributes
+- URL-based execution contexts
+- style/CSS contexts
+- rich content preview/final renderers
+
+### Browser context
+The browser interpretation context that determines what control is needed.
+
+Examples:
+- HTML text
+- HTML attribute
+- JavaScript string or script block
+- URL attribute
+- style/CSS
+- raw markup
+- DOM insertion
+- framework raw HTML render
+
+Source discovery should document enough downstream use to explain why the source matters.
+
+---
+
+# 2. Trust Boundary Classification
+
+## 2.1 Client-controlled
+The value comes from request path, query string, request body, form data, headers, cookies, GraphQL variables, RPC arguments, uploaded filenames, uploaded metadata, import rows, URL fragments, or other user-controlled browser inputs.
+
+## 2.2 External-system-controlled
+The value comes from `postMessage`, WebSocket/EventSource messages, third-party widget payloads, queue messages, webhooks, partner payloads, provider events, internal service responses, or integration sync. It is only trusted after origin, integrity, and scope are verified.
+
+## 2.3 Stored attacker-influenced
+The value is read from database, cache, object storage, CMS storage, profile records, comments, tickets, messages, rich-text fields, markdown fields, notification templates, saved report labels, admin-configured content, or imported records, and earlier attacker influence is possible.
+
+## 2.4 Server-trusted
+The value is fixed in trusted server-side code, generated by trusted backend logic, selected from a strict allowlist, or derived from trusted configuration with no attacker-controlled content.
+
+## 2.5 Mixed
+The value combines untrusted input with trusted data, or an untrusted value is escaped, sanitized, serialized safely, allowlisted, constrained, marked safe after a trusted pipeline, or transformed before use.
+
+## 2.6 Unclear
+The origin cannot be determined from visible code.
+
+---
+
+# 3. Shared Source Categories
+
+## 3.1 Reflected input sources
+Values supplied by a request or browser interaction and rendered immediately.
+
+Examples:
+- search query
+- error message input
+- preview form content
+- redirect message
+- route parameter in page title
+
+Audit relevance:
+Trace whether the value is rendered as text, attribute, URL, script data, raw HTML, or client-side DOM content.
+
+## 3.2 Stored content sources
+Values written earlier and displayed later.
+
+Examples:
+- comments
+- profile fields
+- chat messages
+- CMS articles
+- ticket content
+- admin-configured banners
+- notification templates
+
+Audit relevance:
+Stored source paths require writer-path review and every display path review, including admin and preview views.
+
+## 3.3 Template and response model sources
+Values passed to templates, views, partials, response builders, or server-side render helpers.
+
+Examples:
+- model attributes
+- view context values
+- server-generated HTML snippets
+- script data variables
+- email/web preview values
+
+Audit relevance:
+The same value may be safe in text context but unsafe in raw HTML, script, attribute, or URL contexts.
+
+## 3.4 Browser and client-side sources
+Values originating or re-entering in the browser.
+
+Examples:
+- `location.search`
+- `location.hash`
+- `document.URL`
+- `window.name`
+- `postMessage`
+- localStorage/sessionStorage
+- WebSocket/EventSource data
+- API JSON values
+- route params
+- frontend store values
+
+Audit relevance:
+Backend JSON can still be source data if frontend code later inserts it into HTML or script-relevant contexts.
+
+## 3.5 Rich text, markdown, and trusted-HTML sources
+Values intended to contain formatting or markup.
+
+Examples:
+- markdown input
+- WYSIWYG HTML
+- sanitized HTML
+- `safeHtml`
+- `trustedHtml`
+- DOMPurify output
+- `Markup` / `SafeString`
+- editor preview content
+
+Audit relevance:
+Source discovery should distinguish original untrusted content from sanitizer output and values marked trusted.
+
+## 3.6 Cross-layer and alternate render sources
+Values crossing from one layer or render path to another.
+
+Examples:
+- backend API field to React prop
+- preview renderer to final renderer
+- user view to admin view
+- web page to email preview
+- markdown renderer to export path
+- notification content to dashboard
+
+Audit relevance:
+Equivalent content can be handled safely in one path and unsafely in another.
+
+---
+
+# 4. Rendering Context Source Types
+
+## 4.1 HTML text context sources
+Sources that render inside normal element text.
+
+Audit relevance:
+Usually require HTML escaping or framework-safe text rendering.
+
+## 4.2 HTML attribute context sources
+Sources that render inside attributes such as `title`, `value`, `data-*`, `href`, or `src`.
+
+Audit relevance:
+Require attribute-safe handling, quote safety, and URL scheme checks where applicable.
+
+## 4.3 JavaScript context sources
+Sources that render inside `<script>`, inline JavaScript strings, JSON bootstrapping, event handlers, or script templates.
+
+Audit relevance:
+Require safe serialization and context-aware handling; HTML escaping alone is not enough.
+
+## 4.4 URL context sources
+Sources that render into URL-bearing attributes or client-side navigation APIs.
+
+Audit relevance:
+Require scheme allowlists and context-appropriate encoding.
+
+## 4.5 Raw HTML and rich markup sources
+Sources that render as HTML instead of text.
+
+Audit relevance:
+Require trusted origin or strong sanitization immediately before raw rendering.
+
+## 4.6 DOM insertion and framework raw-render sources
+Sources passed into DOM or framework HTML-interpreting sinks.
+
+Audit relevance:
+Require safe text APIs, strict sanitization, or a trusted HTML pipeline.
+
+---
+
+# 5. Shared Source Patterns
+
+## S1. Request value becomes page content
+Example idea:
+- a search term, error value, or preview input enters a template model or frontend component.
+
+Audit relevance:
+Trace the browser context where the source is rendered.
+
+## S2. Stored user content becomes display content
+Example idea:
+- profile bio, comment body, ticket text, or CMS body is loaded and rendered.
+
+Audit relevance:
+Identify writer path, all render paths, and whether any path marks the value raw or safe.
+
+## S3. Rich text or markdown becomes HTML
+Example idea:
+- markdown or WYSIWYG content is converted to HTML and rendered in preview or final display.
+
+Audit relevance:
+Identify source before conversion, sanitizer output, and raw render destination.
+
+## S4. API content becomes frontend HTML
+Example idea:
+- backend JSON field such as `body`, `bodyHtml`, `message`, or `description` is inserted by frontend code.
+
+Audit relevance:
+Trace from API source to component prop and browser sink.
+
+## S5. Browser-side source becomes DOM content
+Example idea:
+- `location.hash`, `postMessage`, storage, or WebSocket data reaches DOM update code.
+
+Audit relevance:
+Treat browser-side values as source points when attacker influence is possible.
+
+## S6. Safe/trusted wrapper source
+Example idea:
+- a value named `safeHtml`, `trustedContent`, `Markup`, `SafeString`, or sanitizer output is passed into a raw render helper.
+
+Audit relevance:
+Record both the pre-sanitization source and the trusted-wrapper source when visible.
+
+---
+
+# 6. False-Positive Controls
+
+Do not record a source point as high-priority if:
+- the value is fixed in trusted code,
+- the source is only used for logs, server-side decisions, or non-rendering metadata,
+- the downstream operation is a safe text-only sink and no alternate render path is visible,
+- the source is selected from a strict trusted allowlist,
+- the value cannot be influenced by an attacker or weakly trusted producer.
+
+Use `Suspected source` or `Not enough evidence` if:
+- the source is visible but final browser rendering is hidden,
+- the rendering sink is visible but source origin is hidden,
+- template behavior, framework escaping, sanitizer configuration, or wrapper behavior is unavailable,
+- storage writer paths are missing,
+- API-to-frontend flow is only partially visible.
+
+Do not over-claim based only on:
+- user input existing,
+- HTML-like data existing,
+- a sanitizer name,
+- a frontend framework being present,
+- a rich text feature existing,
+- an API returning strings without seeing frontend rendering.
+
+---
+
+# 7. Source Classification
+
+## Confirmed source
+Use `Confirmed source` when there is clear evidence that:
+- the source origin is visible,
+- it reaches template data, response construction, raw HTML data, sanitizer input/output, API-rendered content, frontend props, browser-side DOM data, or an equivalent rendering path,
+- and the trust boundary can be classified.
+
+## Suspected source
+Use `Suspected source` when:
+- a value appears rendering-relevant,
+- the origin or downstream rendering use is partially visible,
+- but hidden escaping, sanitization, serialization, framework behavior, storage, or wrapper behavior may change the classification.
+
+## Not enough evidence
+Use `Not enough evidence` when:
+- the source origin cannot be determined,
+- the downstream rendering relevance cannot be determined,
+- or critical template/frontend/rendering behavior is not visible.
+
+## Probably irrelevant
+Use `Probably irrelevant` when:
+- the value is visible,
+- downstream use is visible,
+- and it does not influence browser-rendered content, browser-interpreted contexts, rich-text conversion, API-fed rendering, DOM insertion, or alternate render paths.
+
+---
+
+# 8. What Good Evidence Looks Like
+
+Strong source point records usually include:
+- the exact entry point
+- the source value name
+- the source origin and trust boundary
+- propagation steps such as model assignment, storage, API serialization, markdown conversion, sanitization, safe-wrapper marking, component prop passing, or DOM data assignment
+- the first downstream rendering-relevant use
+- context if visible: HTML text, attribute, script, URL, raw HTML, DOM insertion, rich-text preview, final display, admin display, or frontend component
+- the follow-up render/context/control check needed
+
+Good source points usually answer:
+1. Where does the rendering-relevant value enter?
+2. Who controls or can influence it?
+3. Is it reflected input, stored content, template data, API content, browser-side data, markdown/rich text, safe HTML, or alternate render content?
+4. What browser-rendering behavior should be checked next?
+5. What code proves the connection?
+
+---
+
+# 9. Shared Follow-up Guidance
+
+After source discovery, the XSS audit should verify:
+- whether the source reaches a real browser-interpreted sink,
+- which rendering context is involved,
+- whether escaping is context-appropriate,
+- whether rich text or markdown is sanitized after conversion,
+- whether values marked safe or trusted have a real trusted pipeline,
+- whether frontend components use safe text rendering or raw HTML sinks,
+- whether preview, final display, admin display, email/web preview, export, and alternate paths enforce the same controls.
+
+Avoid weak conclusions such as:
+- source exists, therefore vulnerability exists,
+- template engine exists, therefore all rendering is safe,
+- JSON API exists, therefore XSS is impossible,
+- sanitizer name exists, therefore content is safe,
+- admin path exists, therefore source is trusted.
+
+---
+
+# 10. Shared Quick Checklist
+
+Use this as a reminder, not as a substitute for reasoning.
+
+- Is there a client-controlled, external-system-controlled, or stored attacker-influenced rendering source?
+- Does it influence text, attribute, JavaScript, URL, raw HTML, DOM, or framework rendering?
+- Is it stored or transformed before later rendering?
+- Is it passed through markdown, rich text, sanitizer, safe/trusted wrapper, or API serialization?
+- Does it cross from backend to frontend rendering?
+- What render/context/control check should review this source next?
