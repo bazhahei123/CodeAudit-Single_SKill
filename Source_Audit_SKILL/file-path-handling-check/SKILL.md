@@ -76,8 +76,8 @@ Focus on file-path source points in:
 # Audit Workflow
 
 1. Identify the primary backend language and major framework.
-2. Load `reference/common-cases.md`.
-3. Load the matching language reference file from `reference/`.
+2. Load `references/common-cases.md`.
+3. Load the matching language reference file from `references/`.
 4. Enumerate relevant source surfaces, especially download, preview, upload, import/export, archive extraction, template/resource loading, cleanup, file-management, and background-processing paths.
 5. Identify file-path-relevant source points, such as filenames, relative paths, resource names, template names, archive entry names, upload metadata, export destinations, stored paths, queue payloads, and cleanup targets.
 6. For each source point, determine whether it is client-controlled, external-system-controlled, stored attacker-influenced, server-trusted, mixed, or unclear.
@@ -90,26 +90,26 @@ Focus on file-path source points in:
 # Reference Loading Rules
 
 Always load:
-- `reference/common-cases.md`
+- `references/common-cases.md`
 
-Then load the matching language-specific reference file from `reference/`:
+Then load the matching language-specific reference file from `references/`:
 
-- Java -> `reference/java-cases.md`
-- Python -> `reference/python-cases.md`
-- PHP -> `reference/php-cases.md`
+- Java -> `references/java-cases.md`
+- Python -> `references/python-cases.md`
+- PHP -> `references/php-cases.md`
 
 If the project contains multiple languages, prioritize the language and framework that implement the actual filesystem or local resource path handling logic.
 
 Do not rely only on route names or parameter names; focus on where path-like values are built, normalized, resolved, mapped, or passed into file or resource operations.
 
-If the backend language is not one of the supported language-specific references, continue using `reference/common-cases.md` and rely only on clearly identified framework and code evidence.
+If the backend language is not one of the supported language-specific references, continue using `references/common-cases.md` and rely only on clearly identified framework and code evidence.
 
-If the language cannot be determined confidently, state the uncertainty and use only `reference/common-cases.md` plus directly observed code behavior.
+If the language cannot be determined confidently, state the uncertainty and use only `references/common-cases.md` plus directly observed code behavior.
 
 ## Reference usage rules
 
 - Use reference files as source discovery guidance, not as proof that a vulnerability exists.
-- `reference/common-cases.md` defines shared path source concepts, propagation patterns, trust boundaries, false-positive controls, and source output standards.
+- `references/common-cases.md` defines shared path source concepts, propagation patterns, trust boundaries, false-positive controls, and source output standards.
 - Language-specific reference files define framework source locations, path-like input shapes, language-specific APIs, and follow-up checks.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.

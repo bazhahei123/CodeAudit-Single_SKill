@@ -74,37 +74,40 @@ Focus on SSRF source points in:
 # Audit Workflow
 
 1. Identify the primary backend language, framework, and outbound request libraries.
-2. Load the matching language reference file from `references/`.
-3. Enumerate relevant source surfaces, especially webhook testers, callback configuration, URL previewers, screenshotters, crawlers, remote image/file loaders, import/render features, metadata fetchers, sitemap/feed readers, integration connectors, queue jobs, and generic HTTP helper services.
-4. Identify outbound-request-relevant source points, such as full URLs, hostnames, IPs, schemes, ports, paths, query strings, callback targets, redirect sources, proxy settings, internal-service target values, metadata endpoint values, stored endpoint records, and queued fetch payloads.
-5. For each source point, determine whether it is client-controlled, external-system-controlled, stored attacker-influenced, server-trusted, mixed, or unclear.
-6. Trace each source far enough to document downstream SSRF relevance, such as URL parsing, URL construction, host/path recomposition, outbound client calls, redirect-following clients, stored callback replay, renderer resource loading, or network wrapper calls.
-7. Review the code using the six source dimensions below.
-8. Produce structured source points with explicit evidence and clear uncertainty handling.
+2. Load `references/common-cases.md`.
+3. Load the matching language reference file from `references/`.
+4. Enumerate relevant source surfaces, especially webhook testers, callback configuration, URL previewers, screenshotters, crawlers, remote image/file loaders, import/render features, metadata fetchers, sitemap/feed readers, integration connectors, queue jobs, and generic HTTP helper services.
+5. Identify outbound-request-relevant source points, such as full URLs, hostnames, IPs, schemes, ports, paths, query strings, callback targets, redirect sources, proxy settings, internal-service target values, metadata endpoint values, stored endpoint records, and queued fetch payloads.
+6. For each source point, determine whether it is client-controlled, external-system-controlled, stored attacker-influenced, server-trusted, mixed, or unclear.
+7. Trace each source far enough to document downstream SSRF relevance, such as URL parsing, URL construction, host/path recomposition, outbound client calls, redirect-following clients, stored callback replay, renderer resource loading, or network wrapper calls.
+8. Review the code using the six source dimensions below.
+9. Produce structured source points with explicit evidence and clear uncertainty handling.
 
 ---
 
 # Reference Loading Rules
 
-Load the matching language-specific reference file from `references/`:
+Always load:
+- `references/common-cases.md`
+
+Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
 
-The original `ssrf-check` directory does not include a common reference file; do not reference a missing common file.
-
 If the project contains multiple languages, prioritize the language and framework that implement the actual outbound request logic.
 
 Do not rely only on URL field names or helper names; focus on where request targets are actually received, parsed, normalized, validated, resolved, redirected, and fetched.
 
-If the backend language is not one of the supported language-specific references, use this `SKILL.md` and rely only on clearly identified framework and code evidence.
+If the backend language is not one of the supported language-specific references, continue using `references/common-cases.md` and rely only on clearly identified framework and code evidence.
 
-If the language cannot be determined confidently, state the uncertainty and use this `SKILL.md` plus directly observed code behavior.
+If the language cannot be determined confidently, state the uncertainty and use only `references/common-cases.md` plus directly observed code behavior.
 
 ## Reference usage rules
 
 - Use reference files as source discovery guidance, not as proof that a vulnerability exists.
+- `references/common-cases.md` defines shared SSRF source concepts, source categories, trust boundaries, propagation patterns, false-positive controls, and source output standards.
 - Language-specific reference files define framework source locations, outbound-request source shapes, language-specific client APIs, and follow-up checks.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.

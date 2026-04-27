@@ -1,9 +1,9 @@
-# AI Code Audit Skills Summary
+# AI Code Audit Source Skills Summary
 
 ## 1. Overall Architecture
 
 ```text
-skills/
+Source_Audit_SKILL/
 ├── access-control-check/
 │   ├── SKILL.md
 │   └── references/
@@ -11,78 +11,78 @@ skills/
 │       ├── java-cases.md
 │       ├── python-cases.md
 │       └── php-cases.md
+├── bussiness-logic-check/
+│   ├── SKILL.md
+│   └── references/
+│       ├── authentication-cases.md
+│       ├── common-cases.md
+│       ├── payment-cases.md
+│       ├── promotion-cases.md
+│       ├── rate-limit-cases.md
+│       ├── resource-consumption-cases.md
+│       ├── third-party-integration-cases.md
+│       └── workflow-cases.md
+├── deserialization-check/
+│   ├── SKILL.md
+│   └── references/
+│       ├── common-cases.md
+│       ├── java-cases.md
+│       ├── php-cases.md
+│       └── python-cases.md
+├── file-path-handling-check/
+│   ├── SKILL.md
+│   └── references/
+│       ├── common-cases.md
+│       ├── java-cases.md
+│       ├── php-cases.md
+│       └── python-cases.md
+├── rce-check/
+│   ├── SKILL.md
+│   └── references/
+│       ├── common-cases.md
+│       ├── java-cases.md
+│       ├── php-cases.md
+│       └── python-cases.md
 ├── sql-injection-check/
 │   ├── SKILL.md
 │   └── references/
 │       ├── common-cases.md
-│       ├── java-cases.md
-│       ├── python-cases.md
-│       └── php-cases.md
-├── xss-check/
+│       ├── java-sql-cases.md
+│       ├── php-sql-cases.md
+│       └── python-sql-cases.md
+├── ssrf-check/
 │   ├── SKILL.md
 │   └── references/
 │       ├── common-cases.md
 │       ├── java-cases.md
-│       ├── python-cases.md
 │       ├── php-cases.md
-│       └── javascript-cases.md
-├── unsafe-deserialization-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── java-cases.md
-│       ├── python-cases.md
-│       └── php-cases.md
-├── business-logic-abuse-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── payment-cases.md
-│       ├── authentication-cases.md
-│       ├── rate-limit-cases.md
-│       ├── workflow-cases.md
-│       ├── promotion-cases.md
-│       ├── resource-consumption-cases.md
-│       └── third-party-integration-cases.md
-├── command-execution-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── java-cases.md
-│       ├── python-cases.md
-│       └── php-cases.md
-├── path-traversal-check/
-│   ├── SKILL.md
-│   └── references/
-│       ├── common-cases.md
-│       ├── java-cases.md
-│       ├── python-cases.md
-│       └── php-cases.md
-└── ssrf-check/
+│       └── python-cases.md
+└── xss-check/
     ├── SKILL.md
     └── references/
         ├── common-cases.md
+        ├── javascript-cases.md
         ├── java-cases.md
-        ├── python-cases.md
-        └── php-cases.md
+        ├── php-cases.md
+        └── python-cases.md
 ```
 
 ## 2. Skill Coverage Summary
 
-| Skill | Main Goal | Core Test Content |
+| Skill | Main Goal | Core Source Content |
 |---|---|---|
-| Access Control Check | Check whether identity, role, object scope, tenant scope, and business-state restrictions are correctly enforced. | Authentication boundary, function-level authorization, object-level authorization, business-context authorization, client-side only auth, consistency across routes/methods/layers. |
-| SQL Injection Check | Check whether untrusted input can alter query logic, query structure, or SQL execution behavior. | Source-to-query flow, unsafe query construction, parameterization and binding, ORDER BY / LIMIT / table / column control, ORM/raw query misuse, second-order SQLi. |
-| XSS Check | Check whether user-controlled content reaches browser-executable rendering contexts unsafely. | Reflected/stored/DOM XSS, unsafe template output, raw HTML sinks, script/attribute/URL contexts, markdown/rich-text rendering, frontend DOM/framework sinks, sanitizer misuse. |
-| Unsafe Deserialization Check | Check whether untrusted or weakly trusted data is restored into dangerous objects or types. | Untrusted input to deserializer, dangerous deserialization sinks, magic/lifecycle triggers, gadget behavior, integrity boundary failures, framework/library misuse, second-order restore paths. |
-| Business Logic Abuse Check | Check whether core business rules can be abused through wrong state, order, frequency, value, or beneficiary binding. | State transitions, workflow sequencing, idempotency/replay, rate/quota abuse, payment/accounting integrity, actor-target-beneficiary mismatch, promotions, callbacks, async jobs. |
-| Command Execution Check | Check whether untrusted input can influence commands, shells, interpreters, eval paths, or external tools. | Command construction, shell injection, argument/option injection, dangerous process APIs, eval/expression execution, external tool misuse, wrapper/helper sinks, second-order execution. |
-| Path Traversal Check | Check whether untrusted input can escape intended file/resource scope. | Arbitrary read, write, delete, overwrite, include/load paths, unsafe path joins, normalize vs canonical path, base-dir containment, symlink issues, archive extraction / zip slip. |
-| SSRF Check | Check whether untrusted input can influence outbound requests to unintended internal or privileged targets. | URL/host construction, outbound request sinks, internal network reachability, metadata access, redirect bypass, DNS/parser bypass, protocol misuse, indirect SSRF via preview/import/webhook/jobs. |
+| Access Control Source Check | Identify identity, role, object, tenant, relationship, and workflow-state sources that drive authorization decisions. | Principal sources, route/object IDs, tenant selectors, ownership attributes, delegated actors, policy context, client-supplied auth context. |
+| Business Logic Source Check | Identify business-state, actor, amount, quota, workflow, callback, promotion, and integration inputs that can influence business rule execution. | Payment values, account binding, rate/quota keys, state transition inputs, promotion claims, resource usage requests, third-party events. |
+| Deserialization Source Check | Identify serialized payload sources and type-selection inputs that may reach object restoration paths. | Request bodies, cookies, queues, cache records, files, session data, polymorphic type fields, framework binder inputs. |
+| File Path Handling Source Check | Identify path, filename, archive entry, storage key, and resource locator sources that may influence file operations. | Upload names, download paths, template names, include paths, object keys, archive entries, symlink-adjacent paths. |
+| RCE Source Check | Identify command, interpreter, script, template, plugin, expression, and external-tool inputs that may influence execution behavior. | Process arguments, shell fragments, eval expressions, template code, job payloads, environment/config values, tool options. |
+| SQL Injection Source Check | Identify query-shaping values that may influence SQL text, structure, identifiers, filters, ordering, or ORM criteria. | Request filters, sort/order fields, dynamic table/column names, raw fragments, imported values, second-order query inputs. |
+| SSRF Source Check | Identify URL, host, IP, callback, webhook, proxy, fetch, import, and redirect-controlled inputs that may influence outbound requests. | User URLs, avatar/image fetches, webhooks, integrations, preview/import jobs, metadata-like targets, DNS/redirect-influenced values. |
+| XSS Source Check | Identify browser-rendering-relevant inputs that may flow toward server-rendered pages, DOM rendering, rich text, Markdown, or frontend raw rendering. | Reflected request values, stored content, template model values, API-to-frontend fields, browser-side sources, trusted/safe HTML markers. |
 
-## 3 usage verification
+## 3. Usage Verification
 
-### Access Control Check
+### Access Control Source Check
 
 /Evidence/access-control-audit-report-v2.md
 
