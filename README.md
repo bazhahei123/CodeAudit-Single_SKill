@@ -15,13 +15,65 @@ The source skills do not directly confirm vulnerabilities. They create structure
 CodeAudit-Single_SKill/
 ├── Sink_Audit_SKILL/
 │   ├── access-control-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
 │   ├── bussiness-logic-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── authentication-cases.md
+│   │       ├── common-cases.md
+│   │       ├── payment-cases.md
+│   │       ├── promotion-cases.md
+│   │       ├── rate-limit-cases.md
+│   │       ├── resource-consumption-cases.md
+│   │       ├── third-party-integration-cases.md
+│   │       └── workflow-cases.md
 │   ├── deserialization-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
 │   ├── file-path-handling-check/
+│   │   ├── SKILL.md
+│   │   └── reference/
+│   │       ├── common-cases.md
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
 │   ├── rce-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
 │   ├── sql-injection-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── common-cases.md
+│   │       ├── java-sql-cases.md
+│   │       ├── php-sql-cases.md
+│   │       └── python-sql-cases.md
 │   ├── ssrf-check/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── java-cases.md
+│   │       ├── php-cases.md
+│   │       └── python-cases.md
 │   └── xss-check/
+│       ├── SKILL.md
+│       └── references/
+│           ├── common-cases.md
+│           ├── java-cases.md
+│           ├── javascript-cases.md
+│           ├── php-cases.md
+│           └── python-cases.md
 ├── Source_Audit_SKILL/
 │   ├── access-control-check/
 │   │   ├── SKILL.md
