@@ -12,3 +12,5 @@ It covers:
 - Nginx variable expansion / SSI risk
 - Raw backend response leakage
 - `merge_slashes off`
+
+References：https://blog.detectify.com/industry-insights/common-nginx-misconfigurations-that-leave-your-web-server-ope-to-attack/
