@@ -58,7 +58,215 @@ Look for:
 
 ---
 
-# 2. Python Unsafe Deserialization Anti-Patterns
+# 2. High-Coverage Python Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, sink behavior, trigger behavior, and missing controls.
+
+## 2.1 Web, API, and request entry candidates
+Search for:
+- `@app.route`
+- `@blueprint.route`
+- `@bp.route`
+- `Flask`
+- `request.data`
+- `request.get_data`
+- `request.form`
+- `request.files`
+- `request.cookies`
+- `request.headers`
+- `request.args`
+- `@api_view`
+- `APIView`
+- `ViewSet`
+- `ModelViewSet`
+- `GenericAPIView`
+- `parser_classes`
+- `FileUploadParser`
+- `MultiPartParser`
+- `path(`
+- `re_path(`
+- `url(`
+- `View`
+- `dispatch`
+- `post`
+- `get`
+- `put`
+- `patch`
+- `delete`
+- `@csrf_exempt`
+- `@app.post`
+- `@app.get`
+- `Body`
+- `File`
+- `UploadFile`
+- `Cookie`
+- `Header`
+- `Depends`
+- `Request`
+- `Form`
+- `aiohttp.web.post`
+- `tornado.web.RequestHandler`
+- `GraphQLView`
+- `Mutation`
+
+## 2.2 Message, worker, job, and import entry candidates
+Search for:
+- `@shared_task`
+- `@app.task`
+- `Celery`
+- `task_serializer`
+- `accept_content`
+- `kombu`
+- `enable_insecure_serializers`
+- `dramatiq.actor`
+- `rq.job`
+- `huey.task`
+- `on_message`
+- `consume`
+- `KafkaConsumer`
+- `pika`
+- `basic_consume`
+- `redis.pubsub`
+- `websocket`
+- `import`
+- `upload`
+- `restore`
+- `replay`
+- `sync`
+- `management command`
+- `BaseCommand`
+- `handle`
+- `cache.get`
+- `session`
+- `signed_cookie`
+
+## 2.3 Native object-restoration sink candidates
+Search for:
+- `pickle.load`
+- `pickle.loads`
+- `_pickle.loads`
+- `cPickle.loads`
+- `dill.load`
+- `dill.loads`
+- `cloudpickle.load`
+- `cloudpickle.loads`
+- `joblib.load`
+- `pandas.read_pickle`
+- `torch.load`
+- `numpy.load`
+- `allow_pickle=True`
+- `shelve.open`
+- `marshal.load`
+- `marshal.loads`
+- `copyreg`
+- `pickle.Unpickler`
+- `Unpickler.find_class`
+- `loads(data)`
+- `deserialize(data)`
+- `restore(data)`
+- `decode(data)`
+
+## 2.4 YAML, JSON object hook, and framework serializer candidates
+Search for:
+- `yaml.load`
+- `yaml.Loader`
+- `yaml.FullLoader`
+- `yaml.UnsafeLoader`
+- `yaml.unsafe_load`
+- `ruamel.yaml.YAML`
+- `typ='unsafe'`
+- `jsonpickle.decode`
+- `jsonpickle.loads`
+- `json.loads`
+- `object_hook`
+- `object_pairs_hook`
+- `msgpack.unpackb`
+- `ext_hook`
+- `raw=False`
+- `bson.decode`
+- `xmlrpc.client.loads`
+- `Serializer.loads`
+- `django.core.signing.loads`
+- `PickleSerializer`
+- `SESSION_SERIALIZER`
+- `cache serializer`
+- `redis serializer`
+- `kombu.serialization.register`
+
+## 2.5 Trigger and gadget behavior candidates
+Search for:
+- `__reduce__`
+- `__reduce_ex__`
+- `__setstate__`
+- `__getstate__`
+- `__getnewargs__`
+- `__getnewargs_ex__`
+- `__new__`
+- `__del__`
+- `find_class`
+- `persistent_load`
+- `object_hook`
+- `ext_hook`
+- `importlib.import_module`
+- `getattr`
+- `setattr`
+- `eval`
+- `exec`
+- `os.system`
+- `subprocess`
+- `open`
+- `requests.get`
+- `socket`
+- `Path`
+- `tempfile`
+
+## 2.6 Required-control candidates
+Search near sinks for:
+- `safe_load`
+- `CSafeLoader`
+- `SafeLoader`
+- `FullLoader` review
+- `allow_pickle=False`
+- `weights_only=True`
+- `RestrictedUnpickler`
+- `find_class` allowlist
+- `allowed`
+- `allowlist`
+- `signature`
+- `Signer`
+- `TimestampSigner`
+- `BadSignature`
+- `loads(..., salt=`
+- `max_age`
+- `schema`
+- `pydantic`
+- `dataclass`
+- `TypedDict`
+- `validate`
+- `content_type`
+- `accept_content`
+- `task_serializer='json'`
+
+## 2.7 Python graph search recipes
+Useful combinations:
+
+```text
+@app.route + pickle.loads
+request.data + pickle.loads
+APIView + yaml.load
+UploadFile + joblib.load
+cache.get + pickle.loads
+@shared_task + pickle.loads
+accept_content + pickle
+enable_insecure_serializers
+torch.load + request/file/import
+numpy.load + allow_pickle=True
+jsonpickle.decode + request
+```
+
+---
+
+# 3. Python Unsafe Deserialization Anti-Patterns
 
 ### A1. `pickle.loads` on request-derived data
 ```python
@@ -104,7 +312,7 @@ The code may assume integrity without verifying it strongly.
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-DESER-1: Direct pickle restore
 
@@ -149,7 +357,7 @@ Verify whether upstream producers can be attacker-influenced and whether safer f
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
 ## 4.1 Pickle heuristics
 Pay attention to:

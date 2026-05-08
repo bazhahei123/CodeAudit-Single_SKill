@@ -37,7 +37,220 @@ Source questions:
 
 ---
 
-# 2. Python Source Patterns
+# 2. High-Coverage Python SSRF Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows request-target construction, URL parsing, URL recomposition, host/scheme/port/path selection, redirect behavior, DNS-sensitive target choice, proxy/client options, stored callback replay, renderer imports, or outbound request wrapper relevance.
+
+## 2.1 Web, API, and request entry candidates
+
+Search for:
+- Django `View`
+- Django `APIView`
+- Django `ViewSet`
+- Django `GenericViewSet`
+- Django `ModelViewSet`
+- Django `urls.py`
+- `path(`
+- `re_path(`
+- `request.GET`
+- `request.POST`
+- `request.data`
+- `request.query_params`
+- `request.headers`
+- Flask `@app.route`
+- Flask `Blueprint`
+- `request.args`
+- `request.form`
+- `request.json`
+- `request.get_json`
+- `request.values`
+- FastAPI `@app.get`
+- FastAPI `@app.post`
+- FastAPI `APIRouter`
+- `Query`
+- `Path`
+- `Body`
+- `Header`
+- Pydantic model fields
+- Starlette `Request`
+- GraphQL resolvers
+- Graphene `mutate`
+- Strawberry resolvers
+
+## 2.2 Worker, message, webhook, preview, import, and admin entries
+
+Search for:
+- Celery `@app.task`
+- Celery `shared_task`
+- RQ jobs
+- Dramatiq actors
+- Huey tasks
+- APScheduler jobs
+- management commands
+- Click/Typer commands
+- webhook handlers
+- callback handlers
+- preview views
+- import views
+- export views
+- renderer jobs
+- screenshot jobs
+- crawler jobs
+- metadata jobs
+- admin connectivity tests
+- replay handlers
+- queue consumers
+- ETL/sync tasks
+
+## 2.3 Direct target and URL source candidates
+
+Search for request, schema, serializer, dict, task, or model fields named:
+- `url`
+- `uri`
+- `target`
+- `target_url`
+- `request_url`
+- `remote_url`
+- `external_url`
+- `callback`
+- `callback_url`
+- `webhook`
+- `webhook_url`
+- `redirect_url`
+- `return_url`
+- `preview_url`
+- `image_url`
+- `avatar_url`
+- `file_url`
+- `download_url`
+- `import_url`
+- `feed_url`
+- `sitemap_url`
+- `metadata_url`
+- `open_graph_url`
+- `endpoint`
+- `base_url`
+- `service_url`
+- `provider_url`
+- `tenant_url`
+- `integration_url`
+
+## 2.4 Partial destination, protocol, and client-option candidates
+
+Search for:
+- `host`
+- `hostname`
+- `domain`
+- `ip`
+- `address`
+- `service_name`
+- `scheme`
+- `protocol`
+- `port`
+- `path`
+- `route`
+- `query`
+- `resource`
+- `object_key`
+- `endpoint_override`
+- `proxy`
+- `proxies`
+- `proxy_url`
+- `no_proxy`
+- `allow_redirects`
+- `follow_redirects`
+- `verify`
+- `timeout`
+- `ssl`
+- `trust_env`
+
+## 2.5 URL construction, parser, and normalization candidates
+
+Search for source values near:
+- `urllib.parse.urlparse`
+- `urllib.parse.urlsplit`
+- `urllib.parse.urljoin`
+- `urllib.parse.unquote`
+- `urllib.parse.parse_qs`
+- `urljoin`
+- `urlparse`
+- `urlsplit`
+- `yarl.URL`
+- `furl`
+- `rfc3986`
+- `base64.b64decode`
+- f-strings with `http://` or `https://`
+- `.format(`
+- `%` formatting
+- string concatenation around URL pieces
+- `socket.gethostbyname`
+- `socket.getaddrinfo`
+- `ipaddress.ip_address`
+- custom resolver helpers
+
+## 2.6 Stored, callback, and indirect fetch source candidates
+
+Search for:
+- webhook registration records
+- callback target records
+- integration endpoint records
+- tenant endpoint settings
+- provider endpoint settings
+- saved crawler targets
+- URL preview records
+- import job URLs
+- retry or replay payloads
+- queue payload URLs
+- remote image or avatar URLs
+- OpenGraph metadata URLs
+- feed or sitemap URLs
+- PDF/HTML/Markdown renderer inputs
+- Selenium/Playwright preview URLs
+- cloud SDK endpoint overrides
+- storage service endpoint settings
+
+## 2.7 Downstream SSRF relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- `requests.get`
+- `requests.post`
+- `requests.put`
+- `requests.request`
+- `requests.Session`
+- `httpx.get`
+- `httpx.post`
+- `httpx.Client`
+- `httpx.AsyncClient`
+- `urllib.request.urlopen`
+- `urllib.request.Request`
+- `aiohttp.ClientSession`
+- `pycurl`
+- `boto3` endpoint URL configuration
+- `botocore.config.Config`
+- Selenium `driver.get`
+- Playwright `page.goto`
+- `BeautifulSoup` or metadata fetch helpers
+- feed parser and sitemap fetch helpers
+- shared outbound request wrappers
+
+## 2.8 Python graph search recipes
+
+Useful combinations:
+
+```text
+@app.route/APIRouter + request.args/request.json url/host + urlparse/urljoin
+APIView/ViewSet + request.query_params callback_url/webhook_url + requests/httpx
+FastAPI Body/Query + endpoint/base_url/provider_url + outbound wrapper
+Celery/shared_task + stored URL/callback + requests/httpx/aiohttp
+f-string/.format + request/stored host/path + requests/httpx
+allow_redirects/follow_redirects + request/stored URL
+socket.getaddrinfo/ipaddress + host source + fetch wrapper
+driver.get/page.goto + preview_url/screenshot source
+```
+
+---
+
+# 3. Python Source Patterns
 
 ## P-S1. Request-derived URL source
 Example idea:
@@ -102,7 +315,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-S-SSRF-1: Direct URL source
 
@@ -138,9 +351,9 @@ Inspect library configuration and resource loading restrictions.
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
-## 4.1 Framework request source heuristics
+## 5.1 Framework request source heuristics
 Pay attention to:
 - Django `request.GET`, `request.POST`, and `request.data`
 - Flask `request.args`, `request.form`, and `request.get_json()`
@@ -149,7 +362,7 @@ Pay attention to:
 - uploaded metadata and import rows
 - webhook, preview, import, render, and admin route parameters
 
-## 4.2 URL assembly source heuristics
+## 5.2 URL assembly source heuristics
 Pay attention to:
 - string-built URLs
 - `urllib.parse` parsing and recomposition
@@ -158,7 +371,7 @@ Pay attention to:
 - preview/import target construction
 - helper methods named `fetch`, `download`, `preview`, `verify`, `crawl`, or `import`
 
-## 4.3 Client API source heuristics
+## 5.3 Client API source heuristics
 Pay attention to:
 - `requests`
 - `httpx`
@@ -167,7 +380,7 @@ Pay attention to:
 - session-level defaults
 - helper wrappers around these clients
 
-## 4.4 Redirect, DNS, and proxy source heuristics
+## 5.4 Redirect, DNS, and proxy source heuristics
 Pay attention to:
 - `allow_redirects`
 - session-wide redirect defaults
@@ -175,7 +388,7 @@ Pay attention to:
 - DNS resolution and IP range checks
 - wrapper logic that silently follows redirects
 
-## 4.5 Indirect and stored source heuristics
+## 5.5 Indirect and stored source heuristics
 Pay attention to:
 - webhook testers
 - URL previewers
@@ -187,7 +400,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Python source as high-priority if:
 - the value is selected from a strict allowlist of safe fixed endpoints,
@@ -205,7 +418,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Python source evidence includes:
 - route/view/worker/admin/import/render entry point,
@@ -222,7 +435,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Python Source Checklist
+# 8. Quick Python Source Checklist
 
 - Are request values used as full URLs, callback targets, hosts, ports, paths, schemes, or remote resource references?
 - Can request or stored values name localhost, loopback, link-local, private-network, cloud metadata, or internal service targets?

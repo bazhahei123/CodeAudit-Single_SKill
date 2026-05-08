@@ -36,7 +36,227 @@ Source questions:
 
 ---
 
-# 2. Java Source Patterns
+# 2. High-Coverage Java SQL Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows SQL value construction, structural SQL selection, raw fragment creation, ORM/query-builder input, stored query metadata, or data-access wrapper relevance.
+
+## 2.1 HTTP, controller, and request entry candidates
+
+Search for:
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@PatchMapping`
+- `@DeleteMapping`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestBody`
+- `@RequestHeader`
+- `@CookieValue`
+- `@ModelAttribute`
+- `MultipartFile`
+- `HttpServletRequest`
+- `ServletRequest`
+- `request.getParameter`
+- `request.getParameterMap`
+- `request.getHeader`
+- `Pageable`
+- `Sort`
+- `Specification`
+- `@GraphQlController`
+- `@QueryMapping`
+- `@MutationMapping`
+- `@SchemaMapping`
+- JAX-RS `@Path`
+- JAX-RS `@GET`
+- JAX-RS `@POST`
+- JAX-RS `@QueryParam`
+- JAX-RS `@PathParam`
+- JAX-RS `@HeaderParam`
+
+## 2.2 RPC, message, job, admin, and import entries
+
+Search for:
+- `@GrpcService`
+- `StreamObserver`
+- `@MessageMapping`
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `@SqsListener`
+- `@Scheduled`
+- `@Async`
+- Spring Batch `ItemReader`
+- Spring Batch `ItemProcessor`
+- `CommandLineRunner`
+- `ApplicationRunner`
+- `@EventListener`
+- webhook controllers
+- import controllers
+- export controllers
+- report controllers
+- admin controllers
+- dashboard controllers
+- saved search handlers
+- replay handlers
+- migration/admin SQL tools
+
+## 2.3 SQL value and criteria source candidates
+
+Search for parameter, DTO, entity, map, or JSON fields named:
+- `q`
+- `query`
+- `keyword`
+- `search`
+- `term`
+- `username`
+- `email`
+- `status`
+- `state`
+- `type`
+- `category`
+- `tenantId`
+- `accountId`
+- `userId`
+- `orgId`
+- `ids`
+- `from`
+- `to`
+- `startDate`
+- `endDate`
+- `filters`
+- `criteria`
+- `conditions`
+- `rules`
+- `predicate`
+- `where`
+- `specification`
+
+## 2.4 Structural SQL selector source candidates
+
+Search for:
+- `sort`
+- `sortBy`
+- `orderBy`
+- `direction`
+- `field`
+- `fields`
+- `column`
+- `columns`
+- `select`
+- `projection`
+- `table`
+- `tableName`
+- `schema`
+- `database`
+- `partition`
+- `operator`
+- `op`
+- `comparator`
+- `join`
+- `groupBy`
+- `having`
+- `limit`
+- `offset`
+- `page`
+- `pageSize`
+- `cursor`
+- `procedure`
+- `procedureName`
+
+## 2.5 Raw fragment and query template source candidates
+
+Search for:
+- `sql`
+- `rawSql`
+- `querySql`
+- `nativeQuery`
+- `customQuery`
+- `reportSql`
+- `whereClause`
+- `orderClause`
+- `havingClause`
+- `joinClause`
+- `condition`
+- `expression`
+- `filterExpression`
+- `queryTemplate`
+- `reportTemplate`
+- `savedQuery`
+- `dashboardQuery`
+- `StringBuilder`
+- `String.format`
+- `MessageFormat.format`
+- `Collectors.joining`
+- string concatenation around `WHERE`, `ORDER BY`, `LIMIT`, `OFFSET`, `SELECT`, `FROM`, or `JOIN`
+
+## 2.6 ORM, mapper, and query-wrapper input candidates
+
+Search for source values passed into:
+- mapper method parameters
+- MyBatis `@Param`
+- MyBatis `${...}` fields
+- MyBatis XML `<if>`, `<choose>`, `<where>`, `<trim>`, `<foreach>`, and provider SQL builders
+- `@SelectProvider`
+- `@UpdateProvider`
+- `@DeleteProvider`
+- `@InsertProvider`
+- MyBatis-Plus `QueryWrapper`
+- MyBatis-Plus `LambdaQueryWrapper`
+- `PageHelper.orderBy`
+- Spring Data repository helper methods
+- `JpaSpecificationExecutor`
+- JPA `Specification`
+- QueryDSL predicates
+- jOOQ plain SQL helpers
+- `EntityManager` query text builders
+- `JdbcTemplate` wrapper services
+- report/query/export services
+- saved filter readers and query metadata loaders
+
+## 2.7 Downstream SQL relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- `Statement`
+- `PreparedStatement`
+- `Connection.createStatement`
+- `Connection.prepareStatement`
+- `JdbcTemplate.query`
+- `JdbcTemplate.queryForList`
+- `JdbcTemplate.queryForObject`
+- `JdbcTemplate.update`
+- `JdbcTemplate.execute`
+- `NamedParameterJdbcTemplate`
+- `EntityManager.createQuery`
+- `EntityManager.createNativeQuery`
+- Hibernate `createQuery`
+- Hibernate `createNativeQuery`
+- jOOQ `DSLContext`
+- MyBatis mapper XML or annotations
+- stored procedure callers
+- repository, DAO, report, export, analytics, or dashboard query helpers
+
+## 2.8 Java graph search recipes
+
+Useful combinations:
+
+```text
+@GetMapping/@PostMapping + @RequestParam/@RequestBody filter/sort + repository/DAO
+@RestController + sortBy/orderBy/field + ORDER BY/JdbcTemplate/MyBatis
+@RequestBody + whereClause/condition/expression + EntityManager/createNativeQuery
+@QueryMapping/@MutationMapping + filters/operators + Specification/QueryDSL
+@KafkaListener/@Scheduled + savedFilter/reportTemplate + query builder/helper
+MyBatis ${} + @Param/filter/orderBy/tableName
+Pageable/Sort + request DTO + repository/helper
+StringBuilder/String.format + request/stored field + WHERE/ORDER BY/LIMIT
+```
+
+---
+
+# 3. Java Source Patterns
 
 ## J-S1. Request-derived query value
 Example idea:
@@ -100,7 +320,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-S-SQL-1: Repository query value source
 
@@ -136,9 +356,9 @@ Trace writer and reader paths and verify stored data is structured and revalidat
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
-## 4.1 Spring route and DTO source heuristics
+## 5.1 Spring route and DTO source heuristics
 Pay attention to:
 - `@RequestParam`
 - `@PathVariable`
@@ -148,7 +368,7 @@ Pay attention to:
 - GraphQL resolver arguments
 - admin/report/search route parameters
 
-## 4.2 Spring JDBC and raw JDBC source heuristics
+## 5.2 Spring JDBC and raw JDBC source heuristics
 Pay attention to:
 - values flowing into SQL strings used by `JdbcTemplate`
 - values added to `StringBuilder`, `String.format`, or concatenated SQL
@@ -156,7 +376,7 @@ Pay attention to:
 - sort/filter fragments built before data-access calls
 - helper methods returning SQL strings or fragments
 
-## 4.3 MyBatis source heuristics
+## 5.3 MyBatis source heuristics
 Pay attention to:
 - mapper method parameters
 - `${}` substitutions
@@ -165,7 +385,7 @@ Pay attention to:
 - `ORDER BY`, `WHERE`, `LIMIT`, and table/column fragments
 - raw string parameters in mapper interfaces
 
-## 4.4 JPA, Hibernate, and jOOQ source heuristics
+## 5.4 JPA, Hibernate, and jOOQ source heuristics
 Pay attention to:
 - `EntityManager.createQuery(...)`
 - `EntityManager.createNativeQuery(...)`
@@ -174,7 +394,7 @@ Pay attention to:
 - Criteria API values vs raw expression strings
 - jOOQ plain SQL helpers
 
-## 4.5 Stored and second-order source heuristics
+## 5.5 Stored and second-order source heuristics
 Pay attention to:
 - saved search rules
 - report templates
@@ -186,7 +406,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Java source as high-priority if:
 - the value is selected from a strict allowlist of safe columns, tables, operators, directions, or report templates,
@@ -203,7 +423,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Java source evidence includes:
 - route/controller/worker/admin/import entry point,
@@ -220,7 +440,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Java Source Checklist
+# 8. Quick Java Source Checklist
 
 - Are request values used as query values, filter keys, operators, sort fields, or pagination controls?
 - Are table names, columns, selected fields, report fields, or schemas dynamic?

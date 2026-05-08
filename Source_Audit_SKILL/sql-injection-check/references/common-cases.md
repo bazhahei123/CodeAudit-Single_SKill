@@ -200,6 +200,234 @@ Examples:
 Audit relevance:
 Stored values require writer-path review and revalidation before query use.
 
+## 3.7 High-coverage candidate inventory for graph search
+
+Use this inventory as a seed list for code search, graph queries, and taint source enumeration. A candidate name is not proof by itself; keep it only when code shows SQL value construction, SQL structural selection, raw fragment creation, ORM/query-builder input, stored query metadata, or data-access helper relevance.
+
+### Entry-point candidates
+
+Externally reachable or weakly trusted code surfaces that may introduce SQL-relevant values:
+- route
+- controller
+- handler
+- endpoint
+- resolver
+- mutation
+- query resolver
+- RPC method
+- gRPC method
+- webhook
+- callback
+- WebSocket handler
+- message consumer
+- queue consumer
+- scheduled job
+- worker
+- import job
+- export job
+- report job
+- dashboard action
+- admin action
+- replay action
+- sync job
+- migration tool
+- CLI command
+- Android exported component
+- content provider
+- deep link
+- WebView bridge
+- Binder or AIDL method
+- native IPC handler
+- socket handler
+
+### Value and criteria candidates
+
+Data values that may become SQL predicates or query values:
+- `q`
+- `query`
+- `keyword`
+- `search`
+- `term`
+- `name`
+- `username`
+- `email`
+- `phone`
+- `status`
+- `state`
+- `type`
+- `category`
+- `tenant`
+- `tenantId`
+- `accountId`
+- `userId`
+- `orgId`
+- `ids`
+- `from`
+- `to`
+- `startDate`
+- `endDate`
+- `dateRange`
+- `min`
+- `max`
+- `filters`
+- `criteria`
+- `rules`
+- `conditions`
+- `predicate`
+
+### Filter, sort, and pagination candidates
+
+Inputs that often control query behavior:
+- `filter`
+- `filterBy`
+- `filterField`
+- `filterValue`
+- `operator`
+- `op`
+- `comparator`
+- `where`
+- `whereClause`
+- `condition`
+- `sort`
+- `sortBy`
+- `order`
+- `orderBy`
+- `direction`
+- `asc`
+- `desc`
+- `page`
+- `pageSize`
+- `limit`
+- `offset`
+- `cursor`
+- `take`
+- `skip`
+- `top`
+- `fetch`
+
+### Structural SQL candidates
+
+Inputs that may select SQL syntax or database objects:
+- `field`
+- `fields`
+- `column`
+- `columns`
+- `select`
+- `selectList`
+- `projection`
+- `table`
+- `tableName`
+- `schema`
+- `database`
+- `partition`
+- `entity`
+- `model`
+- `join`
+- `joinType`
+- `groupBy`
+- `having`
+- `function`
+- `aggregate`
+- `procedure`
+- `procedureName`
+- `storedProcedure`
+
+### Raw fragment and template candidates
+
+Inputs that may become executable SQL text or SQL-like DSL:
+- `sql`
+- `rawSql`
+- `querySql`
+- `nativeQuery`
+- `customQuery`
+- `reportSql`
+- `whereSql`
+- `orderSql`
+- `havingSql`
+- `sqlFragment`
+- `rawCondition`
+- `rawWhere`
+- `rawOrder`
+- `expression`
+- `filterExpression`
+- `searchExpression`
+- `dsl`
+- `template`
+- `queryTemplate`
+- `reportTemplate`
+- `savedQuery`
+- `dashboardQuery`
+
+### Stored and second-order candidates
+
+Persisted, queued, or imported values that may later shape SQL:
+- saved filter
+- saved search
+- saved query
+- report template
+- dashboard definition
+- custom field mapping
+- tenant-specific column mapping
+- admin query preset
+- query metadata
+- imported row
+- uploaded metadata
+- partner sync payload
+- webhook payload
+- queue payload
+- job argument
+- workflow state
+- retry payload
+- replay record
+- cached criteria
+
+### Query-construction evidence candidates
+
+Search near candidate sources for code that shows SQL relevance:
+- string concatenation
+- string interpolation
+- format string
+- template expansion
+- `StringBuilder`
+- `stringstream`
+- `append`
+- `join`
+- `WHERE`
+- `ORDER BY`
+- `GROUP BY`
+- `HAVING`
+- `LIMIT`
+- `OFFSET`
+- `SELECT`
+- `FROM`
+- `JOIN`
+- `UNION`
+- `raw`
+- `native`
+- `text`
+- `literal`
+- `statement`
+- `command text`
+- `query builder`
+- `repository`
+- `DAO`
+- `mapper`
+
+## 3.8 Generic graph query recipes
+
+Useful source-discovery combinations:
+
+```text
+<entry candidate> + <filter/sort/pagination candidate> + <repository/DAO/helper>
+<entry candidate> + <structural SQL candidate> + <ORDER BY/WHERE/LIMIT/OFFSET>
+<entry candidate> + <raw fragment/template candidate> + <query construction evidence>
+<stored candidate> + <worker/report/export entry> + <query builder/helper>
+<ORM raw-helper candidate> + <request/stored value> + <raw/native/text keyword>
+<mobile/IPC/native entry> + <selection/projection/sort source> + <local/native DB API>
+```
+
+When the graph result is noisy, prioritize paths where the same value name or object field travels from an entry point into query option assembly, SQL string construction, raw helper calls, stored report generation, or data-access wrapper arguments.
+
 ---
 
 # 4. SQL Source Contexts

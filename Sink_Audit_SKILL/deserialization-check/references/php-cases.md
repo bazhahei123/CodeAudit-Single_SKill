@@ -56,7 +56,215 @@ Look for:
 
 ---
 
-# 2. PHP Unsafe Deserialization Anti-Patterns
+# 2. High-Coverage PHP Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, sink behavior, trigger behavior, and missing controls.
+
+## 2.1 Web, framework, and request entry candidates
+Search for:
+- `Route::get`
+- `Route::post`
+- `Route::put`
+- `Route::patch`
+- `Route::delete`
+- `Route::any`
+- `Route::match`
+- `Route::resource`
+- `Route::apiResource`
+- `Controller`
+- `__invoke`
+- `Request $request`
+- `$request->input`
+- `$request->get`
+- `$request->all`
+- `$request->file`
+- `$request->cookie`
+- `$request->header`
+- `$request->getContent`
+- `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `$_FILES`
+- `php://input`
+- `#[Route]`
+- `@Route`
+- `AbstractController`
+- `Action`
+- `Middleware`
+- `Kernel`
+
+## 2.2 Queue, command, webhook, and import entry candidates
+Search for:
+- `ShouldQueue`
+- `handle`
+- `Job`
+- `Listener`
+- `EventSubscriber`
+- `Command`
+- `Console`
+- `schedule`
+- `webhook`
+- `callback`
+- `import`
+- `upload`
+- `restore`
+- `replay`
+- `sync`
+- `cache()->get`
+- `Cache::get`
+- `Session::get`
+- `$session->get`
+- `$redis->get`
+- `$queue->pop`
+- `onMessage`
+- `MessageConsumer`
+
+## 2.3 Native PHP object-restoration sink candidates
+Search for:
+- `unserialize`
+- `serialize`
+- `Serializable::unserialize`
+- `__unserialize`
+- `session_decode`
+- `session_start`
+- `session.serialize_handler`
+- `session_set_save_handler`
+- `igbinary_unserialize`
+- `msgpack_unserialize`
+- `yaml_parse`
+- `yaml_parse_file`
+- `wddx_deserialize`
+- `var_export`
+- `eval('return '`
+- `base64_decode`
+- `gzinflate`
+- `gzuncompress`
+- `openssl_decrypt`
+- `decrypt`
+- `deserialize`
+- `restore`
+- `decode`
+
+## 2.4 Phar and file-metadata trigger candidates
+Search for user-controlled paths reaching file APIs, especially when `phar://` or archive import is possible:
+- `phar://`
+- `Phar`
+- `PharData`
+- `file_exists`
+- `is_file`
+- `is_dir`
+- `file_get_contents`
+- `fopen`
+- `copy`
+- `unlink`
+- `rename`
+- `stat`
+- `filesize`
+- `filemtime`
+- `md5_file`
+- `hash_file`
+- `getimagesize`
+- `exif_read_data`
+- `mime_content_type`
+- `include`
+- `require`
+- `ZipArchive`
+- `SplFileInfo`
+
+## 2.5 Framework serializer and storage candidates
+Search for:
+- `Illuminate\\Encryption\\Encrypter`
+- `Crypt::decrypt`
+- `decrypt($`
+- `unserialize: true`
+- `SerializesModels`
+- `Queueable`
+- `Cache::remember`
+- `Store::get`
+- `Symfony\\Component\\Serializer`
+- `ObjectNormalizer`
+- `PhpMarshaller`
+- `MarshallerInterface`
+- `Doctrine`
+- `ProxyManager`
+- `Monolog`
+- `Laravel`
+- `Symfony`
+- `Composer`
+- `autoload`
+
+## 2.6 Magic-method and gadget behavior candidates
+Search for:
+- `__wakeup`
+- `__destruct`
+- `__toString`
+- `__call`
+- `__callStatic`
+- `__invoke`
+- `__get`
+- `__set`
+- `__isset`
+- `__sleep`
+- `__serialize`
+- `__unserialize`
+- `Serializable`
+- `Iterator`
+- `ArrayAccess`
+- `close`
+- `delete`
+- `unlink`
+- `include`
+- `require`
+- `system`
+- `exec`
+- `shell_exec`
+- `proc_open`
+- `curl_exec`
+
+## 2.7 Required-control candidates
+Search near sinks for:
+- `allowed_classes`
+- `['allowed_classes' => false]`
+- `['allowed_classes' => [`
+- `hash_hmac`
+- `hash_equals`
+- `openssl_verify`
+- `signed`
+- `MAC`
+- `HMAC`
+- `validate`
+- `schema`
+- `DTO`
+- `json_decode`
+- `JSON_THROW_ON_ERROR`
+- `phar.readonly`
+- `stream_wrapper_unregister('phar')`
+- `realpath`
+- `basename`
+- `path allowlist`
+- `mime allowlist`
+- `trusted`
+
+## 2.8 PHP graph search recipes
+Useful combinations:
+
+```text
+Route::post + unserialize
+$request->input + unserialize
+$_COOKIE + base64_decode + unserialize
+Cache::get + unserialize
+ShouldQueue + unserialize
+Crypt::decrypt + unserialize
+file_exists + phar://
+getimagesize + uploaded file + phar
+__destruct + file/network/command side effect
+unserialize without allowed_classes
+```
+
+---
+
+# 3. PHP Unsafe Deserialization Anti-Patterns
 
 ### A1. `unserialize` on request-derived data
 ```php
@@ -101,7 +309,7 @@ Some file operations can trigger dangerous metadata processing when phar paths a
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-DESER-1: Direct `unserialize`
 
@@ -146,7 +354,7 @@ Verify whether user-controlled paths can reference phar payloads and trigger dan
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 `unserialize` heuristics
 Pay attention to:

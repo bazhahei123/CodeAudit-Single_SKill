@@ -34,7 +34,223 @@ Source questions:
 
 ---
 
-# 2. PHP Source Patterns
+# 2. High-Coverage PHP SQL Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows SQL value construction, structural SQL selection, raw fragment creation, ORM/query-builder input, stored query metadata, or data-access wrapper relevance.
+
+## 2.1 Web, framework, and request entry candidates
+
+Search for:
+- Laravel `Route::get`
+- Laravel `Route::post`
+- Laravel `Route::put`
+- Laravel `Route::patch`
+- Laravel `Route::delete`
+- Laravel controller methods
+- `$request->input`
+- `$request->query`
+- `$request->post`
+- `$request->all`
+- `$request->only`
+- `$request->validated`
+- `$request->header`
+- route parameters
+- Symfony `#[Route]`
+- Symfony `Request`
+- `$request->query->get`
+- `$request->request->get`
+- `$request->headers->get`
+- ThinkPHP controllers
+- Yii controllers
+- CodeIgniter controllers
+- WordPress `add_action`
+- WordPress REST routes
+- raw `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `$_SERVER`
+- uploaded file metadata
+
+## 2.2 Queue, command, admin, report, and import entries
+
+Search for:
+- Laravel jobs
+- Laravel listeners
+- Laravel events
+- Laravel queued jobs
+- Laravel console commands
+- Symfony commands
+- Symfony Messenger handlers
+- cron scripts
+- webhook controllers
+- import controllers
+- export controllers
+- report controllers
+- dashboard controllers
+- admin actions
+- saved search handlers
+- replay handlers
+- ETL/sync tasks
+- legacy admin scripts
+
+## 2.3 SQL value and criteria source candidates
+
+Search for request, DTO, array, model, or form fields named:
+- `q`
+- `query`
+- `keyword`
+- `search`
+- `term`
+- `username`
+- `email`
+- `status`
+- `state`
+- `type`
+- `category`
+- `tenant_id`
+- `account_id`
+- `user_id`
+- `org_id`
+- `ids`
+- `from_date`
+- `to_date`
+- `start_date`
+- `end_date`
+- `filters`
+- `criteria`
+- `conditions`
+- `rules`
+- `predicate`
+- `where`
+- `scope`
+
+## 2.4 Structural SQL selector source candidates
+
+Search for:
+- `sort`
+- `sort_by`
+- `order_by`
+- `orderBy`
+- `direction`
+- `field`
+- `fields`
+- `column`
+- `columns`
+- `select`
+- `projection`
+- `table`
+- `table_name`
+- `schema`
+- `database`
+- `partition`
+- `operator`
+- `op`
+- `comparator`
+- `join`
+- `group_by`
+- `groupBy`
+- `having`
+- `limit`
+- `offset`
+- `page`
+- `page_size`
+- `cursor`
+- `procedure`
+- `procedure_name`
+
+## 2.5 Raw fragment and query template source candidates
+
+Search for:
+- `sql`
+- `raw_sql`
+- `query_sql`
+- `native_query`
+- `custom_query`
+- `report_sql`
+- `where_clause`
+- `order_clause`
+- `having_clause`
+- `join_clause`
+- `condition`
+- `expression`
+- `filter_expression`
+- `query_template`
+- `report_template`
+- `saved_query`
+- `dashboard_query`
+- interpolation inside SQL strings
+- concatenation around `WHERE`, `ORDER BY`, `LIMIT`, `OFFSET`, `SELECT`, `FROM`, or `JOIN`
+- `sprintf`
+- `vsprintf`
+- `implode`
+
+## 2.6 ORM, DBAL, and query-wrapper input candidates
+
+Search for source values passed into:
+- PDO wrapper helpers
+- mysqli wrapper helpers
+- Laravel `DB::raw`
+- Laravel `whereRaw`
+- Laravel `orWhereRaw`
+- Laravel `havingRaw`
+- Laravel `orderByRaw`
+- Laravel `selectRaw`
+- Laravel `fromRaw`
+- Laravel `joinRaw`
+- Laravel `DB::select`
+- Laravel `DB::statement`
+- Eloquent scopes that accept raw fragments or dynamic columns
+- Symfony DBAL `executeQuery`
+- Doctrine native SQL helpers
+- Doctrine DQL string builders
+- ThinkPHP raw query helpers
+- Yii raw SQL helpers
+- CodeIgniter raw query helpers
+- WordPress `$wpdb->query`
+- WordPress `$wpdb->get_results`
+- report/query/export services
+- saved filter readers and query metadata loaders
+
+## 2.7 Downstream SQL relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- `PDO::query`
+- `PDO::prepare`
+- `PDOStatement::execute`
+- `mysqli_query`
+- `mysqli::query`
+- `mysqli_prepare`
+- `DB::select`
+- `DB::statement`
+- `DB::unprepared`
+- `DB::raw`
+- `whereRaw`
+- `orderByRaw`
+- `selectRaw`
+- Symfony DBAL `executeQuery`
+- Doctrine `createQuery`
+- Doctrine `createNativeQuery`
+- stored procedure callers
+- repository, report, export, analytics, or dashboard query helpers
+
+## 2.8 PHP graph search recipes
+
+Useful combinations:
+
+```text
+Route::get/Route::post + $request->input filter/sort + repository/query helper
+$request->query/$_GET + order_by/field + orderByRaw/DB::raw
+Symfony #[Route] + where_clause/expression + DBAL executeQuery
+Laravel job/command + saved_filter/report_template + query builder/helper
+validated input + dynamic column/table/operator + Eloquent scope
+sprintf/implode/concat + request/stored field + WHERE/ORDER BY/LIMIT
+$wpdb/DB::select/PDO::query + raw_sql/custom_query/report_sql source
+```
+
+---
+
+# 3. PHP Source Patterns
 
 ## H-S1. Request-derived query value
 Example idea:
@@ -98,7 +314,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-S-SQL-1: PDO or mysqli query value source
 
@@ -134,9 +350,9 @@ Trace writer and reader paths and verify stored data is structured and revalidat
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
-## 4.1 Laravel source heuristics
+## 5.1 Laravel source heuristics
 Pay attention to:
 - `$request->input(...)`
 - route parameters
@@ -148,7 +364,7 @@ Pay attention to:
 - `orderByRaw(...)`
 - raw Eloquent scopes or repository helpers
 
-## 4.2 PDO and mysqli source heuristics
+## 5.2 PDO and mysqli source heuristics
 Pay attention to:
 - `$_GET`, `$_POST`, and route values flowing into SQL strings
 - values interpolated before `prepare(...)`
@@ -157,7 +373,7 @@ Pay attention to:
 - helper methods constructing SQL strings centrally
 - raw admin/report scripts
 
-## 4.3 Symfony, ThinkPHP, Yii, and CodeIgniter source heuristics
+## 5.3 Symfony, ThinkPHP, Yii, and CodeIgniter source heuristics
 Pay attention to:
 - raw SQL through DBAL connection objects
 - `executeQuery(...)`
@@ -166,7 +382,7 @@ Pay attention to:
 - repository helpers returning raw SQL
 - framework-specific raw expression helpers
 
-## 4.4 Structural control source heuristics
+## 5.4 Structural control source heuristics
 Check whether the following are user-controlled:
 - sortable field
 - sort direction
@@ -178,7 +394,7 @@ Check whether the following are user-controlled:
 - select field list
 - union-capable fragments
 
-## 4.5 Stored and second-order source heuristics
+## 5.5 Stored and second-order source heuristics
 Pay attention to:
 - saved search rules
 - report templates
@@ -191,7 +407,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a PHP source as high-priority if:
 - the value is selected from a strict allowlist of safe columns, tables, operators, directions, or report templates,
@@ -208,7 +424,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good PHP source evidence includes:
 - route/controller/script/worker/admin/import entry point,
@@ -225,7 +441,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick PHP Source Checklist
+# 8. Quick PHP Source Checklist
 
 - Are request values used as query values, filter keys, operators, sort fields, or pagination controls?
 - Are table names, columns, selected fields, report fields, or schemas dynamic?

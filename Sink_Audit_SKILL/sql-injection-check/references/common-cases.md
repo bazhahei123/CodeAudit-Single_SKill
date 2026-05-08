@@ -108,6 +108,11 @@ This is usually **not** solved by normal value placeholders. Structural elements
 Prioritize these attack surfaces first:
 
 - login and authentication queries
+- public route/controller annotations and HTTP handler registration
+- GraphQL mutation or resolver handlers that query, filter, sort, report, or export data
+- RPC, gRPC, SOAP, WCF, Thrift, Binder, DBus, or internal protocol methods that carry filters or selectors
+- WebSocket and message-frame handlers carrying search, report, or admin query inputs
+- Android content providers, local SQLite helpers, Room raw queries, and exported mobile components that query local data
 - search and filter endpoints
 - reporting and export functionality
 - sortable and pageable list endpoints
@@ -120,6 +125,174 @@ Prioritize these attack surfaces first:
 - background jobs that consume stored user-controlled data
 
 These features frequently involve dynamic conditions, optional filters, or convenience helpers that create SQL injection risk.
+
+## 2.1 Candidate search groups for graph workflows
+
+When a graph database cannot start from a single universal sink, build candidate sets from four groups and intersect them.
+
+### Entry candidates
+Search for externally reachable or semi-trusted query entry points:
+- controller
+- route
+- handler
+- endpoint
+- resolver
+- mutation
+- action
+- servlet
+- middleware
+- webhook
+- callback
+- listener
+- consumer
+- worker
+- job
+- scheduler
+- admin
+- dashboard
+- report
+- export
+- import
+- search
+- filter
+- sort
+- order
+- page
+- login
+- auth
+- lookup
+- autocomplete
+- analytics
+- query
+- raw query
+- saved search
+- saved filter
+- data grid
+- content provider
+- IPC
+- RPC
+- WebSocket
+- deep link
+- exported
+
+### Query construction candidates
+Search for user-controlled values entering executable query text or structural fragments:
+- sql
+- query
+- statement
+- command text
+- where
+- whereClause
+- condition
+- filter
+- having
+- orderBy
+- sort
+- direction
+- groupBy
+- limit
+- offset
+- pageSize
+- table
+- column
+- field
+- operator
+- selector
+- projection
+- selection
+- selectionArgs
+- raw
+- native
+- text
+- fragment
+- clause
+- template
+- saved filter
+- report filter
+- custom query
+- string builder
+- format
+- interpolation
+- concatenation
+- join conditions
+
+### Query execution sink candidates
+Search for APIs that execute SQL or SQL-like query fragments:
+- execute
+- executeQuery
+- query
+- rawQuery
+- execSQL
+- statement
+- command
+- cursor
+- prepare
+- prepared statement
+- createQuery
+- createNativeQuery
+- native query
+- raw
+- whereRaw
+- orderByRaw
+- groupByRaw
+- havingRaw
+- selectRaw
+- fromRaw
+- text
+- literal
+- stored procedure
+- callable statement
+- DBAL
+- ORM raw helper
+- repository raw helper
+- database client wrapper
+
+### Required-control candidates
+Search near candidate sinks for controls:
+- prepared statement
+- bound parameter
+- bind
+- placeholder
+- parameterized
+- setParameter
+- selectionArgs
+- query args
+- typed query
+- named parameter
+- positional parameter
+- allowlist
+- whitelist
+- fixed mapping
+- enum
+- switch
+- permitted fields
+- safe sort
+- safe operator
+- safe column
+- safe table
+- query builder DSL
+- criteria API
+- safe ORM filter
+- schema validation
+- revalidate stored filter
+- reject raw clause
+- no raw SQL
+
+## 2.2 Generic graph search recipes
+
+Useful candidate recipes:
+
+```text
+<entry candidate> + <query execution sink candidate>
+<search/filter/sort/report/export> + <raw SQL sink>
+<request/body/header/cookie/job payload> + <query construction candidate>
+<orderBy/sort/field/column/table/operator> + <raw/native/text sink>
+<stored filter/report template/saved search> + <later SQL sink>
+<ORM/query builder> + <raw fragment helper>
+<candidate sink> without nearby <required-control candidate>
+<prepared statement> + <concatenated structural fragment>
+<dynamic SQL> + <missing structural allowlist>
+```
 
 ---
 

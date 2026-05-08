@@ -119,7 +119,149 @@ Source questions:
 
 ---
 
-# 2. Java Source Patterns and Blind Spots
+# 2. High-Coverage Java Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows an authorization-relevant path such as protected object access, privileged action, tenant boundary, policy check, or workflow transition.
+
+## 2.1 HTTP, controller, and route entry candidates
+
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@DeleteMapping`
+- `@PatchMapping`
+- `@RequestPart`
+- `@ModelAttribute`
+- `@CrossOrigin`
+- `@ControllerAdvice`
+- `RouterFunction`
+- `ServerRequest`
+- `HandlerFunction`
+- `HttpServlet`
+- `doGet`
+- `doPost`
+- `doPut`
+- `doDelete`
+- `doPatch`
+- `Filter`
+- `OncePerRequestFilter`
+- `HandlerInterceptor`
+- JAX-RS `@Path`
+- JAX-RS `@GET`
+- JAX-RS `@POST`
+- JAX-RS `@PUT`
+- JAX-RS `@DELETE`
+- JAX-RS `@PATCH`
+- servlet `@WebServlet`
+- servlet `web.xml` mappings
+
+## 2.2 Request binding and client-controlled source candidates
+
+- `@PathVariable`
+- `@RequestParam`
+- `@RequestBody`
+- `@RequestHeader`
+- `@CookieValue`
+- `@RequestPart`
+- `MultipartFile`
+- `HttpServletRequest#getParameter`
+- `HttpServletRequest#getHeader`
+- `HttpServletRequest#getCookies`
+- `HttpServletRequest#getInputStream`
+- `HttpServletRequest#getReader`
+- DTO fields named `id`, `ids`, `userId`, `accountId`, `ownerId`, `tenantId`, `orgId`, `role`, `permission`, `scope`, `action`, `status`, `state`
+- collection fields such as `ids`, `userIds`, `fileIds`, `orderIds`, `projectIds`
+- pagination or filter DTOs only when they include identity, tenant, role, object, status, or action values
+
+## 2.3 Authentication identity source candidates
+
+- `Authentication`
+- `Principal`
+- `SecurityContextHolder`
+- `@AuthenticationPrincipal`
+- `JwtAuthenticationToken`
+- `OAuth2AuthenticationToken`
+- `OidcUser`
+- `UserDetails`
+- `HttpSession#getAttribute`
+- `request.getUserPrincipal()`
+- `request.isUserInRole(...)`
+- JWT claims such as `sub`, `user_id`, `uid`, `tenant_id`, `scope`, `roles`
+- custom helpers such as `getCurrentUser`, `currentUser`, `loginUser`, `UserContext`, `TenantContext`, `SecurityUtils`, `AuthUtils`
+- request attributes set by filters, such as `currentUserId`, `tenantId`, `principal`, `claims`
+
+## 2.4 Role, permission, policy, and authority candidates
+
+- `@PreAuthorize`
+- `@PostAuthorize`
+- `@Secured`
+- `@RolesAllowed`
+- `hasRole`
+- `hasAnyRole`
+- `hasAuthority`
+- `hasAnyAuthority`
+- `hasPermission`
+- `PermissionEvaluator`
+- `AccessDecisionVoter`
+- `AuthorizationManager`
+- `@EnableMethodSecurity`
+- `SecurityFilterChain`
+- `requestMatchers`
+- `authorizeHttpRequests`
+- `antMatchers`
+- `mvcMatchers`
+- `permitAll`
+- `authenticated`
+- custom calls such as `canAccess`, `canRead`, `canWrite`, `canDelete`, `checkPermission`, `requireRole`, `isAdmin`, `isOwner`, `isTenantMember`
+
+## 2.5 Object, tenant, and repository source candidates
+
+- object IDs: `id`, `userId`, `ownerId`, `accountId`, `orderId`, `invoiceId`, `fileId`, `projectId`, `documentId`, `resourceId`, `paymentId`
+- tenant scopes: `tenantId`, `orgId`, `organizationId`, `companyId`, `workspaceId`, `teamId`, `departmentId`, `accountId`
+- repository methods: `findById`, `getById`, `findOne`, `findAllById`, `deleteById`, `existsById`
+- scoped methods: `findByIdAndUserId`, `findByIdAndOwnerId`, `findByIdAndTenantId`, `findByTenantId`, `findByOrgId`
+- JPA annotations and query APIs: `@Query`, `Specification`, `CriteriaBuilder`, `Predicate`, `EntityManager#createQuery`, `createNativeQuery`
+- MyBatis candidates: `@Param`, mapper XML `#{id}`, `${tenantId}`, dynamic `<if>`, `<foreach>`, mapper method parameters
+- batch fields: `List<Long> ids`, `Set<Long> ids`, `Collection<Long> ids`, request DTO arrays
+
+## 2.6 GraphQL, RPC, message, and async entry candidates
+
+- Spring GraphQL `@QueryMapping`
+- Spring GraphQL `@MutationMapping`
+- GraphQL Java `DataFetcher`
+- Netflix DGS `@DgsQuery`, `@DgsMutation`, `@DgsData`
+- gRPC `ImplBase` service methods and protobuf request fields
+- RSocket `@MessageMapping`
+- WebSocket `@MessageMapping`, `@SubscribeMapping`, `SimpMessagingTemplate`
+- SOAP `@WebService`, `@WebMethod`
+- Kafka `@KafkaListener`
+- RabbitMQ `@RabbitListener`
+- JMS `@JmsListener`
+- `@Scheduled`, `@Async`, queue consumers, and job handlers when payloads originate from user actions
+
+## 2.7 Business action and workflow candidates
+
+- route or method names containing `approve`, `reject`, `publish`, `unpublish`, `archive`, `restore`, `delete`, `disable`, `enable`, `lock`, `unlock`, `reset`, `refund`, `void`, `cancel`, `transfer`, `assign`, `share`, `export`, `download`, `invite`, `promote`, `demote`, `grant`, `revoke`
+- request fields named `action`, `operation`, `status`, `state`, `stage`, `transition`, `targetState`, `targetStatus`
+- service calls such as `approveOrder`, `publishPost`, `disableUser`, `deleteProject`, `exportReport`, `refundPayment`, `transferOwner`, `changeRole`, `grantPermission`
+- enum types ending in `Action`, `Status`, `State`, `Role`, `Permission`, `Scope`
+
+## 2.8 Java graph search recipes
+
+```text
+@RequestMapping/@GetMapping/@PostMapping + @PathVariable/@RequestParam/@RequestBody + findById/delete/export/update
+@PreAuthorize/hasPermission + #id/#tenantId/#action + controller route
+SecurityContextHolder/Authentication/@AuthenticationPrincipal + service/repository call
+@MutationMapping/DataFetcher + argument id/tenantId/action/status + service method
+@KafkaListener/@RabbitListener/job handler + payload userId/tenantId/objectId + protected action
+```
+
+---
+
+# 3. Java Source Patterns and Blind Spots
 
 These are high-priority source signals. They are not automatic proof of a vulnerability.
 
@@ -321,7 +463,7 @@ What to verify next:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 Use these as source reasoning patterns, not as direct proof.
 
@@ -429,7 +571,7 @@ The requested state transition may affect authorization-sensitive workflow.
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
 ## 4.1 Spring MVC heuristics
 Pay attention to:
@@ -513,7 +655,7 @@ Audit questions:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Java source as high-priority if:
 - the value does not reach access-control-relevant logic,
@@ -531,7 +673,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Java source evidence includes:
 - controller method and route annotation,
@@ -549,7 +691,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Java Source Checklist
+# 8. Quick Java Source Checklist
 
 - Are object IDs read from `@PathVariable`, `@RequestParam`, or request DTOs?
 - Are `userId`, `tenantId`, `orgId`, or `role` accepted from request input?

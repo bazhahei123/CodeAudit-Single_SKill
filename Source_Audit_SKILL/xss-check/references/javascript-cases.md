@@ -35,7 +35,159 @@ Source questions:
 
 ---
 
-# 2. JavaScript / TypeScript Source Patterns
+# 2. High-Coverage JavaScript / TypeScript XSS Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows browser-visible output, DOM data, framework props, browser-interpreted HTML, script data, attribute values, URL values, rich text, markdown, sanitizer input/output, trusted HTML wrappers, or alternate component path relevance.
+
+## 2.1 Browser and client-side source candidates
+
+Search for:
+- `location.search`
+- `location.hash`
+- `location.href`
+- `document.URL`
+- `document.documentURI`
+- `document.referrer`
+- `window.name`
+- `history.state`
+- `URLSearchParams`
+- `new URL`
+- router params
+- route query
+- route hash
+- `localStorage.getItem`
+- `sessionStorage.getItem`
+- `document.cookie`
+- `postMessage`
+- `message` event
+- `event.data`
+- WebSocket `message`
+- EventSource `message`
+- BroadcastChannel `message`
+- Service Worker message
+- third-party widget event
+
+## 2.2 API, state, and prop source candidates
+
+Search for:
+- `fetch`
+- `axios`
+- `XMLHttpRequest`
+- GraphQL query result
+- Apollo result
+- React Query data
+- SWR data
+- Redux store
+- Vuex store
+- Pinia store
+- Zustand store
+- MobX observable
+- context value
+- hydrated state
+- `__INITIAL_STATE__`
+- `__NEXT_DATA__`
+- `window.__DATA__`
+- component props
+- route params
+- form values
+- API fields named `html`, `bodyHtml`, `contentHtml`, `messageHtml`, `safeHtml`, `trustedHtml`, `rawHtml`, `markdown`, `rendered`, `body`, `content`, `description`, `message`, `title`, `label`
+
+## 2.3 Rich text, markdown, sanitizer, and trusted wrapper candidates
+
+Search for source values near:
+- `DOMPurify.sanitize`
+- `sanitizeHtml`
+- `xss`
+- `marked`
+- `markdown-it`
+- `remark`
+- `rehype`
+- `showdown`
+- `turndown`
+- `quill`
+- `slate`
+- `prosemirror`
+- `tiptap`
+- `ckeditor`
+- `tinymce`
+- `draft-js`
+- `trustedTypes`
+- `TrustedHTML`
+- `safeHtml`
+- `trustedHtml`
+- `rawHtml`
+- `dangerousHtml`
+- preview renderer
+- final renderer
+- admin renderer
+
+## 2.4 Framework and DOM propagation candidates
+
+Search for values passed into or through:
+- React props
+- React state
+- `useState`
+- `useMemo`
+- `useEffect`
+- React Context
+- Vue props
+- Vue refs
+- Vue computed values
+- Angular `@Input`
+- Angular template bindings
+- Svelte props
+- stores
+- Lit properties
+- Web Component attributes
+- custom raw HTML components
+- DOM helper wrappers
+- template strings that produce HTML
+
+## 2.5 Downstream rendering relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- `innerHTML`
+- `outerHTML`
+- `insertAdjacentHTML`
+- `document.write`
+- `document.writeln`
+- `Range.createContextualFragment`
+- `DOMParser.parseFromString`
+- `template.innerHTML`
+- `iframe.srcdoc`
+- `eval`
+- `setTimeout` with string
+- `setInterval` with string
+- React `dangerouslySetInnerHTML`
+- Vue `v-html`
+- Angular `bypassSecurityTrustHtml`
+- Angular `bypassSecurityTrustUrl`
+- Angular `bypassSecurityTrustResourceUrl`
+- Svelte `{@html ...}`
+- Lit `unsafeHTML`
+- Preact `dangerouslySetInnerHTML`
+- Solid `innerHTML`
+- htmx `innerHTML` swap paths
+- markdown preview/final renderers
+
+## 2.6 JavaScript graph search recipes
+
+Useful combinations:
+
+```text
+location.search/location.hash + state/prop assignment + innerHTML/raw render
+postMessage/event.data + message handler + DOM/framework render
+WebSocket/EventSource data + notification/chat panel + raw HTML/markdown renderer
+API response html/bodyHtml/contentHtml + React/Vue/Angular/Svelte prop + raw render
+DOMPurify/sanitizeHtml output + safeHtml/trustedHtml + raw render component
+marked/markdown-it/remark + markdown source + innerHTML/v-html/dangerouslySetInnerHTML
+localStorage/sessionStorage + route/component state + DOM insertion
+__NEXT_DATA__/hydrated state + component prop + raw HTML component
+```
+
+---
+
+# 3. JavaScript / TypeScript Source Patterns
 
 ## JS-S1. Browser URL or storage source
 Example idea:
@@ -99,7 +251,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case JS-S-XSS-1: Browser-side source
 
@@ -143,9 +295,9 @@ Verify origin validation, schema validation, and safe rendering.
 
 ---
 
-# 4. JavaScript / TypeScript-Specific Audit Heuristics
+# 5. JavaScript / TypeScript-Specific Audit Heuristics
 
-## 4.1 Browser data-source heuristics
+## 5.1 Browser data-source heuristics
 Pay attention to:
 - `location.search`
 - `location.hash`
@@ -156,7 +308,7 @@ Pay attention to:
 - query params
 - localStorage/sessionStorage
 
-## 4.2 Message and async source heuristics
+## 5.2 Message and async source heuristics
 Pay attention to:
 - `postMessage`
 - WebSocket data
@@ -165,7 +317,7 @@ Pay attention to:
 - third-party widget events
 - notification/event payloads
 
-## 4.3 API and state source heuristics
+## 5.3 API and state source heuristics
 Pay attention to:
 - backend JSON rendered into UI
 - fields named `html`, `body`, `content`, `message`, `description`, `rendered`, `safeHtml`, or `trustedHtml`
@@ -173,7 +325,7 @@ Pay attention to:
 - hydrated server-side data
 - admin dashboard data
 
-## 4.4 DOM and raw render source heuristics
+## 5.4 DOM and raw render source heuristics
 Pay attention to values passed toward:
 - `innerHTML`
 - `outerHTML`
@@ -182,7 +334,7 @@ Pay attention to values passed toward:
 - `Range.createContextualFragment`
 - wrapper utilities that eventually write HTML into the DOM
 
-## 4.5 Framework source heuristics
+## 5.5 Framework source heuristics
 Pay attention to values passed toward:
 - React `dangerouslySetInnerHTML`
 - Vue `v-html`
@@ -193,7 +345,7 @@ Pay attention to values passed toward:
 - raw HTML wrapper components
 - custom directives rendering HTML
 
-## 4.6 Rich text and sanitizer source heuristics
+## 5.6 Rich text and sanitizer source heuristics
 Pay attention to:
 - DOMPurify or alternative sanitizer inputs and outputs
 - markdown pipelines
@@ -202,7 +354,7 @@ Pay attention to:
 - custom HTML allowlists
 - values marked trusted after sanitization
 
-## 4.7 Layer inconsistency source heuristics
+## 5.7 Layer inconsistency source heuristics
 Check whether source handling is consistent across:
 - backend-rendered page vs SPA component
 - preview vs final render
@@ -213,7 +365,7 @@ Check whether source handling is consistent across:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a JavaScript/TypeScript source as high-priority if:
 - the value is fixed trusted markup,
@@ -230,7 +382,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good JavaScript/TypeScript source evidence includes:
 - browser-side source, API response, component input, frontend store, or external message entry point,
@@ -247,7 +399,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick JavaScript / TypeScript Source Checklist
+# 8. Quick JavaScript / TypeScript Source Checklist
 
 - Are browser URL, storage, message, WebSocket, or EventSource values rendered?
 - Are API fields containing user-generated content passed to frontend components?

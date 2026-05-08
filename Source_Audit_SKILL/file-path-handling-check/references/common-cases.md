@@ -178,6 +178,204 @@ Examples:
 - local resource name
 - report type mapped to a path
 
+## 3.6 High-coverage candidate inventory for graph search
+
+Use this inventory as a seed list for code search, graph queries, and taint source enumeration. A candidate name is not proof by itself; keep it only when code shows file path construction, local resource selection, archive extraction, upload/export destination, include/template loading, or file operation relevance.
+
+### Entry-point candidates
+
+- `route`
+- `controller`
+- `handler`
+- `endpoint`
+- `api`
+- `resolver`
+- `mutation`
+- `rpc`
+- `grpc`
+- `webhook`
+- `callback`
+- `consumer`
+- `listener`
+- `worker`
+- `job`
+- `task`
+- `upload`
+- `download`
+- `preview`
+- `export`
+- `import`
+- `archive`
+- `extract`
+- `cleanup`
+- `delete`
+- `move`
+- `copy`
+- `admin`
+- `batch`
+- `sync`
+- `contentProvider`
+- `documentProvider`
+- `deepLink`
+- `ipc`
+- `bridge`
+
+### Path-like value candidates
+
+- `file`
+- `filename`
+- `fileName`
+- `name`
+- `path`
+- `filepath`
+- `filePath`
+- `dir`
+- `directory`
+- `folder`
+- `location`
+- `target`
+- `destination`
+- `dest`
+- `source`
+- `src`
+- `resource`
+- `resourceName`
+- `template`
+- `templateName`
+- `view`
+- `theme`
+- `locale`
+- `language`
+- `page`
+- `report`
+- `config`
+- `log`
+- `key`
+- `storageKey`
+- `objectKey`
+- `blobName`
+- `bucket`
+- `prefix`
+- `uri`
+- `url`
+- `contentUri`
+- `documentId`
+
+### Uploaded file and metadata candidates
+
+- `originalFilename`
+- `originalName`
+- `clientFilename`
+- `contentDisposition`
+- `Content-Disposition`
+- `filename*=`
+- `uploadName`
+- `tempName`
+- `tmpName`
+- `extension`
+- `suffix`
+- `mime`
+- `contentType`
+- `metadata`
+- `imageName`
+- `mediaPath`
+- `attachment`
+- `avatar`
+- `document`
+- `reportFile`
+- `importFile`
+
+### Archive and import candidates
+
+- `entry`
+- `entryName`
+- `member`
+- `memberName`
+- `zipEntry`
+- `tarEntry`
+- `archiveEntry`
+- `manifest`
+- `manifestPath`
+- `packagePath`
+- `nestedPath`
+- `extractPath`
+- `extractDir`
+- `destinationPath`
+- `ZipSlip`
+- `archiveName`
+- `backupFile`
+- `restoreFile`
+
+### Transformation and path construction candidates
+
+- `join`
+- `resolve`
+- `combine`
+- `concat`
+- `normalize`
+- `clean`
+- `canonical`
+- `canonicalize`
+- `realpath`
+- `absolute`
+- `abspath`
+- `toRealPath`
+- `basename`
+- `dirname`
+- `extension`
+- `replace`
+- `strip`
+- `sanitize`
+- `safeName`
+- `secureFilename`
+- `urlDecode`
+- `decode`
+- `baseDir`
+- `rootDir`
+- `uploadDir`
+- `downloadDir`
+- `tempDir`
+- `workDir`
+- `storagePath`
+
+### Stored and second-order source candidates
+
+- `storedPath`
+- `savedPath`
+- `fileRecord`
+- `fileMetadata`
+- `database path`
+- `cache path`
+- `session path`
+- `queue path`
+- `job path`
+- `cleanupTarget`
+- `deleteTarget`
+- `exportPath`
+- `reportPath`
+- `templatePath`
+- `backupPath`
+- `objectStorage`
+- `s3Key`
+- `blobPath`
+- `failedJob`
+- `retryPayload`
+- `adminImport`
+- `replayPayload`
+
+## 3.7 Generic graph query recipes
+
+Use these combinations to locate likely source paths:
+
+```text
+<entry-point candidate> + <path-like value candidate> + <path construction candidate>
+<upload candidate> + <original filename metadata> + <write/move/copy candidate>
+<archive/import candidate> + <entry/member/manifest name> + <extract destination candidate>
+<stored source candidate> + <path-like field> + <read/delete/export/cleanup candidate>
+<resource selector candidate> + <template/theme/locale/report> + <include/load/render candidate>
+<mobile/IPC candidate> + <content URI/document ID/path field> + <file operation candidate>
+```
+
 ---
 
 # 4. Direct vs Second-Order Path Sources

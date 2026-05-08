@@ -69,9 +69,200 @@ Look for:
 
 ---
 
-# 2. PHP SQL Injection Anti-Patterns
+# 2. High-Coverage PHP SQL Candidate Inventory
 
-## 2.1 Raw SQL Anti-Patterns
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, query construction behavior, sink execution, and missing binding or structural controls.
+
+## 2.1 Web, framework, and request entry candidates
+Search for:
+- `Route::get`
+- `Route::post`
+- `Route::put`
+- `Route::patch`
+- `Route::delete`
+- `Route::any`
+- `Route::match`
+- `Route::resource`
+- `Route::apiResource`
+- `Controller`
+- `__invoke`
+- `Request $request`
+- `$request->input`
+- `$request->get`
+- `$request->query`
+- `$request->post`
+- `$request->all`
+- `$request->cookie`
+- `$request->header`
+- `$request->getContent`
+- `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `php://input`
+- `#[Route]`
+- `@Route`
+- `AbstractController`
+- `Action`
+- `Middleware`
+
+## 2.2 Queue, command, admin, report, and export entries
+Search for:
+- `ShouldQueue`
+- `handle`
+- `Job`
+- `Listener`
+- `EventSubscriber`
+- `Command`
+- `Console`
+- `schedule`
+- `admin`
+- `dashboard`
+- `analytics`
+- `report`
+- `export`
+- `search`
+- `filter`
+- `sort`
+- `savedFilter`
+- `reportTemplate`
+- `runReport`
+- `generateExport`
+- `DataTables`
+- `ajax`
+
+## 2.3 Query construction and structural fragment candidates
+Search for:
+- `$sql`
+- `$query`
+- `$statement`
+- `$where`
+- `$whereClause`
+- `$condition`
+- `$filter`
+- `$orderBy`
+- `$sort`
+- `$sortField`
+- `$direction`
+- `$column`
+- `$table`
+- `$operator`
+- `$limit`
+- `$offset`
+- string concatenation with `.`
+- `sprintf`
+- `implode`
+- interpolated SQL strings
+- `DB::raw`
+- `whereRaw`
+- `orWhereRaw`
+- `orderByRaw`
+- `groupByRaw`
+- `havingRaw`
+- `selectRaw`
+- `fromRaw`
+- `custom_query`
+- `report_sql`
+
+## 2.4 PDO, mysqli, and raw database sink candidates
+Search for:
+- `$pdo->query`
+- `$pdo->prepare`
+- `$stmt->execute`
+- `PDO::query`
+- `PDO::prepare`
+- `mysqli_query`
+- `mysqli_multi_query`
+- `$mysqli->query`
+- `$mysqli->multi_query`
+- `$conn->executeQuery`
+- `$conn->executeStatement`
+- `executeQuery`
+- `executeStatement`
+- `query`
+- `prepare`
+- `fetchAll`
+- `pg_query`
+- `pg_send_query`
+- `sqlite_query`
+- `oci_parse`
+- `sqlsrv_query`
+
+## 2.5 Framework ORM and query-builder raw sink candidates
+Search for:
+- `DB::select`
+- `DB::statement`
+- `DB::unprepared`
+- `DB::insert`
+- `DB::update`
+- `DB::delete`
+- `DB::table`
+- `DB::raw`
+- `whereRaw`
+- `orWhereRaw`
+- `orderByRaw`
+- `groupByRaw`
+- `havingRaw`
+- `selectRaw`
+- `fromRaw`
+- `joinSub`
+- `Eloquent`
+- `Model::query`
+- `createQueryBuilder`
+- `Doctrine\\DBAL`
+- `createNativeQuery`
+- `getConnection`
+- `ThinkPHP`
+- `Yii::$app->db->createCommand`
+- `CodeIgniter`
+
+## 2.6 Required-control candidates
+Search near sinks for:
+- `prepare`
+- `bindParam`
+- `bindValue`
+- `execute([`
+- named placeholders
+- positional placeholders
+- query builder safe methods
+- `where`
+- `orderBy` with mapping
+- `Rule::in`
+- `Validator`
+- `validate`
+- `enum`
+- `match`
+- `allowedSorts`
+- `allowedColumns`
+- `allowedTables`
+- `Arr::only`
+- `in_array` strict
+- `filter_var`
+- `Doctrine QueryBuilder parameters`
+- `setParameter`
+- `ExpressionBuilder`
+
+## 2.7 PHP graph search recipes
+Useful combinations:
+
+```text
+Route::get + DB::select
+$request->input + DB::raw
+$_GET + mysqli_query
+Controller + whereRaw
+orderByRaw + request parameter
+PDO::query + string concatenation
+DB::statement + interpolated variable
+savedFilter + whereClause + DB::select
+reportTemplate + custom_query + query
+createCommand + request parameter
+```
+
+---
+
+# 3. PHP SQL Injection Anti-Patterns
+
+## 3.1 Raw SQL Anti-Patterns
 
 ### A1. Concatenated SQL in PDO / mysqli
 ```php
@@ -85,7 +276,7 @@ $sql = "select * from orders where status = '$status'";
 $result = mysqli_query($conn, $sql);
 ```
 
-## 2.2 Structural Injection Anti-Patterns
+## 3.2 Structural Injection Anti-Patterns
 
 ### A3. User-controlled ORDER BY
 ```php
@@ -99,7 +290,7 @@ $sql = "select * from invoice where " . $condition;
 $rows = $pdo->query($sql)->fetchAll();
 ```
 
-## 2.3 Laravel / Query Builder Misuse Anti-Patterns
+## 3.3 Laravel / Query Builder Misuse Anti-Patterns
 
 ### A5. `DB::raw(...)` with request-derived fragment
 ```php
@@ -111,7 +302,7 @@ $query = DB::table('users')->orderByRaw($sort);
 $rows = DB::select("select * from report where type = '$type'");
 ```
 
-## 2.4 Mixed Safe / Unsafe Anti-Patterns
+## 3.4 Mixed Safe / Unsafe Anti-Patterns
 
 ### A7. Partial parameterization
 ```php
@@ -127,7 +318,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute([$id]);
 ```
 
-## 2.5 Second-Order Anti-Patterns
+## 3.5 Second-Order Anti-Patterns
 
 ### A9. Stored filter reused in SQL
 ```php
@@ -144,7 +335,7 @@ return $pdo->query($sql)->fetchAll();
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-SQL-1: Raw Query Injection
 
@@ -186,7 +377,7 @@ $rows = DB::select($sql);
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 Laravel heuristics
 Pay attention to:
@@ -235,7 +426,7 @@ Check whether SQL safety is consistent across:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not report a vulnerability as confirmed if:
 - the input is provably constant or server-controlled,
@@ -246,7 +437,7 @@ Do not report a vulnerability as confirmed if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Strong evidence usually includes:
 - the exact entry point
@@ -258,7 +449,7 @@ Strong evidence usually includes:
 
 ---
 
-# 7. Quick PHP SQL Audit Checklist
+# 8. Quick PHP SQL Audit Checklist
 
 - Do request inputs reach PDO, mysqli, DB::select, DB::raw, or raw query helpers?
 - Are queries built with concatenation, interpolation, or raw fragments?

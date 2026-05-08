@@ -186,6 +186,269 @@ Prioritize these source surfaces first:
 - repository query arguments
 - workflow action names and status fields
 
+## 3.1 High-coverage candidate inventory for graph search
+
+Use this inventory as a seed list for code search, graph queries, and taint source enumeration. A candidate name is not proof by itself; keep it only when the code path shows access-control relevance.
+
+### Entry-point candidates
+
+- `controller`
+- `route`
+- `handler`
+- `endpoint`
+- `resolver`
+- `mutation`
+- `query`
+- `action`
+- `webhook`
+- `callback`
+- `consumer`
+- `listener`
+- `receiver`
+- `job`
+- `task`
+- `command`
+- `export`
+- `import`
+- `bulk`
+- `admin`
+- `manage`
+- `internal`
+- `mobile`
+- `api`
+- `legacy`
+- `debug`
+
+### Client-controlled source APIs
+
+- path variables
+- query parameters
+- request body fields
+- form fields
+- headers
+- cookies
+- uploaded file metadata
+- CSV/import row fields
+- GraphQL variables
+- RPC arguments
+- WebSocket messages
+- webhook payload fields
+- Android Intent extras
+- Android deep-link parameters
+- Android Binder/AIDL arguments
+- native IPC messages
+- CLI arguments for user-triggered jobs
+- queue message payload fields
+
+### Identity source candidates
+
+- `user`
+- `current_user`
+- `currentUser`
+- `user_id`
+- `userId`
+- `uid`
+- `account_id`
+- `accountId`
+- `member_id`
+- `memberId`
+- `actor`
+- `actor_id`
+- `principal`
+- `subject`
+- `sub`
+- `owner`
+- `owner_id`
+- `created_by`
+- `createdBy`
+- `operator`
+- `operator_id`
+- `admin_user`
+- `session_user`
+- `login_user`
+
+### Role, permission, and entitlement candidates
+
+- `role`
+- `roles`
+- `role_id`
+- `roleId`
+- `permission`
+- `permissions`
+- `perm`
+- `scope`
+- `scopes`
+- `authority`
+- `authorities`
+- `privilege`
+- `privileges`
+- `entitlement`
+- `entitlements`
+- `is_admin`
+- `isAdmin`
+- `admin`
+- `superuser`
+- `root`
+- `operator`
+- `staff`
+- `manager`
+- `group`
+- `groups`
+- `team_role`
+- `access_level`
+- `accessLevel`
+- `policy`
+- `gate`
+- `capability`
+- `capabilities`
+
+### Protected object identifier candidates
+
+- `id`
+- `ids`
+- `object_id`
+- `objectId`
+- `resource_id`
+- `resourceId`
+- `entity_id`
+- `entityId`
+- `record_id`
+- `recordId`
+- `order_id`
+- `orderId`
+- `invoice_id`
+- `invoiceId`
+- `payment_id`
+- `paymentId`
+- `file_id`
+- `fileId`
+- `document_id`
+- `documentId`
+- `project_id`
+- `projectId`
+- `ticket_id`
+- `ticketId`
+- `case_id`
+- `caseId`
+- `report_id`
+- `reportId`
+- `profile_id`
+- `profileId`
+- `asset_id`
+- `assetId`
+- `device_id`
+- `deviceId`
+
+### Tenant and organization candidates
+
+- `tenant`
+- `tenant_id`
+- `tenantId`
+- `org`
+- `org_id`
+- `orgId`
+- `organization_id`
+- `organizationId`
+- `company_id`
+- `companyId`
+- `workspace_id`
+- `workspaceId`
+- `team_id`
+- `teamId`
+- `department_id`
+- `departmentId`
+- `account_id`
+- `accountId`
+- `customer_id`
+- `customerId`
+- `merchant_id`
+- `merchantId`
+- `partner_id`
+- `partnerId`
+- `site_id`
+- `siteId`
+- `domain`
+- `subdomain`
+- `tenant_slug`
+- `workspace_slug`
+
+### Business action and state candidates
+
+- `action`
+- `operation`
+- `op`
+- `method`
+- `status`
+- `state`
+- `stage`
+- `transition`
+- `target_state`
+- `targetStatus`
+- `approve`
+- `reject`
+- `publish`
+- `unpublish`
+- `archive`
+- `restore`
+- `delete`
+- `disable`
+- `enable`
+- `lock`
+- `unlock`
+- `reset`
+- `refund`
+- `void`
+- `cancel`
+- `transfer`
+- `assign`
+- `share`
+- `export`
+- `download`
+- `invite`
+- `promote`
+- `demote`
+- `grant`
+- `revoke`
+
+### Access-control follow-up candidates
+
+- `auth`
+- `authorize`
+- `authorization`
+- `authenticate`
+- `permission`
+- `policy`
+- `gate`
+- `voter`
+- `guard`
+- `can`
+- `allowed`
+- `deny`
+- `role`
+- `scope`
+- `ownership`
+- `owner`
+- `tenant`
+- `membership`
+- `acl`
+- `rbac`
+- `abac`
+- `principal`
+- `subject`
+
+## 3.2 Generic graph query recipes
+
+Use these combinations to find source paths worth human review:
+
+```text
+<entry-point candidate> + <object identifier candidate> + <protected operation verb>
+<entry-point candidate> + <tenant candidate> + <query/repository/service call>
+<entry-point candidate> + <role/permission candidate> + <policy/helper/service call>
+<identity source candidate> + <object identifier candidate> + <ownership/tenant/policy call>
+<batch/list candidate> + <delete/export/share/approve action>
+<alternate entry candidate> + <same service method as protected route>
+```
+
 ---
 
 # 4. Shared Source Patterns

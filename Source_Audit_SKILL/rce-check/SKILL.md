@@ -1,6 +1,6 @@
 ---
 name: Command Execution Source Check
-description: Use this skill to identify source points for command execution and code execution audits, including command names, shell strings, argv values, flags, options, file paths, environment values, working directories, script content, eval expressions, external tool inputs, queued task payloads, stored command templates, and framework-specific execution source locations in Java, Python, and PHP applications.
+description: Use this skill to identify source points for command execution and code execution audits, including command names, shell strings, argv values, flags, options, file paths, environment values, working directories, script content, eval expressions, external tool inputs, queued task payloads, stored command templates, mobile/IPC/RPC execution inputs, and framework-specific execution source locations in Java, Android, C#/.NET, C++, Python, and PHP applications.
 ---
 
 # Command Execution Source Check
@@ -37,6 +37,9 @@ Focus on execution source points in:
 - APIs
 - GraphQL resolvers
 - RPC methods
+- Android exported components, deep links, WebView bridges, Binder/AIDL handlers, WorkManager jobs, content providers, SDK callbacks, and mobile automation or diagnostic features that receive execution-relevant values
+- ASP.NET / .NET controllers, minimal APIs, Razor Pages, SignalR hubs, gRPC services, WCF services, Azure Functions, queue consumers, and worker inputs
+- C++ HTTP/RPC/IPC/native service handlers, CGI/FastCGI entry points, plugin callbacks, custom protocol frames, CLI/admin commands, and native automation jobs
 - service-layer command wrappers
 - process execution helpers
 - shell invocation code
@@ -97,10 +100,17 @@ Always load:
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
 
 If the project contains multiple languages, prioritize the language and framework that implement the actual execution boundary.
+
+For Android, prioritize mobile boundaries that can introduce command names, tool/action selectors, shell fragments, script content, interpreter arguments, file paths, environment-like values, WebView bridge inputs, IPC parcel fields, or WorkManager input data that later reaches an execution wrapper or backend execution API.
+
+For C#/.NET and C++, prioritize server, RPC, IPC, queue, worker, plugin, native automation, process-wrapper, expression-engine, and external-tool layers that receive command, script, argv, option, environment, working-directory, or stored task values.
 
 Do not rely only on wrapper names or task names; focus on where command names, arguments, scripts, expressions, interpreters, or external tools are actually selected, constructed, or invoked.
 
@@ -113,8 +123,61 @@ If the language cannot be determined confidently, state the uncertainty and use 
 - Use reference files as source discovery guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared execution source concepts, propagation patterns, trust boundaries, false-positive controls, and source output standards.
 - Language-specific reference files define framework source locations, execution-relevant source shapes, language-specific APIs, and follow-up checks.
+- Use the high-coverage candidate inventories in each reference as graph-search seed lists for entry points, command/tool selectors, shell/script/eval fields, argv/option/environment values, stored second-order execution sources, and downstream execution-boundary mapping.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
+
+---
+
+# Graph / Taint Source Discovery Workflow
+
+When the audit uses a graph database, code property graph, semantic index, or taint-tracking pipeline, seed discovery with candidate groups instead of relying on one exact source name.
+
+## Candidate group A: entry points
+
+Search for code locations that receive execution-relevant data:
+- HTTP route annotations, route tables, controller methods, handlers, servlet mappings, minimal APIs, and legacy scripts
+- GraphQL resolvers and mutations
+- RPC, gRPC, WCF, SOAP, Thrift, WebSocket, queue, worker, and message handlers
+- Android activities, services, broadcast receivers, content providers, deep links, WebView bridge methods, Binder/AIDL handlers, and WorkManager jobs
+- C++ HTTP/RPC/IPC handlers, native plugin callbacks, CGI/FastCGI handlers, CLI/admin tools, and background automation jobs
+
+## Candidate group B: command, tool, action, and interpreter selectors
+
+Search for values likely to select what gets executed:
+- `cmd`, `command`, `commandName`, `tool`, `toolName`, `executable`, `program`, `binary`, `process`
+- `script`, `scriptName`, `interpreter`, `runtime`, `engine`, `plugin`, `module`, `class`, `method`, `function`
+- `action`, `operation`, `mode`, `subcommand`, `task`, `job`, `workflow`, `runner`, `handler`
+
+## Candidate group C: argument, option, path, and environment values
+
+Search for values that can alter execution behavior:
+- `arg`, `args`, `argv`, `arguments`, `param`, `parameters`, `option`, `options`, `flag`, `flags`, `switch`
+- `host`, `target`, `url`, `uri`, `ip`, `domain`, `file`, `filename`, `path`, `input`, `output`, `config`
+- `env`, `environment`, `cwd`, `workDir`, `workingDir`, `stdin`, `inputStream`, `payload`, `template`
+
+## Candidate group D: shell, script, eval, and expression text
+
+Search for text that may be interpreted:
+- `shell`, `shellCommand`, `commandLine`, `commandTemplate`, `template`, `scriptBody`, `sourceCode`, `code`
+- `eval`, `expression`, `formula`, `rule`, `spel`, `ognl`, `mvel`, `jexl`, `groovy`, `python`, `php`, `powershell`, `bash`, `cmd`
+- `debug`, `diagnostic`, `adminEval`, `runScript`, `executeScript`, `automation`
+
+## Candidate group E: indirect and second-order execution sources
+
+Search for execution-relevant values from:
+- database task definitions, saved automations, command templates, scheduler configs, cron metadata, replay/admin payloads
+- queue messages, job args, failed jobs, retry payloads, webhook payloads, provider events, internal service responses
+- uploaded filenames and metadata, imported rows, config files, plugin manifests, scripts, temporary files, generated files
+
+## Candidate group F: downstream relevance mapping
+
+Keep only candidates connected to execution-relevant behavior:
+- command construction, argv construction, shell string construction, script generation, interpreter invocation
+- eval/expression/script engine input
+- process launch wrappers, external CLI wrappers, automation runners, diagnostic utilities
+- environment map construction, working-directory selection, stdin/config file creation
+- stored task loading, queue worker execution, replay/admin execution paths
 
 ---
 

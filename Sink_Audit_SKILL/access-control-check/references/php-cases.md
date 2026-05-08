@@ -111,6 +111,92 @@ Questions:
 - Is scope enforced at query time or only assumed elsewhere?
 - Is client-supplied `tenant_id` trusted directly?
 
+## 1.7 High-coverage PHP sink candidate inventory
+
+Use this list to seed searches for protected entry points and authorization sinks. A candidate is not proof of a bug; it is a place where missing or inconsistent access control matters.
+
+### Laravel route and controller candidates
+Look for:
+- `Route::get`
+- `Route::post`
+- `Route::put`
+- `Route::patch`
+- `Route::delete`
+- `Route::match`
+- `Route::any`
+- `Route::resource`
+- `Route::apiResource`
+- `Route::controller`
+- `Route::group`
+- `middleware(...)`
+- `withoutMiddleware(...)`
+- `routes/web.php`
+- `routes/api.php`
+- controller methods such as `index`, `show`, `store`, `update`, `destroy`
+- invokable controllers with `__invoke`
+- Livewire actions and component methods
+- Nova / Filament / Backpack admin resources
+
+### Laravel auth and authorization candidates
+Look for:
+- `auth` middleware
+- `auth:sanctum`, `auth:api`, `auth:passport`
+- guards in `config/auth.php`
+- `$this->middleware(...)`
+- `$this->authorize(...)`
+- `Gate::allows`, `Gate::denies`, `Gate::authorize`
+- policies with `view`, `viewAny`, `create`, `update`, `delete`, `restore`, `forceDelete`
+- middleware such as `can:...`
+- role packages such as `hasRole`, `hasPermissionTo`, `can`
+- `Auth::user()`, `auth()->user()`, `auth()->id()`
+- `request()->user()`
+
+### Symfony and common PHP framework candidates
+Look for:
+- Symfony route attributes `#[Route(...)]`
+- annotation routes `@Route`
+- controller action methods ending with `Action`
+- `access_control` in `security.yaml`
+- `firewalls`
+- `IS_AUTHENTICATED_FULLY`
+- `ROLE_ADMIN`, `ROLE_*`
+- `#[IsGranted(...)]`
+- `$this->denyAccessUnlessGranted(...)`
+- voters implementing `Voter`
+- `security.authorization_checker`
+- Yii `AccessControl`
+- Yii `VerbFilter`
+- ThinkPHP controller/action routes
+- CodeIgniter controllers and filters
+- Slim / Mezzio / Laminas middleware routes
+
+### Object-level and tenant authorization candidates
+Look for:
+- `find($id)`
+- `findOrFail($id)`
+- `firstOrFail()`
+- `where('id', $id)` without user/tenant scope
+- `Model::query()` followed by unscoped object lookup
+- `DB::table(...)` queries without owner or tenant predicates
+- route model binding without policy checks
+- mass assignment followed by privileged update
+- `delete`, `destroy`, `forceDelete`, `restore`
+- `tenant_id`, `org_id`, `company_id`, `account_id`, `workspace_id` from request input
+- multi-tenant packages with missing tenant resolver enforcement
+
+### Alternate entry and background candidates
+Look for:
+- AJAX endpoints under public routes
+- webhook controllers that mutate local objects
+- queued jobs dispatched from user input
+- console commands reachable through admin panels
+- export/download routes
+- file and attachment controllers
+- admin bulk actions
+- GraphQL resolvers
+- JSON-RPC or custom API dispatchers
+- legacy `.php` files in web root
+
 ---
 
 # 2. PHP Access Control Anti-Patterns

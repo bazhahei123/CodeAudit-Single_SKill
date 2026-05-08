@@ -101,9 +101,241 @@ Questions:
 
 ---
 
-# 2. Java SQL Injection Anti-Patterns
+# 2. High-Coverage Java SQL Candidate Inventory
 
-## 2.1 Raw JDBC Anti-Patterns
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, query construction behavior, sink execution, and missing binding or structural controls.
+
+## 2.1 HTTP, controller, and request entry candidates
+Search for:
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@PatchMapping`
+- `@DeleteMapping`
+- `@RequestBody`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestHeader`
+- `@CookieValue`
+- `@ModelAttribute`
+- `HttpServletRequest`
+- `doGet`
+- `doPost`
+- `doPut`
+- `doDelete`
+- `Filter`
+- `HandlerInterceptor`
+- `OncePerRequestFilter`
+- `search`
+- `filter`
+- `sort`
+- `order`
+- `page`
+- `report`
+- `export`
+- `login`
+
+## 2.2 RPC, GraphQL, message, job, and admin entries
+Search for:
+- `@Path`
+- `@GET`
+- `@POST`
+- `@QueryParam`
+- `@FormParam`
+- `@GraphQlController`
+- `@QueryMapping`
+- `@MutationMapping`
+- `@SchemaMapping`
+- `@MessageMapping`
+- `@GrpcService`
+- `BindableService`
+- `StreamObserver`
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `MessageListener`
+- `onMessage`
+- `@Scheduled`
+- `QuartzJobBean`
+- `Tasklet`
+- `ItemProcessor`
+- `CommandLineRunner`
+- `ApplicationRunner`
+- `admin`
+- `dashboard`
+- `analytics`
+- `savedFilter`
+- `reportTemplate`
+
+## 2.3 Query construction and structural fragment candidates
+Search for:
+- `String sql`
+- `String query`
+- `String hql`
+- `String jpql`
+- `StringBuilder`
+- `StringBuffer`
+- `String.format`
+- `MessageFormat.format`
+- `+ " where " +`
+- `+ " order by " +`
+- `+ " limit " +`
+- `+ " offset " +`
+- `condition`
+- `whereClause`
+- `orderBy`
+- `sort`
+- `sortField`
+- `sortDirection`
+- `column`
+- `table`
+- `operator`
+- `filter`
+- `criteria`
+- `nativeSql`
+- `customQuery`
+- `reportSql`
+- `savedFilter`
+- `${`
+- `@SelectProvider`
+- `@UpdateProvider`
+- `@InsertProvider`
+- `SQLBuilder`
+
+## 2.4 JDBC and Spring JDBC sink candidates
+Search for:
+- `Statement.execute`
+- `Statement.executeQuery`
+- `Statement.executeUpdate`
+- `Connection.createStatement`
+- `Connection.prepareStatement`
+- `PreparedStatement`
+- `CallableStatement`
+- `CallableStatement.execute`
+- `JdbcTemplate.query`
+- `JdbcTemplate.queryForList`
+- `JdbcTemplate.queryForObject`
+- `JdbcTemplate.update`
+- `JdbcTemplate.execute`
+- `NamedParameterJdbcTemplate`
+- `SimpleJdbcCall`
+- `BatchPreparedStatementSetter`
+- `RowMapper`
+- `ResultSetExtractor`
+- `DataSourceUtils`
+
+## 2.5 JPA, Hibernate, jOOQ, QueryDSL, and repository sink candidates
+Search for:
+- `EntityManager.createQuery`
+- `EntityManager.createNativeQuery`
+- `Session.createQuery`
+- `Session.createNativeQuery`
+- `Query.setParameter`
+- `@Query`
+- `nativeQuery = true`
+- `JpaRepository`
+- `Specification`
+- `CriteriaBuilder`
+- `CriteriaQuery`
+- `Root.get`
+- `Order.asc`
+- `Order.desc`
+- `org.hibernate.query.Query`
+- `SQLQuery`
+- `createSQLQuery`
+- `DSLContext.fetch`
+- `DSLContext.execute`
+- `DSLContext.resultQuery`
+- `DSLContext.query`
+- `DSL.field(String)`
+- `DSL.table(String)`
+- `DSL.condition(String)`
+- `QueryDSL`
+
+## 2.6 MyBatis and mapper sink candidates
+Search for:
+- `#{`
+- `${`
+- `<select`
+- `<insert`
+- `<update`
+- `<delete`
+- `<where>`
+- `<if test=`
+- `<foreach`
+- `<choose`
+- `order by ${`
+- `where ${`
+- `@Select`
+- `@Update`
+- `@Delete`
+- `@Insert`
+- `@Param`
+- `ProviderMethodResolver`
+- `SqlProvider`
+- `SelectProvider`
+- `UpdateProvider`
+- `BoundSql`
+- `SqlSession.selectList`
+- `SqlSession.selectOne`
+- `SqlSession.update`
+- `SqlSession.delete`
+
+## 2.7 Required-control candidates
+Search near sinks for:
+- `PreparedStatement`
+- `setString`
+- `setInt`
+- `setLong`
+- `setObject`
+- `setParameter`
+- `MapSqlParameterSource`
+- `SqlParameterSource`
+- `NamedParameterJdbcTemplate`
+- `#{`
+- no `${`
+- `CriteriaBuilder`
+- typed jOOQ DSL
+- `DSL.name`
+- `allowlist`
+- `allowedSorts`
+- `allowedColumns`
+- `allowedTables`
+- `Sort.by` with mapping
+- `Pageable`
+- `enum`
+- `switch`
+- `Pattern.matches`
+- `validateSort`
+- `safeColumn`
+- `safeOrder`
+
+## 2.8 Java graph search recipes
+Useful combinations:
+
+```text
+@GetMapping + JdbcTemplate.query
+@PostMapping + Statement.executeQuery
+@RequestParam + StringBuilder + executeQuery
+@RequestParam + order by + JdbcTemplate
+@Query + nativeQuery = true
+EntityManager.createNativeQuery + request parameter
+createQuery + string concatenation
+MyBatis ${sort}
+@Select + ${where}
+DSL.field(String) + request
+savedFilter + whereClause + query
+reportTemplate + createNativeQuery
+```
+
+---
+
+# 3. Java SQL Injection Anti-Patterns
+
+## 3.1 Raw JDBC Anti-Patterns
 
 ### A1. Concatenated SQL in `Statement`
 ```java
@@ -124,7 +356,7 @@ ps.setInt(1, limit);
 Why risky:
 Even if one value is parameterized, the ORDER BY structure remains user-controlled.
 
-## 2.2 Spring JDBC Anti-Patterns
+## 3.2 Spring JDBC Anti-Patterns
 
 ### A3. `JdbcTemplate` with concatenated query
 ```java
@@ -144,7 +376,7 @@ return jdbcTemplate.query(sql, mapper);
 Why risky:
 A raw condition fragment can give the attacker direct control over SQL logic.
 
-## 2.3 MyBatis Anti-Patterns
+## 3.3 MyBatis Anti-Patterns
 
 ### A5. `${}` used with request-derived data
 ```xml
@@ -166,7 +398,7 @@ Why risky:
 Why risky:
 The query structure is directly controlled by the caller.
 
-## 2.4 JPA / Hibernate Anti-Patterns
+## 3.4 JPA / Hibernate Anti-Patterns
 
 ### A7. JPQL built with string concatenation
 ```java
@@ -186,7 +418,7 @@ return entityManager.createNativeQuery(sql).getResultList();
 Why risky:
 Native query execution with interpolated input is a direct injection sink.
 
-## 2.5 Second-Order and Structural Anti-Patterns
+## 3.5 Second-Order and Structural Anti-Patterns
 
 ### A9. Stored rule reused in SQL
 ```java
@@ -210,7 +442,7 @@ Prepared statements do not protect structural elements like table or column name
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-SQL-1: Raw JDBC Injection
 
@@ -263,7 +495,7 @@ return jdbcTemplate.query(sql, mapper);
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
 ## 4.1 Spring JDBC heuristics
 Pay attention to:
@@ -311,7 +543,7 @@ Check whether SQL safety is consistent across:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not report a vulnerability as confirmed if:
 - the input is provably constant or server-controlled,

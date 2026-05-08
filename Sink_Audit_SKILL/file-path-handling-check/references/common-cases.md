@@ -77,6 +77,10 @@ A sink is the place where the path is used in a meaningful file or local resourc
 Prioritize these attack surfaces first:
 
 - file download and preview endpoints
+- public route/controller annotations and HTTP handler registration
+- GraphQL mutation or resolver handlers that return or mutate files
+- RPC, gRPC, SOAP, WCF, Thrift, Binder, DBus, or internal protocol methods carrying file selectors
+- WebSocket and message-frame handlers carrying filenames, paths, or resource keys
 - upload destination selection
 - import and export handlers
 - log, report, and config readers
@@ -85,8 +89,203 @@ Prioritize these attack surfaces first:
 - template and local resource loaders
 - temporary-file and cleanup logic
 - admin file-management tools
+- webhook, callback, replay, and reconciliation handlers touching local files
+- mobile exported component, deep-link, WebView bridge, share target, or IPC entry points
+- native service socket, pipe, IPC, or custom binary protocol handlers that open local paths
 - background jobs processing stored paths
 - legacy helper methods and alternate file-operation paths
+
+---
+
+# 2.1 Candidate search groups for graph workflows
+
+When a graph database cannot start from a single universal sink, build candidate sets from four groups and intersect them.
+
+### Entry candidates
+Search for externally reachable or semi-trusted execution points:
+- controller
+- route
+- handler
+- endpoint
+- resolver
+- mutation
+- action
+- servlet
+- filter
+- interceptor
+- middleware
+- webhook
+- callback
+- listener
+- consumer
+- subscriber
+- receiver
+- worker
+- job
+- scheduler
+- import
+- export
+- upload
+- download
+- preview
+- view
+- render
+- file
+- image
+- attachment
+- report
+- log
+- template
+- resource
+- backup
+- restore
+- replay
+- cleanup
+- delete
+- rename
+- move
+- copy
+- admin
+- debug
+- IPC
+- RPC
+- WebSocket
+- deep link
+- exported
+- bridge
+
+### Path construction candidates
+Search for user-controlled values entering path assembly or transformation:
+- path
+- filepath
+- filePath
+- filename
+- fileName
+- name
+- key
+- resource
+- template
+- theme
+- locale
+- folder
+- directory
+- dir
+- prefix
+- suffix
+- extension
+- join
+- resolve
+- normalize
+- clean
+- sanitize
+- canonical
+- realpath
+- absolute
+- basename
+- dirname
+- decode
+- URL decode
+- base64 decode
+- separator
+- slash
+- backslash
+- entry name
+- zip entry
+- tar entry
+- original filename
+- storage path
+- temporary path
+- cache path
+
+### File-operation sink candidates
+Search for operations that consume the path:
+- read
+- open
+- stream
+- download
+- preview
+- render
+- include
+- require
+- load
+- template load
+- resource load
+- write
+- save
+- upload save
+- create
+- append
+- copy
+- move
+- rename
+- delete
+- remove
+- unlink
+- extract
+- unzip
+- untar
+- archive
+- chmod
+- stat
+- exists
+- metadata
+- image read
+- config read
+- log read
+
+### Required-control candidates
+Search near candidate sinks for controls:
+- allowlist
+- whitelist
+- permitted
+- base directory
+- baseDir
+- root
+- safe root
+- canonical
+- real path
+- resolved path
+- containment
+- startsWith resolved base
+- relative path
+- reject absolute
+- reject traversal
+- generated filename
+- random filename
+- UUID filename
+- secure filename
+- normalize filename
+- extension allowlist
+- MIME allowlist
+- nofollow symlink
+- symlink
+- link option
+- same filesystem
+- archive entry validation
+- zip slip guard
+- path traversal guard
+- max size
+- max depth
+- permission
+- sandbox
+- storage key mapping
+
+## 2.2 Generic graph search recipes
+
+Useful candidate recipes:
+
+```text
+<entry candidate> + <path construction candidate>
+<entry candidate> + <file-operation sink candidate>
+<download/preview/log/report/template> + <read/open/load sink>
+<upload/export/report/cache> + <write/save/copy/move sink>
+<delete/cleanup/rename/move> + <file path parameter>
+<zip/tar/archive entry> + <extract/write sink>
+<resource/template/theme/locale> + <include/load sink>
+<candidate sink> without nearby <required-control candidate>
+<normalize/clean/sanitize> without resolved base containment
+<stored path/cache path/job payload> + <later file sink>
+```
 
 ---
 

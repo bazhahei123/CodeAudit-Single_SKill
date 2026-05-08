@@ -111,6 +111,90 @@ Questions:
 - Is scope enforced at query time or only assumed elsewhere?
 - Is client-supplied `tenant_id` trusted directly?
 
+## 1.7 High-coverage Python sink candidate inventory
+
+Use this list to seed searches for protected entry points and authorization sinks. A candidate is not proof of a bug; it is a place where missing or inconsistent access control matters.
+
+### Django and DRF route/view candidates
+Look for:
+- `urlpatterns`
+- `path(...)`
+- `re_path(...)`
+- `include(...)`
+- function-based views
+- class-based views such as `View`, `TemplateView`, `DetailView`, `UpdateView`, `DeleteView`
+- DRF `APIView`
+- DRF `ViewSet`, `ModelViewSet`, `ReadOnlyModelViewSet`
+- DRF `GenericAPIView`
+- `@api_view`
+- `@action`
+- `router.register(...)`
+- `get`, `post`, `put`, `patch`, `delete`
+- admin actions
+- management endpoints exposed through URLs
+
+### Flask, FastAPI, Starlette, and async route candidates
+Look for:
+- Flask `@app.route`
+- Flask blueprint routes
+- `MethodView`
+- `before_request`
+- FastAPI `@app.get`, `@app.post`, `@app.put`, `@app.patch`, `@app.delete`
+- `APIRouter`
+- router `include_router(...)`
+- `Depends(...)`
+- Starlette `Route`, `Mount`, `Endpoint`
+- Tornado `RequestHandler`
+- Sanic route decorators
+- aiohttp route tables
+- websocket endpoints
+
+### Authentication and permission candidates
+Look for:
+- Django `LoginRequiredMixin`
+- `@login_required`
+- `@permission_required`
+- `user_passes_test`
+- `has_perm`
+- `is_staff`, `is_superuser`
+- DRF `permission_classes`
+- `IsAuthenticated`
+- `IsAdminUser`
+- `DjangoModelPermissions`
+- custom DRF permissions
+- Flask-Login `@login_required`
+- Flask-JWT / JWT decorators
+- custom decorators such as `@require_admin`, `@roles_required`, `@permission_required`
+- FastAPI dependencies that return current user or enforce role
+- middleware that validates sessions, JWT, API keys, or tenant context
+
+### Object-level and tenant authorization candidates
+Look for:
+- `objects.get(id=...)`
+- `get_object_or_404(Model, id=...)`
+- `Model.query.get(...)`
+- `session.get(Model, id)`
+- `.filter(id=...)` without user/tenant predicates
+- DRF `get_queryset()` missing current-user or tenant scope
+- DRF `get_object()` overrides
+- SQLAlchemy `query.get`, `session.get`, `filter_by(id=...)`
+- raw SQL lookups by external ID
+- `tenant_id`, `org_id`, `workspace_id`, `account_id`, `user_id` from request input
+- service methods that load objects before checking `request.user`
+
+### Alternate entry and asynchronous candidates
+Look for:
+- Graphene / Strawberry / Ariadne GraphQL resolvers and mutations
+- Celery tasks triggered by user-controllable inputs
+- webhook handlers
+- admin actions
+- export/download views
+- file and attachment views
+- background job status/cancel/retry endpoints
+- WebSocket consumers in Channels
+- RPC-style dispatchers
+- internal/debug endpoints enabled in production
+
 ---
 
 # 2. Python Access Control Anti-Patterns

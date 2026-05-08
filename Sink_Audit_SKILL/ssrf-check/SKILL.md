@@ -1,6 +1,6 @@
 ---
 name: SSRF Check
-description: Use this skill to audit application code for server-side request forgery risks, including attacker-controlled request targets, unsafe URL construction, internal network reachability, metadata access, redirect or DNS-based bypasses, protocol misuse, and inconsistent outbound-request controls across routes, jobs, and helper layers.
+description: Use this skill to audit Java, Android, C#/.NET, C++, Python, and PHP application code for server-side request forgery risks, including attacker-controlled request targets, unsafe URL construction, internal network reachability, metadata access, redirect or DNS-based bypasses, protocol misuse, cloud metadata access, and inconsistent outbound-request controls across routes, jobs, IPC, RPC, mobile components, and helper layers.
 ---
 
 # SSRF Check
@@ -35,6 +35,10 @@ Focus on SSRF-related logic in:
 - handlers
 - APIs
 - GraphQL resolvers
+- RPC methods
+- Android exported components, deep links, WebView bridges, SDK callbacks, content providers, and IPC handlers
+- ASP.NET / .NET endpoints, SignalR hubs, WCF services, Azure Functions, and queue consumers
+- C++ HTTP/RPC/IPC handlers, native message consumers, and network client wrappers
 - service-layer HTTP and network helpers
 - webhook and callback test features
 - remote file fetch and preview features
@@ -85,10 +89,19 @@ Always load:
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
 
 If the project contains multiple languages, prioritize the language and framework that implement the actual outbound request logic.
+
+For graph-database or taint-tracking workflows, use the language reference candidate inventories as search seeds:
+- entry candidates, such as route annotations, controllers, handlers, exported components, RPC methods, message consumers, jobs, webhook testers, previewers, import/export actions, and admin tools,
+- request-target construction candidates, such as URL parsing, host/scheme/port/path recomposition, callback URL storage, redirect target handling, DNS resolution, proxy settings, and decoded URL values,
+- outbound request sink candidates, such as HTTP clients, URL openers, socket clients, FTP clients, cloud SDK endpoint overrides, webhook dispatchers, browser/rendering fetchers, XML/resource loaders, and native networking APIs,
+- required-control candidates, such as strict scheme/host allowlists, final resolved-address checks, private/loopback/link-local/metadata blocking, redirect revalidation, DNS pinning, proxy restrictions, timeout limits, and trusted-only target contracts.
 
 Do not rely only on URL field names or helper names; focus on where request targets are actually parsed, validated, resolved, redirected, and fetched.
 
@@ -100,7 +113,7 @@ If the language cannot be determined confidently, state the uncertainty and use 
 
 - Use reference files as audit guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared SSRF concepts, anti-patterns, false-positive controls, and finding standards.
-- Language-specific reference files define framework control points, dangerous APIs, common implementation mistakes, and language-specific case patterns.
+- Language-specific reference files define framework entry candidates, dangerous outbound request sink API candidates, request-target construction candidates, required controls, common implementation mistakes, and language-specific case patterns.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
 
@@ -131,6 +144,9 @@ Direction: Verify whether SSRF protections are applied consistently across direc
 # High-Priority Audit Targets
 
 Prioritize these targets first when present:
+- public route/controller annotations and HTTP handler registration
+- RPC, GraphQL, WebSocket, webhook, queue, job, import/export, preview, and admin network-test entry points
+- Android exported activity/service/receiver/provider paths, deep links, WebView bridges, SDK callbacks, and Binder/AIDL IPC handlers
 - webhook and callback test endpoints
 - URL preview, screenshot, crawler, or metadata fetch features
 - remote file import or download helpers

@@ -296,6 +296,223 @@ The source can become high-risk if it influences a request that reaches internal
 Follow-up:
 Check whether internal targets are blocked after real resolution and after redirects.
 
+## 3.8 High-coverage candidate inventory for graph search
+
+Use this inventory as a seed list for code search, graph queries, and taint source enumeration. A candidate name is not proof by itself; keep it only when code shows request-target construction, URL parsing, URL recomposition, host/scheme/port/path selection, redirect behavior, DNS-sensitive target choice, proxy/client options, stored callback replay, renderer imports, or outbound request wrapper relevance.
+
+### Entry-point candidates
+
+Externally reachable or weakly trusted code surfaces that may introduce outbound request targets:
+- route
+- controller
+- handler
+- endpoint
+- resolver
+- mutation
+- RPC method
+- gRPC method
+- webhook handler
+- callback handler
+- WebSocket handler
+- message consumer
+- queue consumer
+- scheduled job
+- worker
+- import job
+- export job
+- preview job
+- crawler job
+- metadata job
+- screenshot job
+- renderer job
+- dashboard action
+- admin action
+- diagnostic action
+- replay action
+- sync job
+- CLI command
+- Android exported component
+- deep link
+- WebView bridge
+- Binder or AIDL method
+- content provider
+- native IPC handler
+- socket handler
+
+### Direct URL and target candidates
+
+Values that may represent a full request target:
+- `url`
+- `uri`
+- `target`
+- `targetUrl`
+- `requestUrl`
+- `remoteUrl`
+- `externalUrl`
+- `callback`
+- `callbackUrl`
+- `webhook`
+- `webhookUrl`
+- `redirectUrl`
+- `returnUrl`
+- `previewUrl`
+- `imageUrl`
+- `avatarUrl`
+- `fileUrl`
+- `downloadUrl`
+- `uploadUrl`
+- `importUrl`
+- `feedUrl`
+- `sitemapUrl`
+- `metadataUrl`
+- `openGraphUrl`
+- `rssUrl`
+- `endpoint`
+- `baseUrl`
+- `serviceUrl`
+- `providerUrl`
+- `tenantUrl`
+- `integrationUrl`
+
+### Partial destination candidates
+
+Values that may be recomposed into a final destination:
+- `host`
+- `hostname`
+- `domain`
+- `ip`
+- `address`
+- `service`
+- `serviceName`
+- `scheme`
+- `protocol`
+- `port`
+- `path`
+- `route`
+- `query`
+- `fragment`
+- `base`
+- `resource`
+- `objectKey`
+- `filePath`
+- `assetPath`
+- `tenantEndpoint`
+- `providerEndpoint`
+- `bucketEndpoint`
+- `endpointOverride`
+- `proxyHost`
+- `proxyUrl`
+- `noProxy`
+
+### Internal and metadata target indicators
+
+Values or literals that raise SSRF relevance when attacker-influenced:
+- `localhost`
+- `127.0.0.1`
+- `::1`
+- `0.0.0.0`
+- `169.254.169.254`
+- `metadata`
+- `metadata.google.internal`
+- `169.254.170.2`
+- `100.100.100.200`
+- `10.`
+- `172.16.`
+- `192.168.`
+- `.internal`
+- `.local`
+- Kubernetes service names
+- Docker or container hostnames
+- service registry aliases
+- internal admin service names
+
+### URL construction and parser candidates
+
+Search near source values for transformation evidence:
+- URL parser
+- URI builder
+- URL builder
+- path join
+- query builder
+- percent decode
+- base64 decode
+- punycode
+- IDN conversion
+- userinfo parsing
+- host normalization
+- DNS lookup
+- `redirect`
+- `followRedirect`
+- `Location` header
+- `proxy`
+- `resolver`
+- `scheme`
+- `protocol`
+- `openConnection`
+- `request wrapper`
+
+### Stored and second-order target candidates
+
+Persisted, queued, imported, or external values that may later drive fetches:
+- webhook registration
+- callback registration
+- integration endpoint
+- tenant endpoint
+- provider endpoint
+- connector setting
+- saved crawler target
+- preview record
+- import job
+- report asset
+- remote template
+- object metadata
+- queue payload
+- scheduled job argument
+- retry payload
+- replay record
+- sync state
+- external metadata document
+- uploaded document resource
+
+### Indirect fetch candidates
+
+Non-obvious request sources:
+- URL preview
+- screenshot
+- crawler
+- scraper
+- OpenGraph parser
+- metadata fetcher
+- image loader
+- avatar loader
+- feed parser
+- sitemap parser
+- XML parser
+- HTML renderer
+- PDF renderer
+- Markdown renderer
+- office/document converter
+- browser automation
+- cloud SDK endpoint override
+- package/cache mirror
+- proxy tester
+- connectivity tester
+
+## 3.9 Generic graph query recipes
+
+Useful source-discovery combinations:
+
+```text
+<entry candidate> + <url/host/source field> + <URL construction keyword>
+<entry candidate> + <callback/webhook/integration source> + <stored record or worker>
+<stored target source> + <retry/job/report/import entry> + <HTTP/network wrapper>
+<renderer/importer/preview source> + <remote resource field> + <fetch/render keyword>
+<proxy/protocol/client-option source> + <request wrapper/client builder>
+<mobile/IPC/native entry> + <URL/host/endpoint source> + <network wrapper>
+```
+
+Prioritize candidates where the same value name or object field travels from an entry point into URL parsing, target construction, storage, redirect behavior, proxy/client options, renderer/importer configuration, or an outbound request wrapper.
+
 ---
 
 # 4. Shared Source Patterns

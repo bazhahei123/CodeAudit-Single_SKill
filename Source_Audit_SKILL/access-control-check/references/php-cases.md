@@ -118,7 +118,87 @@ Source questions:
 
 ---
 
-# 2. PHP Source Patterns and Blind Spots
+# 2. High-Coverage PHP Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows an authorization-relevant path such as protected object access, privileged action, tenant boundary, policy check, or workflow transition.
+
+## 2.1 Web, router, and controller entry candidates
+
+- Laravel route definitions: `Route::get`, `Route::post`, `Route::put`, `Route::patch`, `Route::delete`, `Route::match`, `Route::any`, `Route::resource`, `Route::apiResource`, route groups, middleware groups
+- Laravel controllers: `Controller`, invokable controllers, form requests, route model binding, `routes/web.php`, `routes/api.php`, `routes/admin.php`
+- Symfony route attributes: `#[Route]`, `@Route`, route YAML/XML/PHP config, controller actions
+- Symfony controllers extending `AbstractController`
+- ThinkPHP/Yii/CodeIgniter controller methods and route config
+- raw PHP web-root scripts, include-based routers, switch/case dispatchers, AJAX endpoints, admin panel scripts, mobile/API entry files
+- webhook handlers, file import handlers, download/export endpoints, legacy scripts
+
+## 2.2 Request binding and client-controlled source candidates
+
+- Laravel `$request->input`, `$request->query`, `$request->post`, `$request->get`, `$request->header`, `$request->cookie`, `$request->file`, `$request->all`, `$request->only`, `$request->validated`
+- Laravel route parameters: `$request->route(...)`, controller method parameters, implicit/explicit route model binding
+- Symfony `Request->query->get`, `Request->request->get`, `Request->headers->get`, `Request->cookies->get`, `Request->files`, `Request->attributes->get`, JSON-decoded body
+- raw PHP `$_GET`, `$_POST`, `$_REQUEST`, `$_COOKIE`, `$_SERVER`, `php://input`, uploaded file metadata
+- fields named `id`, `ids`, `user_id`, `account_id`, `owner_id`, `tenant_id`, `org_id`, `role`, `permission`, `scope`, `action`, `status`, `state`
+- batch arrays such as `ids`, `user_ids`, `file_ids`, `order_ids`, `project_ids`, `selected_ids`
+
+## 2.3 Authentication identity source candidates
+
+- Laravel `auth()->user()`, `auth()->id()`, `Auth::user()`, `Auth::id()`, `$request->user()`
+- Laravel guards: `Auth::guard(...)`, `guard()->user()`, API token user, Sanctum/Passport token user
+- Symfony `$this->getUser()`, `TokenStorageInterface`, `Security->getUser()`, `UserInterface`
+- session values: `session('user_id')`, `$_SESSION['user_id']`, framework session bags
+- JWT claims: `sub`, `user_id`, `uid`, `tenant_id`, `scope`, `roles`
+- custom helpers: `current_user`, `currentUser`, `getCurrentUser`, `user()`, `loginUser`, `tenant()`, `UserContext`, `TenantContext`
+- middleware-populated request attributes such as `currentUser`, `currentUserId`, `tenantId`, `claims`
+
+## 2.4 Role, permission, policy, and authority candidates
+
+- Laravel policies and gates: `$this->authorize`, `Gate::allows`, `Gate::denies`, `Gate::authorize`, `can`, `cannot`, `authorizeResource`
+- Laravel middleware: `auth`, `can:`, `role:`, `permission:`, `abilities`, `ability`
+- Laravel packages and helpers: Spatie roles/permissions, `hasRole`, `hasAnyRole`, `hasPermissionTo`, `can`, `isAdmin`
+- Symfony security: `#[IsGranted]`, `$this->denyAccessUnlessGranted`, voters, firewalls, access_control, roles hierarchy
+- ThinkPHP/Yii/CodeIgniter auth filters, RBAC components, access rules
+- custom helpers: `checkPermission`, `requireRole`, `requirePermission`, `canAccess`, `isOwner`, `isTenantMember`, `policy`, `acl`
+
+## 2.5 Object, tenant, ORM, and repository source candidates
+
+- object IDs: `id`, `user_id`, `owner_id`, `account_id`, `order_id`, `invoice_id`, `file_id`, `project_id`, `document_id`, `resource_id`, `payment_id`
+- tenant scopes: `tenant_id`, `org_id`, `organization_id`, `company_id`, `workspace_id`, `team_id`, `department_id`, `account_id`
+- Laravel Eloquent: `find`, `findOrFail`, `where`, `whereIn`, `firstOrFail`, `delete`, `update`, `scope...`, route model binding
+- Laravel query builder: `DB::table`, `where`, `whereIn`, `join`, `delete`, `update`
+- Symfony Doctrine: `find`, `findOneBy`, `findBy`, `createQueryBuilder`, repository methods
+- raw SQL/repository methods: `getById`, `findById`, `deleteById`, `getForUser`, `getForTenant`, `exportForOrg`
+- batch operations using arrays from request fields for delete, export, approve, share, role change, or tenant update
+
+## 2.6 GraphQL, RPC, message, and async entry candidates
+
+- Lighthouse GraphQL resolvers, mutations, directives, input objects
+- GraphQLite, OverblogGraphQL, custom resolver methods
+- Symfony Messenger handlers, Laravel jobs, queued listeners, event listeners, command handlers when payloads originate from user-triggered actions
+- RabbitMQ, Kafka, Redis queue, SQS, Beanstalkd, and Pub/Sub consumers
+- WebSocket handlers, broadcast channel authorization, Pusher/Laravel Echo channel callbacks
+- webhook handlers and third-party callback endpoints carrying user, tenant, or object identifiers
+
+## 2.7 Business action and workflow candidates
+
+- route, controller, method, job, or service names containing `approve`, `reject`, `publish`, `unpublish`, `archive`, `restore`, `delete`, `disable`, `enable`, `lock`, `unlock`, `reset`, `refund`, `void`, `cancel`, `transfer`, `assign`, `share`, `export`, `download`, `invite`, `promote`, `demote`, `grant`, `revoke`
+- request/form fields named `action`, `operation`, `status`, `state`, `stage`, `transition`, `target_state`, `target_status`
+- constants/enums ending in `Action`, `Status`, `State`, `Role`, `Permission`, `Scope`
+- service calls such as `approveOrder`, `publishPost`, `disableUser`, `deleteProject`, `exportReport`, `refundPayment`, `transferOwner`, `changeRole`, `grantPermission`
+
+## 2.8 PHP graph search recipes
+
+```text
+Route/controller action + request input/route parameter + model/service/query call
+auth()->user/Auth::user/$request->user + object id/tenant id + policy/repository call
+$this->authorize/Gate::allows/#[IsGranted] + id/tenant_id/action/status + protected operation
+GraphQL mutation/resolver + argument id/tenant_id/action + service method
+job/listener/consumer + payload user_id/tenant_id/object_id + protected action
+```
+
+---
+
+# 3. PHP Source Patterns and Blind Spots
 
 These are high-priority source signals. They are not automatic proof of a vulnerability.
 
@@ -318,7 +398,7 @@ What to verify next:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 Use these as source reasoning patterns, not as direct proof.
 
@@ -427,7 +507,7 @@ The requested state transition may affect authorization-sensitive workflow.
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 Laravel heuristics
 Pay attention to:
@@ -497,7 +577,7 @@ Audit questions:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a PHP source as high-priority if:
 - the value does not reach access-control-relevant logic,
@@ -515,7 +595,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good PHP source evidence includes:
 - route definition and controller method,
@@ -533,7 +613,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick PHP Source Checklist
+# 8. Quick PHP Source Checklist
 
 - Are object IDs read from route parameters or request input?
 - Are `user_id`, `tenant_id`, `org_id`, or `role` accepted from request input?

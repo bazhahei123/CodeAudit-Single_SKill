@@ -34,7 +34,210 @@ Source questions:
 
 ---
 
-# 2. PHP Source Patterns
+# 2. High-Coverage PHP XSS Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows browser-visible output, browser-interpreted HTML, template data, script data, attribute values, URL values, rich text, markdown, sanitizer input/output, trusted HTML wrappers, API content, or alternate render path relevance.
+
+## 2.1 Web, framework, and request entry candidates
+
+Search for:
+- Laravel `Route::get`
+- Laravel `Route::post`
+- Laravel `Route::put`
+- Laravel `Route::patch`
+- Laravel `Route::delete`
+- Laravel controller methods
+- `$request->input`
+- `$request->query`
+- `$request->post`
+- `$request->all`
+- `$request->only`
+- `$request->validated`
+- `$request->header`
+- route parameters
+- Symfony `#[Route]`
+- Symfony `Request`
+- `$request->query->get`
+- `$request->request->get`
+- `$request->headers->get`
+- ThinkPHP controllers
+- Yii controllers
+- CodeIgniter controllers
+- WordPress `add_action`
+- WordPress REST routes
+- raw `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `$_SERVER`
+- uploaded file metadata
+
+## 2.2 Queue, command, render, and admin entries
+
+Search for:
+- Laravel jobs
+- Laravel listeners
+- Laravel events
+- Laravel queued jobs
+- Laravel console commands
+- Symfony commands
+- Symfony Messenger handlers
+- cron scripts
+- webhook controllers
+- preview controllers
+- import controllers
+- export controllers
+- report controllers
+- admin controllers
+- moderation views
+- email renderers
+- notification renderers
+- CMS controllers
+- legacy admin scripts
+
+## 2.3 Reflected and stored content source candidates
+
+Search for request, DTO, array, model, form, job, or config fields named:
+- `q`
+- `query`
+- `search`
+- `keyword`
+- `term`
+- `message`
+- `error`
+- `reason`
+- `title`
+- `name`
+- `display_name`
+- `nickname`
+- `username`
+- `label`
+- `description`
+- `summary`
+- `content`
+- `body`
+- `text`
+- `comment`
+- `reply`
+- `review`
+- `profile`
+- `bio`
+- `signature`
+- `ticket`
+- `notification`
+- `announcement`
+- `article`
+- `post`
+- `cms`
+
+## 2.4 Template, response, and API propagation candidates
+
+Search for source values passed into:
+- Laravel `view(...)`
+- `View::make`
+- `compact(...)`
+- `with(...)`
+- Blade components
+- Blade slots
+- Symfony `render(...)`
+- Twig context arrays
+- raw PHP templates
+- `echo`
+- `print`
+- `printf`
+- `sprintf`
+- `Response`
+- `JsonResponse`
+- API resource fields
+- REST response arrays
+- GraphQL response fields
+- email template contexts
+- report template contexts
+- notification template contexts
+- manual HTML string builders
+
+## 2.5 Raw HTML, trusted wrapper, and context candidates
+
+Search for:
+- `html`
+- `raw_html`
+- `safe_html`
+- `trusted_html`
+- `body_html`
+- `content_html`
+- `message_html`
+- `rendered`
+- `markdown`
+- `rich_text`
+- `wysiwyg`
+- `template`
+- `script`
+- `href`
+- `src`
+- `style`
+- `onclick`
+- Blade `{!!`
+- Blade `!!}`
+- Twig `|raw`
+- `HtmlString`
+- `Markup`
+- custom safe filters
+- sanitizer output
+
+## 2.6 Rich text, markdown, sanitizer, and cross-layer candidates
+
+Search for source values near:
+- markdown renderer
+- `league/commonmark`
+- `Parsedown`
+- `HTMLPurifier`
+- `mewebstudio/Purifier`
+- `sanitize`
+- WYSIWYG editor content
+- preview renderer
+- final renderer
+- admin renderer
+- email/web preview renderer
+- API field consumed by frontend
+- frontend component prop
+- hydrated JSON
+- script data bootstrap
+
+## 2.7 Downstream rendering relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- Blade output
+- Twig output
+- raw PHP templates
+- Blade `{!! !!}`
+- Twig `|raw`
+- direct `echo`
+- response HTML construction
+- markdown-to-HTML renderers
+- sanitizer wrappers
+- JSON API serializers
+- frontend consumers
+- admin/moderation views
+- email/report renderers
+
+## 2.8 PHP graph search recipes
+
+Useful combinations:
+
+```text
+Route::get/Route::post + $request->input q/message + view/Blade context
+$request->query/$_GET + error/search/title + echo/Response/template
+API resource field html/body/content + frontend consumer/raw render
+Laravel job/command + stored comment/notification + email/report renderer
+markdown/Parsedown/CommonMark + stored body + Blade raw/Twig raw
+HTMLPurifier/sanitize + safe_html/trusted_html + raw template output
+sprintf/concat + request/stored field + text/html response
+admin/moderation view + user content + {!! !!}/|raw/echo
+```
+
+---
+
+# 3. PHP Source Patterns
 
 ## H-S1. Request-derived template source
 Example idea:
@@ -98,7 +301,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-S-XSS-1: View data source
 
@@ -134,9 +337,9 @@ Verify context-aware serialization and URL scheme controls.
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
-## 4.1 Laravel and Blade source heuristics
+## 5.1 Laravel and Blade source heuristics
 Pay attention to:
 - `$request->input(...)`
 - route parameters
@@ -146,7 +349,7 @@ Pay attention to:
 - preview and admin views
 - inline script and attribute rendering
 
-## 4.2 Symfony and Twig source heuristics
+## 5.2 Symfony and Twig source heuristics
 Pay attention to:
 - request values passed to Twig
 - `|raw`
@@ -155,7 +358,7 @@ Pay attention to:
 - rich-content render paths
 - admin/moderation templates
 
-## 4.3 Raw PHP source heuristics
+## 5.3 Raw PHP source heuristics
 Pay attention to:
 - `$_GET`, `$_POST`, and `$_REQUEST`
 - direct `echo`
@@ -164,7 +367,7 @@ Pay attention to:
 - request values reflected into pages
 - stored content echoed from database fields
 
-## 4.4 Rich-content source heuristics
+## 5.4 Rich-content source heuristics
 Pay attention to:
 - markdown renderers
 - WYSIWYG HTML fields
@@ -173,7 +376,7 @@ Pay attention to:
 - preview vs final render paths
 - user view vs admin/moderation view
 
-## 4.5 API-to-frontend source heuristics
+## 5.5 API-to-frontend source heuristics
 Pay attention to:
 - JSON fields carrying `html`, `content`, `body`, `message`, `description`, or `rendered` values
 - API responses consumed by frontend components
@@ -181,7 +384,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a PHP source as high-priority if:
 - the value is fixed in trusted code,
@@ -198,7 +401,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good PHP source evidence includes:
 - route/controller/script/worker/admin/import/preview entry point,
@@ -215,7 +418,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick PHP Source Checklist
+# 8. Quick PHP Source Checklist
 
 - Are request values passed to templates, HTML responses, scripts, attributes, or URLs?
 - Are stored comments, profiles, tickets, CMS content, markdown, or rich text later rendered?

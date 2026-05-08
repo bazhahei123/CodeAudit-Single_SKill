@@ -62,7 +62,183 @@ Look for:
 
 ---
 
-# 2. Java XSS Anti-Patterns
+# 2. High-Coverage Java XSS Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, rendering context, sink behavior, and missing context-appropriate controls.
+
+## 2.1 HTTP, controller, and request entry candidates
+Search for:
+- `@Controller`
+- `@RestController`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@PatchMapping`
+- `@DeleteMapping`
+- `@RequestBody`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestHeader`
+- `@CookieValue`
+- `@ModelAttribute`
+- `HttpServletRequest`
+- `Model`
+- `ModelMap`
+- `ModelAndView`
+- `RedirectAttributes`
+- `HttpServletResponse`
+- `PrintWriter`
+- `ServletOutputStream`
+- `doGet`
+- `doPost`
+- `search`
+- `preview`
+- `comment`
+- `profile`
+- `message`
+- `admin`
+- `cms`
+
+## 2.2 RPC, GraphQL, message, job, and render entries
+Search for:
+- `@GraphQlController`
+- `@QueryMapping`
+- `@MutationMapping`
+- `@SchemaMapping`
+- `@MessageMapping`
+- `@ServerEndpoint`
+- `@OnMessage`
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `MessageListener`
+- `@Scheduled`
+- `Tasklet`
+- `CommandLineRunner`
+- `ApplicationRunner`
+- `emailPreview`
+- `notification`
+- `exportHtml`
+- `renderPreview`
+- `moderation`
+
+## 2.3 JSP, Servlet, and manual HTML sink candidates
+Search for:
+- `<%=`
+- `<% out.print`
+- `<% out.write`
+- `JspWriter.print`
+- `JspWriter.write`
+- `out.println`
+- `response.getWriter`
+- `PrintWriter.write`
+- `PrintWriter.print`
+- `response.setContentType("text/html")`
+- `ResponseEntity<String>`
+- `@ResponseBody`
+- `produces = MediaType.TEXT_HTML_VALUE`
+- `String html`
+- `StringBuilder html`
+- `StringBuffer html`
+- `append("<"`
+- `writer.write("<"`
+- `sendError`
+- `RequestDispatcher.forward`
+
+## 2.4 Template engine sink candidates
+Search for:
+- `th:utext`
+- `th:text`
+- `th:href`
+- `th:src`
+- `th:onclick`
+- `th:inline="javascript"`
+- `utext`
+- `Freemarker`
+- `FreeMarkerView`
+- `${...}`
+- `<#noescape>`
+- `?no_esc`
+- `?html`
+- `?js_string`
+- `Template.process`
+- `Velocity`
+- `VelocityEngine`
+- `$!`
+- `Mustache`
+- `Handlebars`
+- `Pebble`
+- `Rocker`
+- `raw`
+- `safeHtml`
+
+## 2.5 Rich text, markdown, sanitizer, and URL-context candidates
+Search for:
+- `markdown`
+- `flexmark`
+- `commonmark`
+- `pegdown`
+- `WYSIWYG`
+- `bodyHtml`
+- `contentHtml`
+- `Jsoup.parse`
+- `Jsoup.clean`
+- `Safelist`
+- `Whitelist`
+- `PolicyFactory`
+- `HtmlPolicyBuilder`
+- `Sanitizers`
+- `OWASP Java HTML Sanitizer`
+- `ESAPI.encoder`
+- `Encode.forHtml`
+- `Encode.forHtmlAttribute`
+- `Encode.forJavaScript`
+- `Encode.forUriComponent`
+- `href`
+- `src`
+- `javascript:`
+
+## 2.6 Required-control candidates
+Search near sinks for:
+- autoescape enabled
+- escaped output
+- `th:text`
+- no `th:utext`
+- `HtmlUtils.htmlEscape`
+- `StringEscapeUtils.escapeHtml4`
+- `Encode.forHtml`
+- `Encode.forHtmlAttribute`
+- `Encode.forJavaScript`
+- `Encode.forUriComponent`
+- `ObjectMapper.writeValueAsString`
+- `Jsoup.clean`
+- `Safelist`
+- `PolicyFactory.sanitize`
+- `Content-Security-Policy`
+- `X-Content-Type-Options`
+- strict URL scheme allowlist
+- preview and final render same sanitizer
+
+## 2.7 Java graph search recipes
+Useful combinations:
+
+```text
+@GetMapping + Model.addAttribute + th:utext
+@PostMapping + comment.content + JSP <%= 
+@RequestParam + response.getWriter
+@Controller + ResponseEntity<String> + text/html
+ModelAndView + bodyHtml
+FreeMarker ?no_esc + user content
+Velocity template + stored content
+markdown + raw HTML output
+Jsoup.clean missing + th:utext
+admin moderation + user-generated content + raw output
+```
+
+---
+
+# 3. Java XSS Anti-Patterns
 
 ### A1. Thymeleaf raw output with untrusted data
 ```html
@@ -101,7 +277,7 @@ Context handling must be verified carefully; plain HTML escaping is not enough f
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-XSS-1: Unescaped JSP output
 
@@ -135,7 +311,7 @@ Verify whether `getBodyHtml()` is trusted, sanitized, and consistently safe acro
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
 ## 4.1 JSP heuristics
 Pay attention to:

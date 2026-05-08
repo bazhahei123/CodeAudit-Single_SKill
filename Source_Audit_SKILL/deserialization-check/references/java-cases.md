@@ -39,7 +39,188 @@ Source questions:
 
 ---
 
-# 2. Java Source Patterns
+# 2. High-Coverage Java Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows serialized payload, object restoration, type metadata, unsafe loader, stored blob, message decoding, or trigger-relevant object state relevance.
+
+## 2.1 HTTP, controller, and request entry candidates
+
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@DeleteMapping`
+- `@PatchMapping`
+- `@RequestBody`
+- `@RequestParam`
+- `@RequestHeader`
+- `@CookieValue`
+- `@RequestPart`
+- `MultipartFile`
+- `HttpServletRequest`
+- `ServletInputStream`
+- `InputStream`
+- `byte[]`
+- `ByteBuffer`
+- `DataInputStream`
+- `Object`
+- `Map<String, Object>`
+- `ResponseEntity`
+- `@WebServlet`
+- `doPost`
+- `doPut`
+- `RouterFunction`
+- `ServerRequest`
+
+## 2.2 Serialized payload and wrapper source candidates
+
+- `payload`
+- `data`
+- `body`
+- `message`
+- `blob`
+- `bytes`
+- `raw`
+- `content`
+- `serialized`
+- `serializedData`
+- `objectData`
+- `base64`
+- `gzip`
+- `zip`
+- `compressed`
+- `encoded`
+- `encrypted`
+- `signed`
+- `cookie`
+- `session`
+- `token`
+- `metadata`
+- `template`
+- `config`
+- `importFile`
+- `backup`
+- `snapshot`
+- `ByteArrayInputStream`
+- `Base64.getDecoder`
+- `GZIPInputStream`
+- `InflaterInputStream`
+
+## 2.3 Type and polymorphic metadata candidates
+
+- `@type`
+- `type`
+- `_type`
+- `class`
+- `className`
+- `clazz`
+- `objectType`
+- `objectClass`
+- `targetType`
+- `defaultTyping`
+- `enableDefaultTyping`
+- `activateDefaultTyping`
+- `JsonTypeInfo`
+- `JsonSubTypes`
+- `Object.class`
+- `readValue(..., Object.class)`
+- `parseObject`
+- `autoType`
+- `typeKey`
+- `discriminator`
+- `kind`
+- `factoryClass`
+- `implementation`
+- `impl`
+
+## 2.4 Stored, cache, session, and second-order candidates
+
+- `HttpSession`
+- `session.getAttribute`
+- `Cookie`
+- `RedisTemplate`
+- `StringRedisTemplate`
+- `RBucket`
+- `RMap`
+- `Cache`
+- `CacheManager`
+- `MemcachedClient`
+- `database blob`
+- `@Lob`
+- `bytea`
+- `savedFilter`
+- `savedTemplate`
+- `metadata`
+- `preferences`
+- `jobDataMap`
+- `JobDataMap`
+- `ExecutionContext`
+- `importRecord`
+- `replay`
+- `deadLetter`
+
+## 2.5 Queue, RPC, and message source candidates
+
+- `@KafkaListener`
+- `ConsumerRecord`
+- `@RabbitListener`
+- `Message`
+- `Message<byte[]>`
+- `@JmsListener`
+- `BytesMessage`
+- `ObjectMessage`
+- `@MessageMapping`
+- `RSocket`
+- gRPC request messages
+- protobuf `ByteString`
+- Hessian request body
+- Dubbo payload
+- Thrift frame
+- Netty `ByteBuf`
+- `ChannelHandler`
+- `decode`
+- `ByteToMessageDecoder`
+- webhook payloads
+
+## 2.6 Restore and downstream mapping candidates
+
+- `ObjectInputStream`
+- `readObject`
+- `readUnshared`
+- `Externalizable`
+- `readExternal`
+- `readResolve`
+- `XMLDecoder`
+- `ObjectMapper.readValue`
+- `ObjectReader.readValue`
+- `JsonMapper`
+- `Yaml`
+- `Yaml.load`
+- `XStream`
+- `HessianInput`
+- `Kryo.readObject`
+- `SerializationUtils.deserialize`
+- `RedisSerializer.deserialize`
+- `JdkSerializationRedisSerializer`
+- `GenericJackson2JsonRedisSerializer`
+- `HttpInvoker`
+
+## 2.7 Java graph search recipes
+
+```text
+@PostMapping/@RequestBody + payload/data/blob + Base64/GZIP/ByteArrayInputStream
+@RequestHeader/@CookieValue + session/token + deserialize/readObject
+@RequestBody + @type/className/Object.class + ObjectMapper/Fastjson
+@KafkaListener/@RabbitListener + message/body/bytes + deserialize/decode
+RedisTemplate/CacheManager + blob/value + RedisSerializer/JdkSerializationRedisSerializer
+MultipartFile/import + metadata/config/archive + XMLDecoder/ObjectMapper/Yaml
+```
+
+---
+
+# 3. Java Source Patterns
 
 ## J-S1. Request-derived stream or bytes
 Example idea:
@@ -103,7 +284,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-S-DESER-1: Native serialization source
 
@@ -139,7 +320,7 @@ Verify attacker influence, integrity controls, and safe deserializer behavior.
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
 ## 4.1 Native serialization source heuristics
 Pay attention to:
@@ -182,7 +363,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Java source as high-priority if:
 - the value is constructed only by trusted server-side code,
@@ -200,7 +381,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Java source evidence includes:
 - route, consumer, import handler, or helper entry point,
@@ -217,7 +398,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Java Source Checklist
+# 8. Quick Java Source Checklist
 
 - Are request bodies, uploads, cookies, or headers converted to streams or bytes?
 - Are base64/compressed values decoded before a restore helper?

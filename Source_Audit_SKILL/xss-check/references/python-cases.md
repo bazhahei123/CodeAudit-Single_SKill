@@ -33,7 +33,211 @@ Source questions:
 
 ---
 
-# 2. Python Source Patterns
+# 2. High-Coverage Python XSS Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows browser-visible output, browser-interpreted HTML, template data, script data, attribute values, URL values, rich text, markdown, sanitizer input/output, trusted HTML wrappers, API content, or alternate render path relevance.
+
+## 2.1 Web, API, and request entry candidates
+
+Search for:
+- Django `View`
+- Django `APIView`
+- Django `ViewSet`
+- Django `GenericViewSet`
+- Django `ModelViewSet`
+- Django `urls.py`
+- `path(`
+- `re_path(`
+- `request.GET`
+- `request.POST`
+- `request.data`
+- `request.query_params`
+- `request.headers`
+- Flask `@app.route`
+- Flask `Blueprint`
+- `request.args`
+- `request.form`
+- `request.json`
+- `request.get_json`
+- `request.values`
+- FastAPI `@app.get`
+- FastAPI `@app.post`
+- FastAPI `APIRouter`
+- `Query`
+- `Path`
+- `Body`
+- `Header`
+- Pydantic model fields
+- Starlette `Request`
+- GraphQL resolvers
+- Graphene `mutate`
+- Strawberry resolvers
+
+## 2.2 Worker, message, render, and admin entries
+
+Search for:
+- Celery `@app.task`
+- Celery `shared_task`
+- RQ jobs
+- Dramatiq actors
+- Huey tasks
+- APScheduler jobs
+- management commands
+- Click/Typer commands
+- webhook handlers
+- preview views
+- import views
+- export views
+- report views
+- admin views
+- moderation views
+- email renderers
+- notification renderers
+- CMS views
+- queue consumers
+
+## 2.3 Reflected and stored content source candidates
+
+Search for request, schema, serializer, dict, model, or task fields named:
+- `q`
+- `query`
+- `search`
+- `keyword`
+- `term`
+- `message`
+- `error`
+- `reason`
+- `title`
+- `name`
+- `display_name`
+- `nickname`
+- `username`
+- `label`
+- `description`
+- `summary`
+- `content`
+- `body`
+- `text`
+- `comment`
+- `reply`
+- `review`
+- `profile`
+- `bio`
+- `signature`
+- `ticket`
+- `notification`
+- `announcement`
+- `article`
+- `post`
+- `cms`
+
+## 2.4 Template, response, and API propagation candidates
+
+Search for source values passed into:
+- Django `render`
+- `TemplateResponse`
+- `render_to_response`
+- `context`
+- Jinja `render_template`
+- FastAPI `Jinja2Templates`
+- `HTMLResponse`
+- `Response`
+- `JsonResponse`
+- DRF serializer fields
+- GraphQL response fields
+- template context dictionaries
+- email template contexts
+- report template contexts
+- notification template contexts
+- manual HTML string builders
+- f-strings containing HTML
+- `.format(` around HTML
+- `%` formatting around HTML
+
+## 2.5 Raw HTML, trusted wrapper, and context candidates
+
+Search for:
+- `html`
+- `raw_html`
+- `safe_html`
+- `trusted_html`
+- `body_html`
+- `content_html`
+- `message_html`
+- `rendered`
+- `markdown`
+- `rich_text`
+- `wysiwyg`
+- `template`
+- `script`
+- `href`
+- `src`
+- `style`
+- `onclick`
+- Jinja `|safe`
+- Django `|safe`
+- `mark_safe`
+- `Markup`
+- `MarkupSafe`
+- custom safe filters
+- sanitizer output
+
+## 2.6 Rich text, markdown, sanitizer, and cross-layer candidates
+
+Search for source values near:
+- `markdown.markdown`
+- `markdown2`
+- `mistune`
+- `commonmark`
+- `bleach.clean`
+- `html_sanitizer`
+- `nh3.clean`
+- WYSIWYG editor content
+- preview renderer
+- final renderer
+- admin renderer
+- email/web preview renderer
+- API field consumed by frontend
+- frontend component prop
+- hydrated JSON
+- script data bootstrap
+
+## 2.7 Downstream rendering relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- Django template output
+- Jinja template output
+- template filters
+- `|safe`
+- `mark_safe`
+- `Markup`
+- `HTMLResponse`
+- manual response construction
+- markdown-to-HTML renderers
+- sanitizer wrappers
+- JSON API serializers
+- frontend consumers
+- admin/moderation views
+- email/report renderers
+
+## 2.8 Python graph search recipes
+
+Useful combinations:
+
+```text
+Django/Flask/FastAPI route + request value + template context/render
+APIView/ViewSet + serializer field html/body/content + frontend consumer
+request.args/request.GET + error/message/search + HTMLResponse/render_template
+Celery/shared_task + stored comment/notification + email/report renderer
+markdown.markdown/mistune + stored body + Markup/mark_safe/template
+bleach.clean/nh3.clean + safe_html/trusted_html + |safe/Markup
+f-string/.format + request/stored field + HTML response
+admin/moderation view + user content + safe/raw filter
+```
+
+---
+
+# 3. Python Source Patterns
 
 ## P-S1. Request-derived template source
 Example idea:
@@ -97,7 +301,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-S-XSS-1: Template context source
 
@@ -133,9 +337,9 @@ Verify context-aware serialization and URL scheme controls.
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
-## 4.1 Django source heuristics
+## 5.1 Django source heuristics
 Pay attention to:
 - request values passed to templates
 - `render(...)` and `TemplateResponse`
@@ -145,7 +349,7 @@ Pay attention to:
 - admin views rendering user content
 - stored comments/profile/CMS fields
 
-## 4.2 Jinja and Flask source heuristics
+## 5.2 Jinja and Flask source heuristics
 Pay attention to:
 - `render_template(...)` context values
 - `|safe`
@@ -154,7 +358,7 @@ Pay attention to:
 - template values inside script or attribute contexts
 - preview and rich-content routes
 
-## 4.3 FastAPI source heuristics
+## 5.3 FastAPI source heuristics
 Pay attention to:
 - `Jinja2Templates`
 - `HTMLResponse`
@@ -162,7 +366,7 @@ Pay attention to:
 - preview endpoints
 - markdown or rich text rendering before template output
 
-## 4.4 Rich-content source heuristics
+## 5.4 Rich-content source heuristics
 Pay attention to:
 - markdown renderers
 - sanitizer wrappers
@@ -171,7 +375,7 @@ Pay attention to:
 - preview vs final render paths
 - user view vs admin/moderation view
 
-## 4.5 API-to-frontend source heuristics
+## 5.5 API-to-frontend source heuristics
 Pay attention to:
 - JSON fields carrying `html`, `content`, `body`, `message`, `description`, or `rendered` values
 - DRF/FastAPI responses consumed by frontend components
@@ -179,7 +383,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Python source as high-priority if:
 - the value is fixed in trusted code,
@@ -196,7 +400,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Python source evidence includes:
 - route/view/worker/admin/import/preview entry point,
@@ -213,7 +417,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Python Source Checklist
+# 8. Quick Python Source Checklist
 
 - Are request values passed to templates, HTML responses, scripts, attributes, or URLs?
 - Are stored comments, profiles, tickets, CMS content, markdown, or rich text later rendered?

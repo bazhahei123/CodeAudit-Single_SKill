@@ -63,7 +63,271 @@ Look for:
 
 ---
 
-# 2. Java Unsafe Deserialization Anti-Patterns
+# 2. High-Coverage Java Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, sink behavior, trigger behavior, and missing controls.
+
+## 2.1 HTTP, controller, and request entry candidates
+Search for:
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@PatchMapping`
+- `@DeleteMapping`
+- `@RequestBody`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestHeader`
+- `@CookieValue`
+- `@ModelAttribute`
+- `MultipartFile`
+- `HttpServletRequest`
+- `ServletInputStream`
+- `InputStream`
+- `byte[]`
+- `String payload`
+- `doGet`
+- `doPost`
+- `doPut`
+- `doFilter`
+- `Filter`
+- `HandlerInterceptor`
+- `OncePerRequestFilter`
+- `WebMvcConfigurer`
+- `HttpMessageConverter`
+- `RequestResponseBodyMethodProcessor`
+
+## 2.2 JAX-RS, RPC, WebSocket, and internal protocol entries
+Search for:
+- `@Path`
+- `@GET`
+- `@POST`
+- `@PUT`
+- `@DELETE`
+- `@Consumes`
+- `@Produces`
+- `@QueryParam`
+- `@FormParam`
+- `@HeaderParam`
+- `@CookieParam`
+- `@ServerEndpoint`
+- `@OnMessage`
+- `@MessageMapping`
+- `@SendTo`
+- `@GrpcService`
+- `BindableService`
+- `StreamObserver`
+- `HessianServlet`
+- `HessianServiceExporter`
+- `BurlapServiceExporter`
+- `RmiServiceExporter`
+- `HttpInvokerServiceExporter`
+- `DubboService`
+- `@DubboService`
+- `TProcessor`
+- `Thrift`
+- `DWR`
+
+## 2.3 Message, cache, job, and import entries
+Search for:
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `MessageListener`
+- `onMessage`
+- `ConsumerRecord`
+- `Message<?>`
+- `SqsListener`
+- `RedisMessageListenerContainer`
+- `@Scheduled`
+- `QuartzJobBean`
+- `Job`
+- `CommandLineRunner`
+- `ApplicationRunner`
+- `Tasklet`
+- `ItemReader`
+- `ItemProcessor`
+- `@Async`
+- `import`
+- `upload`
+- `restore`
+- `replay`
+- `sync`
+- `cache`
+- `session`
+- `rememberMe`
+
+## 2.4 Native and Java object-restoration sink candidates
+Search for:
+- `ObjectInputStream`
+- `readObject`
+- `readUnshared`
+- `readExternal`
+- `Externalizable`
+- `Serializable`
+- `ObjectStreamClass`
+- `ObjectInputFilter`
+- `resolveClass`
+- `resolveProxyClass`
+- `enableResolveObject`
+- `readResolve`
+- `writeReplace`
+- `java.beans.XMLDecoder`
+- `XMLDecoder.readObject`
+- `javax.management.BadAttributeValueExpException`
+- `javax.naming.Reference`
+- `javax.naming.spi.ObjectFactory`
+- `javax.script.ScriptEngineManager`
+- `org.apache.commons.lang3.SerializationUtils.deserialize`
+- `org.apache.commons.lang.SerializationUtils.deserialize`
+- `org.springframework.util.SerializationUtils.deserialize`
+- `org.springframework.core.serializer.DefaultDeserializer`
+- `SerializingConverter`
+- `DeserializingConverter`
+
+## 2.5 JSON, YAML, XML, and mapper sink candidates
+Search for:
+- `ObjectMapper.readValue`
+- `ObjectReader.readValue`
+- `ObjectMapper.convertValue`
+- `ObjectMapper.treeToValue`
+- `readerFor`
+- `readerForUpdating`
+- `Object.class`
+- `JsonTypeInfo`
+- `JsonSubTypes`
+- `enableDefaultTyping`
+- `activateDefaultTyping`
+- `DefaultTyping`
+- `PolymorphicTypeValidator`
+- `LaissezFaireSubTypeValidator`
+- `TypeResolverBuilder`
+- `@type`
+- `com.alibaba.fastjson.JSON.parse`
+- `JSON.parseObject`
+- `JSON.parseArray`
+- `ParserConfig.setAutoTypeSupport`
+- `Feature.SupportAutoType`
+- `autoTypeSupport`
+- `fastjson2`
+- `JSONReader.Feature.SupportAutoType`
+- `XStream.fromXML`
+- `DomDriver`
+- `StaxDriver`
+- `SnakeYAML`
+- `new Yaml`
+- `Yaml.load`
+- `Constructor`
+- `TypeDescription`
+- `SAXReader`
+- `DocumentBuilderFactory`
+- `JAXBContext.createUnmarshaller`
+- `Unmarshaller.unmarshal`
+
+## 2.6 Binary, cache, session, and framework serializer candidates
+Search for:
+- `JdkSerializationRedisSerializer`
+- `GenericJackson2JsonRedisSerializer`
+- `Jackson2JsonRedisSerializer`
+- `RedisSerializer`
+- `SessionRepository`
+- `MapSession`
+- `DefaultCookieSerializer`
+- `CookieRememberMeManager`
+- `AbstractRememberMeManager`
+- `getRememberedSerializedIdentity`
+- `SimplePrincipalCollection`
+- `SimpleMessageConverter`
+- `ObjectMessage`
+- `HessianInput.readObject`
+- `Hessian2Input.readObject`
+- `Kryo.readClassAndObject`
+- `Kryo.readObject`
+- `FSTObjectInput.readObject`
+- `ProtostuffIOUtil.mergeFrom`
+- `MessagePack.read`
+- `ObjectInput`
+- `Input.readString`
+- `ByteArrayInputStream`
+- `Base64.decode`
+- `GZIPInputStream`
+
+## 2.7 Trigger and gadget behavior candidates
+Search for:
+- `private void readObject`
+- `readResolve`
+- `readExternal`
+- `finalize`
+- `compareTo`
+- `hashCode`
+- `equals`
+- `toString`
+- `InvocationHandler`
+- `Proxy.newProxyInstance`
+- `TemplatesImpl`
+- `Transformer`
+- `BeanComparator`
+- `PriorityQueue`
+- `ProcessBuilder`
+- `Runtime.getRuntime`
+- `ScriptEngine`
+- `InitialContext.lookup`
+- `URLClassLoader`
+- `Method.invoke`
+- `Class.forName`
+- `newInstance`
+
+## 2.8 Required-control candidates
+Search near sinks for:
+- `ObjectInputFilter`
+- `jdk.serialFilter`
+- `setObjectInputFilter`
+- `ValidatingObjectInputStream`
+- `resolveClass` allowlist
+- `allowedClasses`
+- `allowTypes`
+- `allowTypeHierarchy`
+- `denyTypes`
+- `PolymorphicTypeValidator`
+- `BasicPolymorphicTypeValidator`
+- `activateDefaultTyping` restrictions
+- `ParserConfig.addAccept`
+- `safeMode`
+- `SafeConstructor`
+- `HMAC`
+- `Mac`
+- `Signature`
+- `verify`
+- `signed`
+- `DTO`
+- `schema`
+- `maxDepth`
+- `maxBytes`
+
+## 2.9 Java graph search recipes
+Useful combinations:
+
+```text
+@PostMapping + ObjectInputStream
+@RequestBody + readObject
+@CookieValue + rememberMe + deserialize
+@KafkaListener + SerializationUtils.deserialize
+@RabbitListener + ObjectMessage
+@JmsListener + SimpleMessageConverter
+XMLDecoder + readObject
+ObjectMapper + activateDefaultTyping
+JSON.parseObject + SupportAutoType
+JdkSerializationRedisSerializer + cache/session
+Hessian2Input + readObject
+Kryo + readClassAndObject
+```
+
+---
+
+# 3. Java Unsafe Deserialization Anti-Patterns
 
 ### A1. Native deserialization on request-derived data
 ```java
@@ -112,7 +376,7 @@ Internal transport does not automatically imply trusted origin.
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-DESER-1: Direct native deserialization
 
@@ -159,7 +423,7 @@ Verify who controls the blob and whether integrity or type restrictions exist.
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
 ## 4.1 Native serialization heuristics
 Pay attention to:

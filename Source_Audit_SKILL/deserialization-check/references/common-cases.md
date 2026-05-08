@@ -168,6 +168,224 @@ Examples:
 - template path
 - object graph relationship
 
+## 3.6 High-coverage candidate inventory for graph search
+
+Use this inventory as a seed list for code search, graph queries, and taint source enumeration. A candidate name is not proof by itself; keep it only when code shows serialized data, type restoration, object restoration, unsafe loader behavior, or second-order restore relevance.
+
+### Entry-point candidates
+
+- `route`
+- `controller`
+- `handler`
+- `endpoint`
+- `api`
+- `resolver`
+- `mutation`
+- `rpc`
+- `grpc`
+- `webhook`
+- `callback`
+- `consumer`
+- `listener`
+- `worker`
+- `job`
+- `task`
+- `import`
+- `upload`
+- `restore`
+- `recover`
+- `replay`
+- `admin`
+- `sync`
+- `cache`
+- `session`
+- `cookie`
+- `ipc`
+- `bridge`
+- `provider`
+- `contentProvider`
+- `deepLink`
+
+### Payload and blob candidates
+
+- `payload`
+- `data`
+- `body`
+- `message`
+- `msg`
+- `event`
+- `raw`
+- `bytes`
+- `byteArray`
+- `buffer`
+- `stream`
+- `input`
+- `content`
+- `blob`
+- `object`
+- `objectData`
+- `serialized`
+- `serializedData`
+- `state`
+- `session`
+- `cookie`
+- `token`
+- `value`
+- `metadata`
+- `template`
+- `config`
+- `snapshot`
+- `backup`
+- `archive`
+- `filter`
+- `preferences`
+- `profile`
+- `parcel`
+- `bundle`
+
+### Encoding, compression, and wrapper candidates
+
+- `base64`
+- `b64`
+- `decode`
+- `decodeBase64`
+- `fromBase64`
+- `gzip`
+- `gunzip`
+- `zip`
+- `unzip`
+- `inflate`
+- `deflate`
+- `compress`
+- `decompress`
+- `encrypted`
+- `decrypt`
+- `signed`
+- `verify`
+- `mac`
+- `hmac`
+- `signature`
+- `wrapped`
+- `envelope`
+- `frame`
+- `binary`
+- `protobuf`
+- `proto`
+- `msgpack`
+- `avro`
+- `thrift`
+- `json`
+- `xml`
+- `yaml`
+- `pickle`
+- `marshal`
+- `phar`
+
+### Type and polymorphic metadata candidates
+
+- `type`
+- `@type`
+- `_type`
+- `$type`
+- `class`
+- `className`
+- `clazz`
+- `objectClass`
+- `objectType`
+- `targetType`
+- `declaredType`
+- `runtimeType`
+- `discriminator`
+- `kind`
+- `tag`
+- `yamlTag`
+- `module`
+- `callable`
+- `factory`
+- `factoryClass`
+- `method`
+- `handler`
+- `callback`
+- `constructor`
+- `interface`
+- `implementation`
+- `impl`
+- `gadget`
+
+### Stored and second-order source candidates
+
+- `cache`
+- `redis`
+- `memcached`
+- `sessionStore`
+- `database`
+- `db`
+- `metadata`
+- `savedFilter`
+- `savedSearch`
+- `savedTemplate`
+- `savedConfig`
+- `preference`
+- `settings`
+- `profile`
+- `snapshot`
+- `backup`
+- `objectStorage`
+- `s3`
+- `blobStore`
+- `queue`
+- `topic`
+- `messageBody`
+- `deadLetter`
+- `retry`
+- `replay`
+- `importRecord`
+- `jobArgs`
+- `taskArgs`
+- `providerPayload`
+- `webhookPayload`
+
+### Trigger-relevant object state candidates
+
+- `path`
+- `file`
+- `filename`
+- `url`
+- `uri`
+- `command`
+- `cmd`
+- `args`
+- `arguments`
+- `template`
+- `templatePath`
+- `include`
+- `resource`
+- `endpoint`
+- `callback`
+- `handler`
+- `method`
+- `factory`
+- `module`
+- `script`
+- `expression`
+- `property`
+- `setter`
+- `delegate`
+- `listener`
+
+## 3.7 Generic graph query recipes
+
+Use these combinations to locate likely source paths:
+
+```text
+<entry-point candidate> + <payload/blob candidate> + <decode/wrapper candidate>
+<entry-point candidate> + <type metadata candidate> + <mapper/loader/restore keyword>
+<stored source candidate> + <blob/value field> + <restore/helper keyword>
+<queue/webhook/rpc candidate> + <message/body/payload> + <deserialize/decode keyword>
+<upload/import candidate> + <archive/metadata/config> + <loader/restore keyword>
+<payload/blob candidate> + <trigger-relevant state candidate> + <magic/lifecycle keyword>
+```
+
 ---
 
 # 4. Direct vs Second-Order Source Paths

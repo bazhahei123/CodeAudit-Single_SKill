@@ -35,7 +35,175 @@ Source questions:
 
 ---
 
-# 2. PHP Source Patterns
+# 2. High-Coverage PHP Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows command construction, shell interpretation, eval/code execution, external tool execution, or stored/background execution relevance.
+
+## 2.1 Web, API, and request entry candidates
+
+- Laravel `Route::get`
+- Laravel `Route::post`
+- Laravel `Route::put`
+- Laravel `Route::patch`
+- Laravel `Route::delete`
+- Laravel controllers
+- Laravel form requests
+- Laravel jobs
+- Laravel commands
+- Symfony `#[Route]`
+- Symfony `@Route`
+- Symfony controller actions
+- Symfony console commands
+- Symfony Messenger handlers
+- ThinkPHP controllers
+- Yii controllers
+- CodeIgniter controllers
+- raw PHP scripts
+- AJAX endpoints
+- webhook handlers
+- admin/debug tools
+
+## 2.2 Request, job, and payload source candidates
+
+- `$request->input(...)`
+- `$request->query(...)`
+- `$request->post(...)`
+- `$request->get(...)`
+- `$request->header(...)`
+- `$request->cookie(...)`
+- `$request->file(...)`
+- `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `$_FILES`
+- `php://input`
+- route params
+- queue payloads
+- job arguments
+- console command arguments
+- decoded JSON body
+
+## 2.3 Command, tool, script, and action selector candidates
+
+- `cmd`
+- `command`
+- `command_name`
+- `tool`
+- `tool_name`
+- `executable`
+- `program`
+- `binary`
+- `process`
+- `script`
+- `script_name`
+- `script_path`
+- `interpreter`
+- `runtime`
+- `engine`
+- `subcommand`
+- `action`
+- `operation`
+- `mode`
+- `runner`
+- `plugin`
+- `task_name`
+- `job_type`
+
+## 2.4 Argument, option, path, environment, and cwd candidates
+
+- `arg`
+- `args`
+- `argv`
+- `arguments`
+- `option`
+- `options`
+- `flag`
+- `flags`
+- `target`
+- `host`
+- `ip`
+- `domain`
+- `url`
+- `file`
+- `filename`
+- `path`
+- `input`
+- `output`
+- `config`
+- `env`
+- `environment`
+- `cwd`
+- `work_dir`
+- `working_dir`
+- `stdin`
+- `payload`
+- `timeout`
+- `profile`
+
+## 2.5 Shell, eval, include, and script candidates
+
+- `shell`
+- `shell_cmd`
+- `shell_command`
+- `command_line`
+- `command_template`
+- `script_body`
+- `source_code`
+- `code`
+- `expression`
+- `expr`
+- `formula`
+- `rule`
+- `eval_input`
+- `debug_code`
+- `template`
+- `include_path`
+- `php_code`
+- `cron`
+- `artisan`
+- `console`
+
+## 2.6 Downstream execution mapping candidates
+
+- `system`
+- `exec`
+- `shell_exec`
+- `passthru`
+- backticks
+- `proc_open`
+- `popen`
+- `pcntl_exec`
+- `eval`
+- `assert`
+- `create_function`
+- `preg_replace /e`
+- `include`
+- `require`
+- `Symfony Process`
+- `Process::fromShellCommandline`
+- `Process`
+- Laravel `Process`
+- external tool wrappers
+- `ffmpeg`
+- `convert`
+- `pandoc`
+- `wkhtmltopdf`
+
+## 2.7 PHP graph search recipes
+
+```text
+Route::post/controller + request input cmd/tool/action + system/exec/shell_exec/proc_open
+request input + args/options/file/path + Symfony Process/Laravel Process
+string concat/template + command_template/shell_command + shell_exec/backticks/Process::fromShellCommandline
+eval/assert/include + code/expression/template/include_path + request/stored value
+queue/job/command + payload/args/commandTemplate + exec/wrapper
+env/cwd/stdin/config + request/job/stored value + proc_open/Process
+```
+
+---
+
+# 3. PHP Source Patterns
 
 ## H-S1. Request-derived shell argument
 Example idea:
@@ -89,7 +257,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-S-CMD-1: Shell argument source
 
@@ -125,7 +293,7 @@ Trace writer and worker paths and verify second-order execution controls.
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 Request and upload source heuristics
 Pay attention to:
@@ -174,7 +342,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a PHP source as high-priority if:
 - the value is selected from a strict allowlist of safe commands, subcommands, or options,
@@ -192,7 +360,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good PHP source evidence includes:
 - route/controller/script/worker/admin/import entry point,
@@ -209,7 +377,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick PHP Source Checklist
+# 8. Quick PHP Source Checklist
 
 - Are request values used as command arguments, flags, modes, or tool selectors?
 - Are command names, scripts, subcommands, or tool choices dynamic?

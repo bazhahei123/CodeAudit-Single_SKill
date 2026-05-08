@@ -1,6 +1,6 @@
 ---
 name: XSS Check
-description: Use this skill to audit application code for cross-site scripting risks, including reflected XSS, stored XSS, unsafe template rendering, unescaped output, dangerous HTML and JavaScript sinks, client-side rendering misuse, and inconsistent output encoding or sanitization across routes, templates, components, and rendering layers.
+description: Use this skill to audit Java, Android, C#/.NET, C++, Python, PHP, and JavaScript/TypeScript application code for cross-site scripting risks, including reflected XSS, stored XSS, unsafe template rendering, unescaped output, WebView XSS, native HTML rendering misuse, dangerous HTML and JavaScript sinks, client-side rendering misuse, and inconsistent output encoding or sanitization across routes, templates, components, mobile views, and rendering layers.
 ---
 
 # XSS Check
@@ -34,6 +34,10 @@ Focus on XSS-related logic in:
 - handlers
 - APIs
 - GraphQL resolvers
+- RPC methods
+- Android exported components, deep links, WebView bridges, SDK callbacks, content providers, and HTML/WebView rendering paths
+- ASP.NET / .NET endpoints, Razor Pages, MVC views, Blazor components, SignalR hubs, Azure Functions, and background-rendering jobs
+- C++ HTTP/RPC/IPC handlers, native UI/WebView wrappers, CGI/FastCGI handlers, and HTML generation layers
 - template rendering code
 - server-side HTML generation
 - client-side rendering logic
@@ -85,6 +89,9 @@ Always load:
 Then load the matching backend language reference file from `references/` when relevant:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
 
@@ -101,6 +108,12 @@ when the codebase includes any of the following:
 
 If the project contains multiple languages, prioritize the language and framework that implement the actual rendering path or output sink.
 
+For graph-database or taint-tracking workflows, use the reference candidate inventories as search seeds:
+- entry candidates, such as route annotations, controllers, handlers, exported components, RPC methods, GraphQL resolvers, message consumers, preview endpoints, admin views, CMS paths, and rendering jobs,
+- render-target construction candidates, such as template model fields, raw HTML variables, markdown/rich-text output, JSON embedded into script, dynamic attributes, URL values, WebView data, and frontend props,
+- rendering or execution sink candidates, such as raw template output, HTML response writers, DOM HTML sinks, framework raw-render APIs, WebView `loadData`/`loadUrl`, native HTML widgets, markdown-to-HTML renderers, and sanitizer bypass helpers,
+- required-control candidates, such as context-aware escaping, safe text sinks, framework autoescape, safe JSON serialization, strict rich HTML sanitization, URL scheme allowlists, Trusted Types, CSP as defense-in-depth, and consistent preview/final rendering controls.
+
 Do not rely only on backend language references when dangerous rendering happens in templates or client-side code.
 
 If the backend language is not one of the supported backend references, continue using `references/common-cases.md` and, when relevant, `references/javascript-cases.md`, relying only on clearly identified framework and code evidence.
@@ -112,6 +125,7 @@ If the language or rendering layer cannot be determined confidently, state the u
 - Use reference files as audit guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared XSS concepts, contexts, anti-patterns, false-positive controls, and finding standards.
 - Backend language reference files define server-side template engines, dangerous output APIs, common implementation mistakes, and language-specific case patterns.
+- Android, C#/.NET, and C++ reference files define platform-specific HTML/WebView/template/native-rendering sink candidates and controls.
 - `references/javascript-cases.md` defines frontend DOM sinks, framework-specific rendering risks, browser-side sanitizer misuse, and client-side XSS case patterns.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
@@ -143,6 +157,9 @@ Direction: Verify whether attacker-controlled data can be stored and later rende
 # High-Priority Audit Targets
 
 Prioritize these targets first when present:
+- public route/controller annotations and HTTP handler registration
+- RPC, GraphQL, WebSocket, queue, job, import/export, preview, and admin rendering entry points
+- Android exported activity/service/receiver/provider paths, deep links, WebView bridges, SDK callbacks, and WebView/HTML rendering paths
 - comments, chat, messaging, and ticket content
 - user profile fields and display names
 - CMS, blog, post, article, and announcement content

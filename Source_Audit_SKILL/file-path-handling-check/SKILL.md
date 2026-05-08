@@ -1,6 +1,6 @@
 ---
 name: File Path Handling Source Check
-description: Use this skill to identify source points for path traversal and unsafe file path handling audits, including path parameters, filenames, uploaded file metadata, archive entry names, stored paths, resource selectors, template names, export destinations, cleanup targets, queue payloads, and framework-specific path source locations in Java, Python, and PHP applications.
+description: Use this skill to identify source points for path traversal and unsafe file path handling audits, including path parameters, filenames, uploaded file metadata, archive entry names, stored paths, resource selectors, template names, export destinations, cleanup targets, queue payloads, mobile/IPC/RPC file inputs, and framework-specific path source locations in Java, Android, C#/.NET, C++, Python, and PHP applications.
 ---
 
 # File Path Handling Source Check
@@ -36,6 +36,10 @@ Focus on file-path source points in:
 - handlers
 - APIs
 - GraphQL resolvers
+- RPC methods
+- Android exported components, deep links, WebView bridges, Binder/AIDL handlers, content providers, WorkManager jobs, SAF/document providers, and SDK callbacks that receive path-like values
+- ASP.NET / .NET controllers, minimal APIs, Razor Pages, SignalR hubs, gRPC services, WCF services, Azure Functions, queue consumers, and worker inputs
+- C++ HTTP/RPC/IPC/native service handlers, CGI/FastCGI entry points, plugin callbacks, custom protocol frames, and native file-processing jobs
 - service-layer file and resource helpers
 - download and preview handlers
 - upload destination logic
@@ -95,10 +99,17 @@ Always load:
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
 
 If the project contains multiple languages, prioritize the language and framework that implement the actual filesystem or local resource path handling logic.
+
+For Android, prioritize mobile boundaries that can introduce filenames, content URIs, document IDs, media paths, WebView bridge path arguments, IPC parcel fields, content-provider paths, WorkManager input data, or backend file identifiers.
+
+For C#/.NET and C++, prioritize server, RPC, IPC, queue, worker, archive, cache/session, native protocol, and data-access layers that receive path-like values, storage keys, resource selectors, archive entries, or cleanup targets.
 
 Do not rely only on route names or parameter names; focus on where path-like values are built, normalized, resolved, mapped, or passed into file or resource operations.
 
@@ -111,8 +122,55 @@ If the language cannot be determined confidently, state the uncertainty and use 
 - Use reference files as source discovery guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared path source concepts, propagation patterns, trust boundaries, false-positive controls, and source output standards.
 - Language-specific reference files define framework source locations, path-like input shapes, language-specific APIs, and follow-up checks.
+- Use the high-coverage candidate inventories in each reference as graph-search seed lists for entry points, filename/path fields, uploaded metadata, archive entries, stored second-order paths, resource selectors, and downstream operation mapping.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
+
+---
+
+# Graph / Taint Source Discovery Workflow
+
+When the audit uses a graph database, code property graph, semantic index, or taint-tracking pipeline, seed discovery with candidate groups instead of relying on one exact source name.
+
+## Candidate group A: entry points
+
+Search for code locations that receive path-like data:
+- HTTP route annotations, route tables, controller methods, handlers, servlet mappings, minimal APIs, and legacy scripts
+- GraphQL resolvers and mutations
+- RPC, gRPC, WCF, SOAP, Thrift, WebSocket, queue, worker, and message handlers
+- Android activities, services, broadcast receivers, content providers, deep links, WebView bridge methods, Binder/AIDL handlers, SAF/document-provider callbacks, and WorkManager jobs
+- C++ HTTP/RPC/IPC handlers, native plugin callbacks, CGI/FastCGI handlers, CLI/admin import tools, and background file-processing jobs
+
+## Candidate group B: path-like field names
+
+Search for values likely to carry filesystem paths, resource selectors, or storage keys:
+- `file`, `filename`, `fileName`, `name`, `path`, `filepath`, `filePath`, `dir`, `directory`, `folder`, `location`
+- `key`, `resource`, `resourceName`, `template`, `theme`, `locale`, `view`, `page`, `report`, `config`, `log`
+- `upload`, `download`, `preview`, `export`, `import`, `backup`, `archive`, `entry`, `member`, `manifest`, `destination`, `target`
+- `uri`, `url`, `contentUri`, `documentId`, `storageKey`, `objectKey`, `blobName`, `bucket`, `prefix`
+
+## Candidate group C: path transformation names
+
+Search for values being decoded, normalized, joined, resolved, mapped, or persisted:
+- `decode`, `urlDecode`, `normalize`, `clean`, `canonical`, `realpath`, `absolute`, `resolve`, `join`, `combine`
+- `basename`, `extension`, `suffix`, `prefix`, `replace`, `strip`, `sanitize`, `safeName`, `secureFilename`
+- `baseDir`, `root`, `uploadDir`, `downloadDir`, `tempDir`, `workDir`, `extractDir`, `storagePath`
+
+## Candidate group D: indirect and second-order source surfaces
+
+Search for path-like values from:
+- uploaded original filenames, content-disposition names, MIME-derived extensions, media metadata, archive names
+- zip/tar/archive entry names, import manifests, package member names, nested archive paths
+- database fields, cache/session values, queue payloads, job args, failed jobs, object storage metadata, saved reports, saved exports, saved templates, cleanup targets
+- mobile content URIs, document IDs, SAF providers, WebView bridge arguments, IPC parcels, plugin payloads
+
+## Candidate group E: downstream relevance mapping
+
+Keep only candidates that can be connected to file-path-relevant behavior:
+- path construction, path join, normalization, canonicalization, resource mapping, or storage-key mapping
+- read, preview, download, include, require, template load, local resource load
+- write, upload, export, delete, move, rename, copy, overwrite, temp-file creation, cleanup
+- archive extraction, import bundle expansion, backup restore, batch file processing, background worker file operations
 
 ---
 

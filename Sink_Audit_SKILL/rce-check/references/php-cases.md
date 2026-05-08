@@ -55,7 +55,225 @@ Look for:
 
 ---
 
-# 2. PHP Command Execution Anti-Patterns
+# 2. High-Coverage PHP Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, execution context, sink behavior, and missing controls.
+
+## 2.1 Web, framework, and request entry candidates
+Search for:
+- `Route::get`
+- `Route::post`
+- `Route::put`
+- `Route::patch`
+- `Route::delete`
+- `Route::any`
+- `Route::match`
+- `Route::resource`
+- `Route::apiResource`
+- `Controller`
+- `__invoke`
+- `Request $request`
+- `$request->input`
+- `$request->get`
+- `$request->query`
+- `$request->post`
+- `$request->all`
+- `$request->file`
+- `$request->cookie`
+- `$request->header`
+- `$request->getContent`
+- `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `$_FILES`
+- `php://input`
+- `#[Route]`
+- `@Route`
+- `AbstractController`
+- `Action`
+- `Middleware`
+
+## 2.2 Queue, command, webhook, import/export, and admin entries
+Search for:
+- `ShouldQueue`
+- `handle`
+- `Job`
+- `Listener`
+- `EventSubscriber`
+- `Command`
+- `Console`
+- `schedule`
+- `webhook`
+- `callback`
+- `admin`
+- `debug`
+- `diagnostic`
+- `convert`
+- `render`
+- `import`
+- `export`
+- `scan`
+- `preview`
+- `generate`
+- `replay`
+- `Artisan::call`
+- `Process`
+- `Symfony\\Component\\Process`
+
+## 2.3 Process, shell, and OS command sink candidates
+Search for:
+- `system`
+- `exec`
+- `shell_exec`
+- `passthru`
+- backticks
+- `proc_open`
+- `popen`
+- `pcntl_exec`
+- `Symfony\\Component\\Process\\Process`
+- `Process::fromShellCommandline`
+- `Process::run`
+- `Process::mustRun`
+- `Illuminate\\Support\\Facades\\Process`
+- `Process::path`
+- `Process::env`
+- `Artisan::call`
+- `ssh2_exec`
+- `expect_popen`
+- `sh -c`
+- `bash -c`
+- `cmd /c`
+- `powershell`
+
+## 2.4 Eval, dynamic PHP, template, and include execution candidates
+Search for:
+- `eval`
+- `assert`
+- `create_function`
+- `preg_replace` with `/e`
+- `mb_ereg_replace` with `e`
+- `include`
+- `include_once`
+- `require`
+- `require_once`
+- `call_user_func`
+- `call_user_func_array`
+- `forward_static_call`
+- variable functions such as `$func(`
+- `ReflectionFunction`
+- `ReflectionMethod`
+- `Closure::fromCallable`
+- `unserialize` gadget-to-exec paths
+- `Blade::render`
+- `view` with dynamic template review
+- `Twig\\Environment::createTemplate`
+- `Twig\\Environment::render`
+
+## 2.5 External tool and converter sink candidates
+Search for wrappers or command names around:
+- `ffmpeg`
+- `magick`
+- `convert`
+- `identify`
+- `gs`
+- `ghostscript`
+- `pdftotext`
+- `pdfinfo`
+- `wkhtmltopdf`
+- `libreoffice`
+- `soffice`
+- `pandoc`
+- `tesseract`
+- `tar`
+- `zip`
+- `unzip`
+- `7z`
+- `git`
+- `ssh`
+- `scp`
+- `curl`
+- `wget`
+- `ping`
+- `traceroute`
+- `nslookup`
+- `openssl`
+- `docker`
+- `kubectl`
+
+## 2.6 Command and argument construction candidates
+Search for:
+- `$cmd`
+- `$command`
+- `$args`
+- `$argv`
+- `$tool`
+- `$toolName`
+- `$script`
+- `$scriptPath`
+- `$commandTemplate`
+- string concatenation with `.`
+- `sprintf`
+- `implode(' '`
+- `explode(' '`
+- `escapeshellarg`
+- `escapeshellcmd`
+- `base64_decode`
+- `urldecode`
+- `rawurldecode`
+- `getClientOriginalName`
+- `cwd`
+- `env`
+- `timeout`
+- `allowedCommands`
+- `allowedTools`
+
+## 2.7 Required-control candidates
+Search near sinks for:
+- `escapeshellarg` with context review
+- `escapeshellcmd` with context review
+- `Process` array constructor
+- fixed command array
+- `fromShellCommandline` avoidance
+- `allowedCommands`
+- `allowedTools`
+- `Rule::in`
+- `Validator`
+- `validate`
+- `enum`
+- `match`
+- `timeout`
+- `setTimeout`
+- `setIdleTimeout`
+- `disable_functions`
+- `open_basedir`
+- `proc_nice`
+- `chroot`
+- `sandbox`
+- non-root
+- `env` allowlist
+- `cwd` allowlist
+
+## 2.8 PHP graph search recipes
+Useful combinations:
+
+```text
+Route::post + system
+$request->input + shell_exec
+$_GET + exec
+Controller + Process::fromShellCommandline
+Command handle + proc_open
+ShouldQueue + Process::run
+Artisan::call + request
+eval + request
+assert + request
+include + request-controlled PHP path
+ffmpeg + user-controlled option
+```
+
+---
+
+# 3. PHP Command Execution Anti-Patterns
 
 ### A1. `system` with concatenated user input
 ```php
@@ -108,7 +326,7 @@ This creates a second-order execution path if the stored template is attacker-in
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-CMD-1: Direct shell command injection
 
@@ -152,7 +370,7 @@ Trace the helper to the real sink and verify shell, argv, and allowlist behavior
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 Process API heuristics
 Pay attention to:

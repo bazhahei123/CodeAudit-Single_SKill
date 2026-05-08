@@ -36,7 +36,188 @@ Source questions:
 
 ---
 
-# 2. Java Source Patterns
+# 2. High-Coverage Java Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows command construction, argv construction, shell interpretation, eval/expression execution, interpreter invocation, external tool execution, or stored/background execution relevance.
+
+## 2.1 HTTP, controller, and request entry candidates
+
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@DeleteMapping`
+- `@PatchMapping`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestBody`
+- `@RequestHeader`
+- `@CookieValue`
+- `@RequestPart`
+- `MultipartFile`
+- `HttpServletRequest`
+- `@WebServlet`
+- `doGet`
+- `doPost`
+- `RouterFunction`
+- `ServerRequest`
+- GraphQL `@QueryMapping`
+- GraphQL `@MutationMapping`
+- gRPC service methods
+
+## 2.2 Command, tool, script, and action selector candidates
+
+- `cmd`
+- `command`
+- `commandName`
+- `tool`
+- `toolName`
+- `executable`
+- `program`
+- `binary`
+- `process`
+- `script`
+- `scriptName`
+- `scriptPath`
+- `interpreter`
+- `runtime`
+- `engine`
+- `subcommand`
+- `action`
+- `operation`
+- `mode`
+- `runner`
+- `plugin`
+- `taskName`
+- `jobType`
+
+## 2.3 Argument, option, path, environment, and cwd candidates
+
+- `arg`
+- `args`
+- `argv`
+- `arguments`
+- `option`
+- `options`
+- `flag`
+- `flags`
+- `target`
+- `host`
+- `ip`
+- `domain`
+- `url`
+- `file`
+- `filename`
+- `path`
+- `input`
+- `output`
+- `config`
+- `env`
+- `environment`
+- `cwd`
+- `workDir`
+- `workingDir`
+- `stdin`
+- `payload`
+- `timeout`
+- `profile`
+
+## 2.4 Shell, script, eval, and expression candidates
+
+- `shellCommand`
+- `commandLine`
+- `commandTemplate`
+- `String.format`
+- `MessageFormat`
+- `StringBuilder`
+- `scriptBody`
+- `sourceCode`
+- `code`
+- `expression`
+- `formula`
+- `rule`
+- `spel`
+- `ognl`
+- `mvel`
+- `jexl`
+- `groovy`
+- `ScriptEngine`
+- `ScriptEngineManager`
+- `ExpressionParser`
+- `GroovyShell`
+- `GroovyClassLoader`
+- `MVEL`
+- `JexlEngine`
+- `RuntimeCompiler`
+
+## 2.5 Queue, job, admin, and stored execution candidates
+
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `@MessageMapping`
+- `@Scheduled`
+- `JobDataMap`
+- `JobExecutionContext`
+- `CommandLineRunner`
+- `ApplicationRunner`
+- `@Async`
+- `taskDefinition`
+- `commandTemplate`
+- `storedCommand`
+- `savedScript`
+- `automationRule`
+- `schedulerConfig`
+- `replayPayload`
+- `adminTask`
+- `diagnostic`
+- `healthcheck`
+- `debug`
+
+## 2.6 Downstream execution mapping candidates
+
+- `Runtime.getRuntime().exec`
+- `Runtime.exec`
+- `ProcessBuilder`
+- `ProcessBuilder.command`
+- `ProcessBuilder.environment`
+- `ProcessBuilder.directory`
+- `start`
+- `exec`
+- `sh -c`
+- `bash -c`
+- `cmd.exe /c`
+- `powershell`
+- `ScriptEngine.eval`
+- `GroovyShell.evaluate`
+- `SpelExpressionParser.parseExpression`
+- `Expression.getValue`
+- external tool wrappers
+- `ffmpeg`
+- `convert`
+- `imagemagick`
+- `pandoc`
+- `wkhtmltopdf`
+- `python`
+- `node`
+- `java -jar`
+
+## 2.7 Java graph search recipes
+
+```text
+@PostMapping/@GetMapping + @RequestParam/@RequestBody cmd/tool/action + ProcessBuilder/Runtime.exec
+@RequestBody + args/options/file/path + ProcessBuilder.command/List<String>
+String.format/StringBuilder + commandTemplate/shellCommand + sh -c/bash -c/cmd.exe
+ScriptEngine/Groovy/SpEL/OGNL/MVEL/JEXL + expression/code/rule + request/stored value
+@KafkaListener/@RabbitListener/@Scheduled + jobArgs/commandTemplate + ProcessBuilder/wrapper
+ProcessBuilder.environment/directory + env/cwd/config/path + request/queue/stored source
+```
+
+---
+
+# 3. Java Source Patterns
 
 ## J-S1. Request-derived command argument
 Example idea:
@@ -90,7 +271,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-S-CMD-1: Process argument source
 
@@ -126,7 +307,7 @@ Trace wrapper internals and verify allowlist behavior.
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
 ## 4.1 Request and DTO source heuristics
 Pay attention to:
@@ -175,7 +356,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Java source as high-priority if:
 - the value is selected from a strict allowlist of safe commands, subcommands, or options,
@@ -193,7 +374,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Java source evidence includes:
 - route/controller/worker/admin/import entry point,
@@ -210,7 +391,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Java Source Checklist
+# 8. Quick Java Source Checklist
 
 - Are request values used as command arguments, flags, modes, or tool selectors?
 - Are command names, scripts, subcommands, or interpreters dynamic?

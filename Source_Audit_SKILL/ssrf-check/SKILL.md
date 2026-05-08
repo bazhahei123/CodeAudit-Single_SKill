@@ -1,6 +1,6 @@
 ---
 name: SSRF Source Check
-description: Use this skill to identify source points for server-side request forgery audits, including URL parameters, host and path selectors, callback and webhook targets, remote fetch inputs, import and preview URLs, redirect-controlled values, DNS-sensitive hostnames, protocol selectors, proxy settings, stored callback URLs, queued fetch jobs, and framework-specific outbound request source locations in Java, Python, and PHP applications.
+description: Use this skill to identify source points for server-side request forgery audits, including URL parameters, host and path selectors, callback and webhook targets, remote fetch inputs, import and preview URLs, redirect-controlled values, DNS-sensitive hostnames, protocol selectors, proxy settings, stored callback URLs, queued fetch jobs, Android mobile/IPC/WebView request sources, native/RPC request sources, and framework-specific outbound request source locations in Java, Android, C#/.NET, C++, Python, and PHP applications.
 ---
 
 # SSRF Source Check
@@ -36,6 +36,10 @@ Focus on SSRF source points in:
 - handlers
 - APIs
 - GraphQL resolvers
+- RPC methods
+- Android exported components, deep links, WebView bridges, SDK callbacks, content providers, Binder/AIDL handlers, push handlers, and WorkManager jobs
+- ASP.NET / .NET controllers, Razor Pages, minimal APIs, SignalR hubs, gRPC/WCF services, Azure Functions, queue consumers, and hosted workers
+- C++ HTTP/RPC/WebSocket/IPC handlers, socket/message consumers, native network wrappers, CLI/admin tools, and cloud SDK endpoint configuration paths
 - service-layer HTTP and network helpers
 - webhook and callback test features
 - remote file fetch and preview features
@@ -73,15 +77,16 @@ Focus on SSRF source points in:
 
 # Audit Workflow
 
-1. Identify the primary backend language, framework, and outbound request libraries.
+1. Identify the primary backend, mobile, or native language, framework, and outbound request libraries.
 2. Load `references/common-cases.md`.
 3. Load the matching language reference file from `references/`.
 4. Enumerate relevant source surfaces, especially webhook testers, callback configuration, URL previewers, screenshotters, crawlers, remote image/file loaders, import/render features, metadata fetchers, sitemap/feed readers, integration connectors, queue jobs, and generic HTTP helper services.
 5. Identify outbound-request-relevant source points, such as full URLs, hostnames, IPs, schemes, ports, paths, query strings, callback targets, redirect sources, proxy settings, internal-service target values, metadata endpoint values, stored endpoint records, and queued fetch payloads.
 6. For each source point, determine whether it is client-controlled, external-system-controlled, stored attacker-influenced, server-trusted, mixed, or unclear.
 7. Trace each source far enough to document downstream SSRF relevance, such as URL parsing, URL construction, host/path recomposition, outbound client calls, redirect-following clients, stored callback replay, renderer resource loading, or network wrapper calls.
-8. Review the code using the six source dimensions below.
-9. Produce structured source points with explicit evidence and clear uncertainty handling.
+8. For graph-database or taint-tracking workflows, use the language reference candidate inventories as search seeds and then prune by real code evidence.
+9. Review the code using the six source dimensions below.
+10. Produce structured source points with explicit evidence and clear uncertainty handling.
 
 ---
 
@@ -93,10 +98,15 @@ Always load:
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
 
-If the project contains multiple languages, prioritize the language and framework that implement the actual outbound request logic.
+If the project contains multiple languages, prioritize the language and framework that implement the actual outbound request, URL parsing, redirect handling, proxy routing, renderer fetch, or endpoint override logic.
+
+For Android, use the Android reference when the app accepts mobile-controlled targets from exported components, deep links, WebView bridges, IPC, SDK callbacks, content providers, push payloads, or local jobs and then makes app-side requests or forwards targets to backend/network SDK logic.
 
 Do not rely only on URL field names or helper names; focus on where request targets are actually received, parsed, normalized, validated, resolved, redirected, and fetched.
 
@@ -108,9 +118,86 @@ If the language cannot be determined confidently, state the uncertainty and use 
 
 - Use reference files as source discovery guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared SSRF source concepts, source categories, trust boundaries, propagation patterns, false-positive controls, and source output standards.
-- Language-specific reference files define framework source locations, outbound-request source shapes, language-specific client APIs, and follow-up checks.
+- Language-specific reference files define framework source locations, high-coverage candidate search terms, outbound-request source shapes, language-specific client APIs, and follow-up checks.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
+
+---
+
+# Graph and Taint Source Discovery Guidance
+
+Use candidate names as search seeds, not proof. A candidate becomes a source point only when code evidence shows it can influence request-target construction, URL parsing, URL recomposition, host/scheme/port/path selection, redirect behavior, DNS-sensitive target choice, proxy/client options, stored callback replay, renderer imports, or outbound request wrappers.
+
+## Candidate group A: entry and transport surfaces
+
+Search for externally reachable or weakly trusted entry points that may carry outbound-request-relevant values:
+- HTTP route/controller annotations and handlers
+- GraphQL resolvers and variables
+- RPC/gRPC/WCF service methods
+- WebSocket and SignalR handlers
+- webhook handlers and partner callbacks
+- queue consumers, scheduled jobs, workflow runners, import jobs, retry/replay jobs, and admin tools
+- Android exported components, deep links, app links, share targets, content providers, WebView bridges, Binder/AIDL handlers, push callbacks, and WorkManager inputs
+- C++ socket, pipe, DBus, custom IPC, HTTP/RPC, and message-bus handlers
+- CLI/admin/connectivity-test commands when arguments can be supplied by users, operators, tenants, or integrations
+
+## Candidate group B: direct request target sources
+
+Search for values that may represent a complete request target:
+- `url`, `uri`, `target`, `targetUrl`, `requestUrl`, `remoteUrl`, `externalUrl`
+- `callback`, `callbackUrl`, `webhook`, `webhookUrl`, `redirectUrl`, `returnUrl`
+- `previewUrl`, `imageUrl`, `avatarUrl`, `fileUrl`, `downloadUrl`, `uploadUrl`
+- `importUrl`, `feedUrl`, `sitemapUrl`, `metadataUrl`, `openGraphUrl`, `rssUrl`
+- `endpoint`, `baseUrl`, `serviceUrl`, `providerUrl`, `tenantUrl`, `integrationUrl`
+
+## Candidate group C: partial URL and destination selectors
+
+Search for values that may select the final network destination after recomposition:
+- `host`, `hostname`, `domain`, `ip`, `address`, `service`, `serviceName`
+- `scheme`, `protocol`, `port`, `path`, `route`, `query`, `fragment`
+- `bucketEndpoint`, `endpointOverride`, `regionEndpoint`, `proxyHost`, `proxyUrl`
+- `localhost`, `127.0.0.1`, `::1`, `169.254.169.254`, `metadata`, `internal`
+- `base`, `resource`, `objectKey`, `filePath`, `assetPath`, `tenantEndpoint`
+
+## Candidate group D: URL construction, parsing, and normalization sources
+
+Search for code that copies or transforms source values before request use:
+- URL parsing helpers and URI builders
+- concatenation, interpolation, format strings, joins, path normalization, and URL encoding/decoding
+- base64 or percent-decoded target values
+- userinfo, encoded host, alternate IP format, IPv6 bracket, and punycode handling
+- validation on one URL object followed by fetching a recomposed or differently parsed target
+
+## Candidate group E: stored, callback, and integration sources
+
+Search for values written earlier and fetched later:
+- webhook registrations, callback URLs, tenant endpoints, integration base URLs, provider endpoints, and connector settings
+- saved crawler targets, preview records, import jobs, report assets, remote templates, and object metadata
+- queue payloads, scheduled job arguments, retry/replay data, webhook delivery records, and sync state
+- admin connectivity tests, diagnostics, and custom endpoint configuration
+
+## Candidate group F: indirect fetch and client-option sources
+
+Search for values that influence non-obvious outbound requests:
+- HTML/PDF/document/markdown renderers, browser automation, screenshot tools, OpenGraph parsers, image loaders, feed/sitemap parsers, XML parsers, and archive/import tools
+- redirect-following flags, proxy settings, no-proxy lists, DNS resolver overrides, timeout settings, TLS/hostname verification flags, allowed protocol lists, and stream wrapper options
+- cloud SDK endpoint overrides, storage client service URLs, registry endpoints, package/cache mirrors, and internal-service aliases
+
+## Graph query recipes
+
+Useful source-discovery combinations:
+
+```text
+<entry candidate> + <url/host/source field> + <URL construction keyword>
+<entry candidate> + <callback/webhook/integration source> + <stored record or worker>
+<stored target source> + <retry/job/report/import entry> + <HTTP/network wrapper>
+<renderer/importer/preview source> + <remote resource field> + <fetch/render keyword>
+<proxy/protocol/client-option source> + <request wrapper/client builder>
+<Android exported/WebView/IPC entry> + <Intent/Uri/Bundle source> + <network/backend SDK target>
+<C++ HTTP/RPC/IPC entry> + <std::string/QUrl/Poco::URI target> + <native network wrapper>
+```
+
+Prune candidates when code proves the value is fixed server-side, strictly mapped to a trusted endpoint, only used as a display label, or unrelated to request-target construction, parsing, redirect behavior, DNS resolution, proxy/client options, render/import fetching, or outbound request execution.
 
 ---
 

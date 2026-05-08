@@ -167,6 +167,11 @@ Typical control:
 
 Prioritize these attack surfaces first:
 
+- public route/controller annotations and HTTP handler registration
+- GraphQL resolvers and mutations that return HTML, rich text, previews, or user-generated content
+- RPC, gRPC, SOAP, WCF, Thrift, Binder, DBus, or internal protocol methods that feed rendering paths
+- WebSocket and message-frame handlers carrying chat, notification, preview, or dashboard content
+- Android exported components, WebView bridges, HTML TextView renderers, and SDK callbacks that display attacker-influenced content
 - comments, chat, tickets, and messaging
 - user profile fields and display names
 - CMS, blog, article, and announcement content
@@ -179,6 +184,167 @@ Prioritize these attack surfaces first:
 - client-side DOM update helpers
 - legacy template rendering paths
 - alternate output formats for the same content
+
+## 3.1 Candidate search groups for graph workflows
+
+When a graph database cannot start from a single universal sink, build candidate sets from four groups and intersect them.
+
+### Entry candidates
+Search for externally reachable or semi-trusted render entry points:
+- controller
+- route
+- handler
+- endpoint
+- resolver
+- mutation
+- action
+- servlet
+- middleware
+- webhook
+- callback
+- listener
+- consumer
+- worker
+- job
+- scheduler
+- admin
+- dashboard
+- report
+- preview
+- render
+- view
+- template
+- CMS
+- comment
+- chat
+- message
+- ticket
+- profile
+- display name
+- notification
+- markdown
+- rich text
+- WYSIWYG
+- export
+- email preview
+- WebView
+- bridge
+- IPC
+- RPC
+- WebSocket
+- deep link
+- exported
+
+### Render-target construction candidates
+Search for user-controlled values entering browser-interpreted contexts:
+- html
+- rawHtml
+- safeHtml
+- bodyHtml
+- contentHtml
+- markdown
+- richText
+- comment
+- message
+- title
+- description
+- displayName
+- profile
+- template
+- model
+- view model
+- props
+- state
+- script
+- json
+- href
+- src
+- style
+- class
+- attribute
+- onclick
+- onerror
+- data-
+- URL
+- fragment
+- preview
+- sanitized
+- encoded
+- safe
+- trusted
+
+### Rendering and execution sink candidates
+Search for APIs that render or execute browser-interpreted content:
+- raw template output
+- unescaped output
+- HTML response
+- response writer
+- template render
+- markdown render
+- rich text render
+- sanitizer bypass
+- safe string marker
+- innerHTML
+- outerHTML
+- insertAdjacentHTML
+- document.write
+- dangerouslySetInnerHTML
+- v-html
+- bypassSecurityTrustHtml
+- {@html}
+- WebView.loadData
+- WebView.loadDataWithBaseURL
+- WebView.loadUrl
+- evaluateJavascript
+- Html.fromHtml
+- native HTML widget
+- script block
+- event handler attribute
+- URL attribute
+
+### Required-control candidates
+Search near candidate sinks for controls:
+- autoescape
+- context-aware escaping
+- HTML escape
+- attribute escape
+- JavaScript escape
+- URL scheme allowlist
+- safe JSON serialization
+- textContent
+- innerText
+- createTextNode
+- sanitizer
+- DOMPurify
+- OWASP Java HTML Sanitizer
+- Bleach
+- HTMLPurifier
+- AntiXSS
+- allowlist
+- trusted types
+- CSP
+- safe markdown
+- raw HTML disabled
+- safe template
+- no raw
+- no safe marker
+- preview/final consistency
+
+## 3.2 Generic graph search recipes
+
+Useful candidate recipes:
+
+```text
+<entry candidate> + <rendering sink candidate>
+<comment/profile/message/markdown/rich text> + <raw HTML sink>
+<request/body/header/cookie/stored content> + <template model/render target>
+<admin/dashboard/moderation> + <user-generated content> + <raw render>
+<markdown renderer> + <HTML sink> without <sanitizer>
+<safe/trusted/raw helper> + <attacker-controlled content>
+<API response field> + <frontend DOM raw sink>
+<WebView/Html.fromHtml/native HTML widget> + <Intent/deep-link/SDK payload>
+<candidate sink> without nearby <required-control candidate>
+```
 
 ---
 

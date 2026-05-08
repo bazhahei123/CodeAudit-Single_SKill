@@ -1,6 +1,6 @@
 ---
 name: SQL Injection Source Check
-description: Use this skill to identify source points for SQL injection audits, including request parameters, search filters, sort and pagination controls, raw SQL fragments, ORM raw-helper inputs, dynamic table and column selectors, report templates, saved filters, imported rows, stored query metadata, and framework-specific SQL source locations in Java, Python, and PHP applications.
+description: Use this skill to identify source points for SQL injection audits, including request parameters, search filters, sort and pagination controls, raw SQL fragments, ORM raw-helper inputs, dynamic table and column selectors, report templates, saved filters, imported rows, stored query metadata, Android local SQL inputs, IPC/RPC/job/query payloads, and framework-specific SQL source locations in Java, Android, C#/.NET, C++, Python, and PHP applications.
 ---
 
 # SQL Injection Source Check
@@ -37,6 +37,9 @@ Focus on SQL source points in:
 - APIs
 - GraphQL resolvers
 - RPC methods
+- Android exported components, content providers, deep links, WebView bridges, Binder/AIDL handlers, SDK callbacks, WorkManager jobs, and local SQLite/Room access
+- ASP.NET / .NET controllers, Razor Pages, minimal APIs, SignalR hubs, gRPC/WCF services, Azure Functions, queue consumers, and hosted workers
+- C++ HTTP/RPC/WebSocket/IPC handlers, socket/message consumers, native database wrappers, and CLI/admin tools
 - service-layer query builders
 - repository or DAO methods
 - ORM query helpers
@@ -73,15 +76,16 @@ Focus on SQL source points in:
 
 # Audit Workflow
 
-1. Identify the primary backend language, database access framework, and ORM/query builder.
+1. Identify the primary backend language, local SQL surface, database access framework, and ORM/query builder.
 2. Load `references/common-cases.md`.
 3. Load the matching language reference file from `references/`.
 4. Enumerate relevant source surfaces, especially search, filter, sort, pagination, login, report, export, admin, analytics, saved filter, dashboard, and background-query paths.
 5. Identify SQL-relevant source points, such as values, filter keys, operators, sort fields, directions, table names, column names, select fields, raw WHERE fragments, query templates, saved filters, report definitions, and ORM raw-helper arguments.
 6. For each source point, determine whether it is client-controlled, external-system-controlled, stored attacker-influenced, server-trusted, mixed, or unclear.
 7. Trace each source far enough to document downstream SQL relevance, such as query string construction, query builder option construction, raw fragment creation, ORM raw helper calls, dynamic stored procedure parameters, or report-query generation.
-8. Review the code using the six source dimensions below.
-9. Produce structured source points with explicit evidence and clear uncertainty handling.
+8. For graph-database or taint-tracking workflows, use the language reference candidate inventories as search seeds and then prune by real code evidence.
+9. Review the code using the six source dimensions below.
+10. Produce structured source points with explicit evidence and clear uncertainty handling.
 
 ---
 
@@ -93,12 +97,17 @@ Always load:
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-sql-cases.md`
+- Android -> `references/android-sql-cases.md`
+- C# / .NET -> `references/csharp-sql-cases.md`
+- C++ / native services -> `references/cpp-sql-cases.md`
 - Python -> `references/python-sql-cases.md`
 - PHP -> `references/php-sql-cases.md`
 
-If the project contains multiple languages, prioritize the language and framework that implement the actual backend SQL construction and execution logic.
+If the project contains multiple languages, prioritize the language and framework that implement the actual backend, native, or local SQL construction and execution logic.
 
 Do not rely only on frontend code when SQL construction happens on the backend.
+
+For Android, use the Android reference only when the app constructs or executes SQLite/Room/ContentProvider queries locally, passes SQL-like selectors to local storage APIs, or forwards mobile-controlled query options into backend SQL APIs.
 
 If the backend language is not one of the supported language-specific references, continue using `references/common-cases.md` and rely only on clearly identified framework and code evidence.
 
@@ -108,9 +117,88 @@ If the language cannot be determined confidently, state the uncertainty and use 
 
 - Use reference files as source discovery guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared SQL source concepts, structural source types, propagation patterns, trust boundaries, false-positive controls, and source output standards.
-- Language-specific reference files define framework source locations, query-source shapes, language-specific APIs, and follow-up checks.
+- Language-specific reference files define framework source locations, high-coverage candidate search terms, query-source shapes, language-specific APIs, and follow-up checks.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
+
+---
+
+# Graph and Taint Source Discovery Guidance
+
+Use candidate names as search seeds, not proof. A candidate becomes a source point only when code evidence shows it can influence SQL values, SQL structure, raw fragments, query options, stored query metadata, or data-access helper behavior.
+
+## Candidate group A: entry and transport surfaces
+
+Search for externally reachable or weakly trusted entry points that may carry SQL-relevant values:
+- HTTP route/controller annotations and handlers
+- GraphQL resolvers and variables
+- RPC/gRPC/WCF service methods
+- WebSocket and SignalR handlers
+- webhook handlers and partner callbacks
+- queue consumers, scheduled jobs, workflow runners, import jobs, and replay/admin tasks
+- Android exported components, content providers, deep links, WebView bridges, Binder/AIDL handlers, push callbacks, and WorkManager inputs
+- C++ socket, pipe, DBus, custom IPC, HTTP/RPC, and message-bus handlers
+- CLI/admin/report/export commands when arguments can be supplied by users, operators, or integrations
+
+## Candidate group B: SQL value and criteria sources
+
+Search for values that may become bound or unbound SQL criteria:
+- `q`, `query`, `keyword`, `search`, `term`, `name`, `username`, `email`, `status`
+- `id`, `ids`, `tenant`, `tenantId`, `accountId`, `userId`, `roleId`, `orgId`
+- `from`, `to`, `startDate`, `endDate`, `range`, `createdAfter`, `createdBefore`
+- `filters`, `criteria`, `conditions`, `rules`, `where`, `predicate`, `specification`
+- `include`, `exclude`, `tags`, `category`, `type`, `state`, `scope`
+
+## Candidate group C: structural SQL selector sources
+
+Search for values that may select SQL structure rather than only data values:
+- `sort`, `sortBy`, `orderBy`, `order`, `direction`, `desc`, `asc`
+- `field`, `fields`, `column`, `columns`, `select`, `projection`, `groupBy`, `having`
+- `table`, `tableName`, `entity`, `model`, `schema`, `database`, `partition`
+- `operator`, `op`, `comparator`, `join`, `joinType`, `relation`
+- `limit`, `offset`, `page`, `pageSize`, `cursor`, `top`, `fetch`, `take`, `skip`
+
+## Candidate group D: raw SQL fragment and template sources
+
+Search for data that may become executable SQL text or SQL-like DSL:
+- `sql`, `rawSql`, `querySql`, `nativeQuery`, `customQuery`, `reportSql`
+- `whereClause`, `orderClause`, `havingClause`, `joinClause`, `groupClause`
+- `condition`, `expression`, `filterExpression`, `searchExpression`, `dsl`
+- `template`, `queryTemplate`, `reportTemplate`, `dashboardQuery`, `savedQuery`
+- `StringBuilder`, interpolation, concatenation, format strings, template expansion, and dynamic fragment joins
+
+## Candidate group E: ORM, query-builder, and wrapper input sources
+
+Search for user or stored values passed into APIs that may hide SQL construction:
+- repository, DAO, mapper, manager, scope, specification, criteria, and query-service methods
+- raw helpers such as `raw`, `whereRaw`, `orderByRaw`, `text`, `literal`, `nativeQuery`, `createNativeQuery`
+- dynamic query builder options for filter, sort, group, select, table, limit, offset, and includes
+- stored procedure names, dynamic procedure arguments, and procedure options when procedures build SQL internally
+- report engines, analytics builders, dashboard builders, export helpers, and search backends that translate input into SQL
+
+## Candidate group F: stored and second-order SQL sources
+
+Search for values written earlier and executed later:
+- saved filters, saved searches, saved queries, report templates, dashboard definitions, and admin query presets
+- imported CSV/Excel rows, uploaded metadata, sync data, webhook payloads, and partner records
+- queue payloads, scheduled job arguments, workflow state, retry/replay records, and cached query metadata
+- tenant-specific configuration, feature flags, custom fields, field mappings, and per-customer report definitions
+
+## Graph query recipes
+
+Useful source-discovery combinations:
+
+```text
+<entry candidate> + <filter/sort/field source> + <repository/DAO/query helper>
+<entry candidate> + <raw SQL fragment source> + <SQL construction keyword>
+<stored query source> + <worker/report/export entry> + <query builder/helper>
+<structural selector source> + <ORDER BY/WHERE/LIMIT/OFFSET keyword> + <data access path>
+<ORM raw-helper input> + <request/stored value> + <raw/native/text keyword>
+<Android exported/content provider entry> + <selection/sort/projection source> + <SQLite/Room/ContentProvider API>
+<C++ HTTP/RPC/IPC entry> + <std::string/sql/where/order source> + <native DB wrapper>
+```
+
+Prune candidates when code proves the value is fixed server-side, strictly allowlisted, mapped to a safe enum, safely bound as a value with no structural influence, or unrelated to SQL.
 
 ---
 

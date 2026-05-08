@@ -36,7 +36,218 @@ Source questions:
 
 ---
 
-# 2. PHP Source Patterns
+# 2. High-Coverage PHP SSRF Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows request-target construction, URL parsing, URL recomposition, host/scheme/port/path selection, redirect behavior, DNS-sensitive target choice, proxy/client options, stored callback replay, renderer imports, or outbound request wrapper relevance.
+
+## 2.1 Web, framework, and request entry candidates
+
+Search for:
+- Laravel `Route::get`
+- Laravel `Route::post`
+- Laravel `Route::put`
+- Laravel `Route::patch`
+- Laravel `Route::delete`
+- Laravel controller methods
+- `$request->input`
+- `$request->query`
+- `$request->post`
+- `$request->all`
+- `$request->only`
+- `$request->validated`
+- `$request->header`
+- route parameters
+- Symfony `#[Route]`
+- Symfony `Request`
+- `$request->query->get`
+- `$request->request->get`
+- `$request->headers->get`
+- ThinkPHP controllers
+- Yii controllers
+- CodeIgniter controllers
+- WordPress `add_action`
+- WordPress REST routes
+- raw `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `$_SERVER`
+- uploaded file metadata
+
+## 2.2 Queue, command, webhook, preview, import, and admin entries
+
+Search for:
+- Laravel jobs
+- Laravel listeners
+- Laravel events
+- Laravel queued jobs
+- Laravel console commands
+- Symfony commands
+- Symfony Messenger handlers
+- cron scripts
+- webhook controllers
+- callback controllers
+- preview controllers
+- import controllers
+- export controllers
+- renderer jobs
+- screenshot jobs
+- crawler jobs
+- metadata jobs
+- admin connectivity tests
+- replay handlers
+- ETL/sync tasks
+- legacy admin scripts
+
+## 2.3 Direct target and URL source candidates
+
+Search for request, DTO, array, model, form, job, or config fields named:
+- `url`
+- `uri`
+- `target`
+- `target_url`
+- `request_url`
+- `remote_url`
+- `external_url`
+- `callback`
+- `callback_url`
+- `webhook`
+- `webhook_url`
+- `redirect_url`
+- `return_url`
+- `preview_url`
+- `image_url`
+- `avatar_url`
+- `file_url`
+- `download_url`
+- `import_url`
+- `feed_url`
+- `sitemap_url`
+- `metadata_url`
+- `open_graph_url`
+- `endpoint`
+- `base_url`
+- `service_url`
+- `provider_url`
+- `tenant_url`
+- `integration_url`
+
+## 2.4 Partial destination, protocol, and client-option candidates
+
+Search for:
+- `host`
+- `hostname`
+- `domain`
+- `ip`
+- `address`
+- `service_name`
+- `scheme`
+- `protocol`
+- `port`
+- `path`
+- `route`
+- `query`
+- `resource`
+- `object_key`
+- `endpoint_override`
+- `proxy`
+- `proxy_host`
+- `proxy_url`
+- `no_proxy`
+- `follow_location`
+- `allow_redirects`
+- `timeout`
+- `ssl`
+- `verify`
+- `stream_context`
+
+## 2.5 URL construction, parser, and normalization candidates
+
+Search for source values near:
+- `parse_url`
+- `http_build_query`
+- `urldecode`
+- `rawurldecode`
+- `base64_decode`
+- `idn_to_ascii`
+- `filter_var`
+- `GuzzleHttp\\Psr7\\Uri`
+- `League\\Uri`
+- `sprintf`
+- `vsprintf`
+- `implode`
+- string interpolation around `http://` or `https://`
+- concatenation around URL pieces
+- `gethostbyname`
+- `dns_get_record`
+- `inet_pton`
+- custom resolver helpers
+
+## 2.6 Stored, callback, and indirect fetch source candidates
+
+Search for:
+- webhook registration records
+- callback target records
+- integration endpoint records
+- tenant endpoint settings
+- provider endpoint settings
+- saved crawler targets
+- URL preview records
+- import job URLs
+- retry or replay payloads
+- queue payload URLs
+- remote image or avatar URLs
+- OpenGraph metadata URLs
+- feed or sitemap URLs
+- PDF/HTML/Markdown renderer inputs
+- browser automation preview URLs
+- cloud SDK endpoint overrides
+- storage service endpoint settings
+
+## 2.7 Downstream SSRF relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- `curl_init`
+- `curl_setopt`
+- `curl_exec`
+- `CURLOPT_URL`
+- `file_get_contents`
+- `fopen`
+- `readfile`
+- `copy`
+- `get_headers`
+- `stream_context_create`
+- `GuzzleHttp\\Client`
+- `Client::request`
+- Laravel `Http::get`
+- Laravel `Http::post`
+- Symfony HTTP client
+- WordPress HTTP API
+- `wp_remote_get`
+- `wp_remote_post`
+- `SoapClient`
+- XML/HTML parsers and importers
+- browser/screenshot wrappers
+- shared outbound request wrappers
+
+## 2.8 PHP graph search recipes
+
+Useful combinations:
+
+```text
+Route::get/Route::post + $request->input url/host + parse_url/http_build_query
+$request->query/$_GET + callback_url/webhook_url + curl/Guzzle/Http client
+Symfony #[Route] + endpoint/base_url/provider_url + HTTP client wrapper
+Laravel job/command + stored URL/callback + Http::get/Guzzle/cURL
+sprintf/implode/concat + request/stored host/path + outbound wrapper
+CURLOPT_FOLLOWLOCATION/allow_redirects + request/stored URL
+gethostbyname/dns_get_record/inet_pton + host source + fetch wrapper
+file_get_contents/fopen/copy + preview/import/image/feed URL
+```
+
+---
+
+# 3. PHP Source Patterns
 
 ## H-S1. Request-derived URL source
 Example idea:
@@ -101,7 +312,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-S-SSRF-1: Direct URL source
 
@@ -137,9 +348,9 @@ Inspect library configuration and resource loading restrictions.
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
-## 4.1 Request and framework source heuristics
+## 5.1 Request and framework source heuristics
 Pay attention to:
 - `$_GET`, `$_POST`, and `$_REQUEST`
 - `$request->input(...)`
@@ -148,7 +359,7 @@ Pay attention to:
 - uploaded metadata and import rows
 - webhook, preview, import, render, and admin route parameters
 
-## 4.2 URL assembly source heuristics
+## 5.2 URL assembly source heuristics
 Pay attention to:
 - string-built URLs
 - `parse_url(...)` parsing and recomposition
@@ -157,7 +368,7 @@ Pay attention to:
 - preview/import target construction
 - helper methods named `fetch`, `download`, `preview`, `verify`, `crawl`, or `import`
 
-## 4.3 Client API source heuristics
+## 5.3 Client API source heuristics
 Pay attention to:
 - cURL
 - `file_get_contents` with URLs
@@ -168,7 +379,7 @@ Pay attention to:
 - framework HTTP clients
 - shared outbound request wrappers
 
-## 4.4 Redirect, protocol, DNS, and proxy source heuristics
+## 5.4 Redirect, protocol, DNS, and proxy source heuristics
 Pay attention to:
 - `CURLOPT_FOLLOWLOCATION`
 - protocol restrictions
@@ -177,7 +388,7 @@ Pay attention to:
 - DNS resolution and IP range checks
 - helper defaults that expand allowed transports
 
-## 4.5 Indirect and stored source heuristics
+## 5.5 Indirect and stored source heuristics
 Pay attention to:
 - webhook test paths
 - previewers
@@ -189,7 +400,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a PHP source as high-priority if:
 - the value is selected from a strict allowlist of safe fixed endpoints,
@@ -207,7 +418,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good PHP source evidence includes:
 - route/controller/script/worker/admin/import/render entry point,
@@ -224,7 +435,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick PHP Source Checklist
+# 8. Quick PHP Source Checklist
 
 - Are request values used as full URLs, callback targets, hosts, ports, paths, schemes, or remote resource references?
 - Can request or stored values name localhost, loopback, link-local, private-network, cloud metadata, or internal service targets?

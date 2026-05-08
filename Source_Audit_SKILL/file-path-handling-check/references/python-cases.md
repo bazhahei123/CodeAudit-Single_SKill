@@ -39,7 +39,173 @@ Source questions:
 
 ---
 
-# 2. Python Source Patterns
+# 2. High-Coverage Python Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows file path construction, resource selection, archive extraction, upload/export destination, or file operation relevance.
+
+## 2.1 Web, API, and request entry candidates
+
+- Django URL `path(...)`
+- Django `re_path(...)`
+- Django views
+- DRF `APIView`
+- DRF `ViewSet`
+- DRF `GenericViewSet`
+- DRF `ModelViewSet`
+- DRF `@api_view`
+- DRF `@action`
+- Flask `@app.route`
+- Flask `@blueprint.route`
+- FastAPI `@app.get`
+- FastAPI `@app.post`
+- FastAPI `@app.put`
+- FastAPI `@app.delete`
+- FastAPI `APIRouter`
+- Starlette `Route`
+- Tornado `RequestHandler`
+- GraphQL resolver
+- GraphQL mutation
+- Celery task
+- RQ job
+- webhook handler
+- admin import command
+
+## 2.2 Request and upload source candidates
+
+- `request.GET`
+- `request.POST`
+- `request.FILES`
+- `request.data`
+- `request.query_params`
+- `request.args`
+- `request.form`
+- `request.json`
+- `request.get_json()`
+- `request.headers`
+- `request.cookies`
+- FastAPI `Path`
+- FastAPI `Query`
+- FastAPI `Body`
+- `UploadFile.filename`
+- `FileStorage.filename`
+- Django `UploadedFile.name`
+- Pydantic fields named `file`, `filename`, `path`, `template`, `resource`, `export_path`
+
+## 2.3 Path-like field and selector candidates
+
+- `file`
+- `filename`
+- `file_name`
+- `path`
+- `file_path`
+- `dir`
+- `directory`
+- `folder`
+- `resource`
+- `template`
+- `template_name`
+- `theme`
+- `locale`
+- `language`
+- `report`
+- `config`
+- `log`
+- `storage_key`
+- `object_key`
+- `bucket`
+- `prefix`
+- `uri`
+- `url`
+- `download`
+- `preview`
+- `export`
+- `destination`
+- `target`
+- `cleanup_target`
+
+## 2.4 Path construction and transform candidates
+
+- `os.path.join`
+- `os.path.abspath`
+- `os.path.realpath`
+- `os.path.normpath`
+- `os.path.basename`
+- `os.path.dirname`
+- `pathlib.Path`
+- `Path.joinpath`
+- `Path.resolve`
+- `Path.absolute`
+- `werkzeug.utils.secure_filename`
+- `urllib.parse.unquote`
+- `posixpath.normpath`
+- `PurePath`
+- `safe_join`
+- `base_dir`
+- `upload_dir`
+- `download_dir`
+- `temp_dir`
+- `extract_dir`
+- `storage_path`
+
+## 2.5 Archive, stored, queue, and second-order candidates
+
+- `zipfile.ZipFile`
+- `ZipInfo.filename`
+- `namelist()`
+- `infolist()`
+- `tarfile.open`
+- `TarInfo.name`
+- `extract`
+- `extractall`
+- import manifest paths
+- database path fields
+- Django model `FileField`
+- Django `ImageField`
+- cache values
+- session values
+- Celery task args
+- queue payloads
+- job payloads
+- export paths
+- cleanup targets
+- object storage keys
+
+## 2.6 Downstream mapping candidates
+
+- `open`
+- `Path.open`
+- `send_file`
+- `send_from_directory`
+- Django `FileResponse`
+- Starlette/FastAPI `FileResponse`
+- `shutil.copy`
+- `shutil.move`
+- `os.remove`
+- `os.unlink`
+- `os.rename`
+- `os.replace`
+- `Path.unlink`
+- `Path.rename`
+- `tempfile.NamedTemporaryFile`
+- `render_template`
+- `get_template`
+- `jinja2.FileSystemLoader`
+- storage helper reads/writes
+
+## 2.7 Python graph search recipes
+
+```text
+route/view/@app.get + request args/path/query file/path/name + os.path/pathlib/open
+UploadFile/FileStorage/UploadedFile + filename/name + save/open/shutil.copy
+zipfile/tarfile + member filename/name + extract/extractall/write
+Celery/RQ/task + path/file/export_path + open/delete/move
+template/theme/locale/resource + get_template/FileSystemLoader/render
+database FileField/path field + stored path + send_file/FileResponse/cleanup
+```
+
+---
+
+# 3. Python Source Patterns
 
 ## P-S1. Request-derived filename or path
 Example idea:
@@ -93,7 +259,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-S-PATH-1: Download/read path source
 
@@ -129,7 +295,7 @@ Verify destructive operations use the same strong containment rules as reads.
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
 ## 4.1 Request and upload source heuristics
 Pay attention to:
@@ -179,7 +345,7 @@ Check whether path source handling is consistent across:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Python source as high-priority if:
 - the value is selected from a strict allowlist of safe resource keys,
@@ -197,7 +363,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Python source evidence includes:
 - route/view/worker/import entry point,
@@ -214,7 +380,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Python Source Checklist
+# 8. Quick Python Source Checklist
 
 - Are request values used as filenames, resource keys, templates, or path fragments?
 - Are uploaded filenames or extensions used for save paths?

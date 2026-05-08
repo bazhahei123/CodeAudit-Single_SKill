@@ -187,6 +187,201 @@ Examples:
 - replay payload
 - admin task configuration
 
+## 3.7 High-coverage candidate inventory for graph search
+
+Use this inventory as a seed list for code search, graph queries, and taint source enumeration. A candidate name is not proof by itself; keep it only when code shows command construction, argv construction, shell interpretation, eval/expression execution, interpreter invocation, external tool execution, or stored/background execution relevance.
+
+### Entry-point candidates
+
+- `route`
+- `controller`
+- `handler`
+- `endpoint`
+- `api`
+- `resolver`
+- `mutation`
+- `rpc`
+- `grpc`
+- `webhook`
+- `callback`
+- `consumer`
+- `listener`
+- `worker`
+- `job`
+- `task`
+- `admin`
+- `debug`
+- `diagnostic`
+- `replay`
+- `batch`
+- `import`
+- `export`
+- `convert`
+- `scan`
+- `probe`
+- `automation`
+- `plugin`
+- `ipc`
+- `bridge`
+
+### Command, tool, action, and interpreter selector candidates
+
+- `cmd`
+- `command`
+- `commandName`
+- `commandLine`
+- `tool`
+- `toolName`
+- `program`
+- `binary`
+- `executable`
+- `process`
+- `script`
+- `scriptName`
+- `scriptPath`
+- `interpreter`
+- `runtime`
+- `engine`
+- `shell`
+- `subcommand`
+- `action`
+- `operation`
+- `mode`
+- `runner`
+- `handler`
+- `module`
+- `plugin`
+- `taskName`
+- `jobType`
+
+### Argument, option, target, and path candidates
+
+- `arg`
+- `args`
+- `argv`
+- `arguments`
+- `param`
+- `params`
+- `parameter`
+- `parameters`
+- `option`
+- `options`
+- `flag`
+- `flags`
+- `switch`
+- `target`
+- `host`
+- `hostname`
+- `ip`
+- `domain`
+- `url`
+- `uri`
+- `file`
+- `filename`
+- `path`
+- `input`
+- `inputPath`
+- `output`
+- `outputPath`
+- `config`
+- `configPath`
+- `template`
+- `profile`
+- `timeout`
+- `cwd`
+- `workDir`
+- `workingDir`
+
+### Shell, script, eval, and expression candidates
+
+- `shellCommand`
+- `commandTemplate`
+- `cmdTemplate`
+- `scriptBody`
+- `sourceCode`
+- `code`
+- `payload`
+- `stdin`
+- `expression`
+- `expr`
+- `formula`
+- `rule`
+- `dsl`
+- `template`
+- `eval`
+- `exec`
+- `execute`
+- `run`
+- `spel`
+- `ognl`
+- `mvel`
+- `jexl`
+- `groovy`
+- `javascript`
+- `python`
+- `php`
+- `powershell`
+- `bash`
+- `cmd.exe`
+
+### Environment and context candidates
+
+- `env`
+- `environment`
+- `envp`
+- `PATH`
+- `LD_PRELOAD`
+- `PYTHONPATH`
+- `NODE_OPTIONS`
+- `JAVA_TOOL_OPTIONS`
+- `HOME`
+- `TMPDIR`
+- `workingDirectory`
+- `currentDirectory`
+- `cwd`
+- `stdin`
+- `inputStream`
+- `tempFile`
+- `scriptFile`
+- `configFile`
+- `pluginPath`
+
+### Stored and second-order execution candidates
+
+- `storedCommand`
+- `commandTemplate`
+- `taskDefinition`
+- `automationRule`
+- `schedulerConfig`
+- `cronConfig`
+- `jobArgs`
+- `taskArgs`
+- `queuePayload`
+- `messageBody`
+- `retryPayload`
+- `failedJob`
+- `replayPayload`
+- `adminTask`
+- `savedScript`
+- `savedExpression`
+- `savedRule`
+- `workflowStep`
+- `pluginManifest`
+- `importRecord`
+
+## 3.8 Generic graph query recipes
+
+Use these combinations to locate likely source paths:
+
+```text
+<entry-point candidate> + <command/tool selector> + <execution wrapper keyword>
+<entry-point candidate> + <arg/option/path candidate> + <process/external tool keyword>
+<shell/script/eval candidate> + <request/stored value> + <shell/eval/interpreter keyword>
+<queue/job/stored candidate> + <command/template/args> + <worker execution keyword>
+<upload/import candidate> + <file/path/config/script> + <external tool/interpreter keyword>
+<environment/context candidate> + <env/cwd/stdin> + <process builder keyword>
+```
+
 ---
 
 # 4. Shell, argv, eval, and tool source contexts

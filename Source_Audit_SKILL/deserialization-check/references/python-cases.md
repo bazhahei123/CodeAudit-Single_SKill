@@ -38,7 +38,188 @@ Source questions:
 
 ---
 
-# 2. Python Source Patterns
+# 2. High-Coverage Python Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows serialized payload, object restoration, unsafe loader, stored blob, message decoding, or reconstruction-state relevance.
+
+## 2.1 Web, API, and request entry candidates
+
+- Django `path(...)`
+- Django `re_path(...)`
+- Django views
+- DRF `APIView`
+- DRF `ViewSet`
+- DRF `GenericViewSet`
+- DRF `ModelViewSet`
+- DRF `@api_view`
+- DRF `@action`
+- Flask `@app.route`
+- Flask `@blueprint.route`
+- FastAPI `@app.post`
+- FastAPI `@app.put`
+- FastAPI `@app.patch`
+- FastAPI `APIRouter`
+- Starlette `Route`
+- Tornado `RequestHandler`
+- GraphQL resolver
+- GraphQL mutation
+- gRPC servicer method
+- `request.body`
+- `request.data`
+- `request.get_data()`
+- `request.get_json()`
+- `request.files`
+- `UploadFile`
+- `File(...)`
+- `Body(...)`
+
+## 2.2 Serialized payload and wrapper source candidates
+
+- `payload`
+- `data`
+- `body`
+- `message`
+- `blob`
+- `bytes`
+- `raw`
+- `content`
+- `serialized`
+- `serialized_data`
+- `object_data`
+- `pickle`
+- `marshal`
+- `shelve`
+- `yaml`
+- `xml`
+- `base64`
+- `b64`
+- `gzip`
+- `zip`
+- `compressed`
+- `encoded`
+- `encrypted`
+- `signed`
+- `cookie`
+- `session`
+- `token`
+- `metadata`
+- `template`
+- `config`
+- `import_file`
+- `backup`
+- `snapshot`
+- `BytesIO`
+- `base64.b64decode`
+- `gzip.decompress`
+- `zlib.decompress`
+
+## 2.3 Type, tag, and reconstruction metadata candidates
+
+- `!!python/object`
+- `!!python/object/apply`
+- `!!python/name`
+- `tag:yaml.org`
+- `type`
+- `_type`
+- `class`
+- `class_name`
+- `module`
+- `callable`
+- `function`
+- `factory`
+- `handler`
+- `callback`
+- `constructor`
+- `reduce`
+- `state`
+- `__reduce__`
+- `__reduce_ex__`
+- `__setstate__`
+- `persistent_id`
+- `persistent_load`
+
+## 2.4 Stored, cache, session, and second-order candidates
+
+- Django session values
+- Flask `session`
+- signed cookies
+- Redis values
+- Memcached values
+- cache entries
+- database blob fields
+- `BinaryField`
+- JSON metadata fields
+- saved filters
+- saved templates
+- saved configs
+- user preferences
+- import records
+- uploaded archives
+- object storage files
+- Celery result backend
+- task arguments
+- replay payloads
+- dead-letter messages
+
+## 2.5 Queue, worker, and external message candidates
+
+- Celery `@shared_task`
+- Celery task args
+- Celery serializer settings
+- RQ jobs
+- Dramatiq actors
+- Huey tasks
+- Kafka messages
+- RabbitMQ messages
+- SQS messages
+- Pub/Sub messages
+- webhook payloads
+- provider events
+- gRPC request bytes
+- WebSocket messages
+- `message.body`
+- `delivery.body`
+- `event.data`
+
+## 2.6 Restore and downstream mapping candidates
+
+- `pickle.loads`
+- `pickle.load`
+- `cPickle.loads`
+- `dill.loads`
+- `cloudpickle.loads`
+- `marshal.loads`
+- `shelve.open`
+- `yaml.load`
+- `yaml.Loader`
+- `yaml.UnsafeLoader`
+- `yaml.FullLoader`
+- `ruamel.yaml`
+- `jsonpickle.decode`
+- `jsonpickle.loads`
+- `joblib.load`
+- `torch.load`
+- `numpy.load`
+- `pandas.read_pickle`
+- custom `deserialize`
+- custom `restore`
+- custom `decode`
+- object factory wrappers
+
+## 2.7 Python graph search recipes
+
+```text
+route/view/@app.post + request.body/request.data + base64/gzip/BytesIO
+request.files/UploadFile + yaml/pickle/config + load/loads
+cookie/session/cache + blob/value + pickle.loads/yaml.load/jsonpickle
+Celery/RQ/Dramatiq + args/message.body + pickle/serializer/deserialize
+YAML text + !!python/object/module/callable + yaml.load
+database BinaryField/metadata + saved blob + restore/load
+```
+
+---
+
+# 3. Python Source Patterns
 
 ## P-S1. Request-derived pickle or binary payload
 Example idea:
@@ -92,7 +273,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-S-DESER-1: Pickle source
 
@@ -128,7 +309,7 @@ Verify producer trust, serializer restrictions, and safe worker input formats.
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
 ## 4.1 Pickle source heuristics
 Pay attention to:
@@ -173,7 +354,7 @@ Check whether source handling is consistent across:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Python source as high-priority if:
 - the value never reaches pickle, unsafe YAML, object restoration, or restore helpers,
@@ -191,7 +372,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Python source evidence includes:
 - route, view, worker, import handler, or cache/session helper entry point,
@@ -208,7 +389,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Python Source Checklist
+# 8. Quick Python Source Checklist
 
 - Are request bodies, uploads, cookies, or sessions decoded and restored?
 - Are base64/compressed values passed toward pickle or loader helpers?

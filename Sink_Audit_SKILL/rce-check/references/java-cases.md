@@ -55,7 +55,250 @@ Look for:
 
 ---
 
-# 2. Java Command Execution Anti-Patterns
+# 2. High-Coverage Java Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, execution context, sink behavior, and missing controls.
+
+## 2.1 HTTP, controller, and request entry candidates
+Search for:
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@PatchMapping`
+- `@DeleteMapping`
+- `@RequestBody`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestHeader`
+- `@CookieValue`
+- `@ModelAttribute`
+- `MultipartFile`
+- `HttpServletRequest`
+- `doGet`
+- `doPost`
+- `doPut`
+- `doDelete`
+- `doFilter`
+- `Filter`
+- `HandlerInterceptor`
+- `OncePerRequestFilter`
+- `WebMvcConfigurer`
+
+## 2.2 RPC, GraphQL, WebSocket, message, and job entries
+Search for:
+- `@Path`
+- `@GET`
+- `@POST`
+- `@QueryParam`
+- `@FormParam`
+- `@GraphQlController`
+- `@QueryMapping`
+- `@MutationMapping`
+- `@MessageMapping`
+- `@ServerEndpoint`
+- `@OnMessage`
+- `@GrpcService`
+- `BindableService`
+- `StreamObserver`
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `MessageListener`
+- `onMessage`
+- `@Scheduled`
+- `QuartzJobBean`
+- `Tasklet`
+- `ItemProcessor`
+- `CommandLineRunner`
+- `ApplicationRunner`
+- `admin`
+- `diagnostic`
+- `convert`
+- `render`
+- `import`
+- `export`
+- `replay`
+
+## 2.3 Process, shell, and OS command sink candidates
+Search for:
+- `Runtime.getRuntime().exec`
+- `Runtime.exec`
+- `ProcessBuilder`
+- `ProcessBuilder.command`
+- `ProcessBuilder.start`
+- `Process`
+- `ProcessImpl`
+- `startPipeline`
+- `inheritIO`
+- `waitFor`
+- `destroy`
+- `sh`
+- `sh -c`
+- `bash`
+- `bash -c`
+- `cmd.exe`
+- `cmd /c`
+- `powershell`
+- `powershell.exe`
+- `pwsh`
+- `/bin/sh`
+- `/bin/bash`
+- `command`
+- `runCommand`
+- `executeCommand`
+- `execCommand`
+- `invokeTool`
+- `runTool`
+- `ShellUtils`
+- `CommandLine`
+- `DefaultExecutor`
+- `Executor`
+- `Apache Commons Exec`
+
+## 2.4 Script, expression, template, and dynamic code sink candidates
+Search for:
+- `ScriptEngineManager`
+- `ScriptEngine.eval`
+- `Invocable.invokeFunction`
+- `NashornScriptEngine`
+- `GraalVM`
+- `Context.eval`
+- `GroovyShell`
+- `GroovyClassLoader`
+- `Eval.me`
+- `SpelExpressionParser`
+- `ExpressionParser`
+- `Expression.getValue`
+- `StandardEvaluationContext`
+- `SimpleEvaluationContext`
+- `Ognl.getValue`
+- `MVEL.eval`
+- `JexlEngine`
+- `JEXL`
+- `BeanShell`
+- `bsh.Interpreter`
+- `Janino`
+- `javax.tools.JavaCompiler`
+- `ToolProvider.getSystemJavaCompiler`
+- `Class.forName`
+- `URLClassLoader`
+- `Method.invoke`
+- `ReflectionUtils.invokeMethod`
+- `TemplatesImpl`
+- `Freemarker`
+- `Velocity`
+
+## 2.5 External tool and converter sink candidates
+Search for wrappers or command names around:
+- `ffmpeg`
+- `magick`
+- `convert`
+- `identify`
+- `gs`
+- `ghostscript`
+- `pdftotext`
+- `pdfinfo`
+- `wkhtmltopdf`
+- `libreoffice`
+- `soffice`
+- `pandoc`
+- `tesseract`
+- `tar`
+- `zip`
+- `unzip`
+- `7z`
+- `git`
+- `ssh`
+- `scp`
+- `curl`
+- `wget`
+- `ping`
+- `traceroute`
+- `nslookup`
+- `openssl`
+- `docker`
+- `kubectl`
+- `helm`
+
+## 2.6 Command and argument construction candidates
+Search for:
+- `String command`
+- `String cmd`
+- `String[] args`
+- `List<String> command`
+- `StringBuilder`
+- `String.format`
+- `MessageFormat.format`
+- `String.join`
+- `split(" ")`
+- `concat`
+- `+ " " +`
+- `template`
+- `commandTemplate`
+- `toolName`
+- `scriptPath`
+- `workingDirectory`
+- `environment`
+- `redirectErrorStream`
+- `URLDecoder.decode`
+- `Base64.getDecoder`
+- `quote`
+- `escape`
+- `sanitize`
+- `allowedCommands`
+- `allowedTools`
+
+## 2.7 Required-control candidates
+Search near sinks for:
+- `allowlist`
+- `allowedCommands`
+- `allowedTools`
+- `enum`
+- `switch`
+- `ProcessBuilder` with fixed first argument
+- `List.of`
+- `Arrays.asList`
+- no `sh -c`
+- no `cmd /c`
+- `timeout`
+- `waitFor(timeout`
+- `destroyForcibly`
+- `redirectErrorStream`
+- `directory`
+- `environment().clear`
+- `validate`
+- `Pattern.matches`
+- `Matcher.matches`
+- `safeArgs`
+- `SimpleEvaluationContext`
+- restricted `StandardEvaluationContext`
+- sandbox
+- non-root
+
+## 2.8 Java graph search recipes
+Useful combinations:
+
+```text
+@PostMapping + Runtime.getRuntime().exec
+@RequestParam + ProcessBuilder
+@GetMapping + ping + ProcessBuilder
+@KafkaListener + runCommand
+@Scheduled + shell
+ProcessBuilder + sh -c
+Runtime.exec + String.format
+ScriptEngine.eval + request parameter
+SpelExpressionParser + getValue
+GroovyShell + evaluate
+toolName + ProcessBuilder
+ffmpeg + user-controlled option
+```
+
+---
+
+# 3. Java Command Execution Anti-Patterns
 
 ### A1. Concatenated `Runtime.exec`
 ```java
@@ -108,7 +351,7 @@ This creates a second-order execution path if the template is attacker-influence
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-CMD-1: Direct command injection
 
@@ -152,7 +395,7 @@ Trace wrapper internals and verify fixed command / allowlist constraints.
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
 ## 4.1 Process API heuristics
 Pay attention to:

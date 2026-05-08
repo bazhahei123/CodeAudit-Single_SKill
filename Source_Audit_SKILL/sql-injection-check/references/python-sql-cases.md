@@ -35,7 +35,219 @@ Source questions:
 
 ---
 
-# 2. Python Source Patterns
+# 2. High-Coverage Python SQL Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows SQL value construction, structural SQL selection, raw fragment creation, ORM/query-builder input, stored query metadata, or data-access wrapper relevance.
+
+## 2.1 Web, API, and request entry candidates
+
+Search for:
+- Django `View`
+- Django `APIView`
+- Django `ViewSet`
+- Django `GenericViewSet`
+- Django `ModelViewSet`
+- Django `urls.py`
+- `path(`
+- `re_path(`
+- `request.GET`
+- `request.POST`
+- `request.data`
+- `request.query_params`
+- `request.headers`
+- `request.COOKIES`
+- `kwargs`
+- Flask `@app.route`
+- Flask `Blueprint`
+- `request.args`
+- `request.form`
+- `request.json`
+- `request.get_json`
+- `request.values`
+- FastAPI `@app.get`
+- FastAPI `@app.post`
+- FastAPI `APIRouter`
+- `Query`
+- `Path`
+- `Body`
+- `Header`
+- Pydantic model fields
+- Starlette `Request`
+- GraphQL resolvers
+- Strawberry `@strawberry.type`
+- Graphene `mutate`
+
+## 2.2 Worker, message, admin, report, and import entries
+
+Search for:
+- Celery `@app.task`
+- Celery `shared_task`
+- RQ jobs
+- Dramatiq actors
+- Huey tasks
+- APScheduler jobs
+- management commands
+- Click/Typer commands
+- webhook handlers
+- import views
+- export views
+- report views
+- dashboard handlers
+- admin actions
+- saved search handlers
+- replay handlers
+- queue consumers
+- ETL/sync tasks
+
+## 2.3 SQL value and criteria source candidates
+
+Search for request, schema, serializer, dict, or model fields named:
+- `q`
+- `query`
+- `keyword`
+- `search`
+- `term`
+- `username`
+- `email`
+- `status`
+- `state`
+- `type`
+- `category`
+- `tenant_id`
+- `account_id`
+- `user_id`
+- `org_id`
+- `ids`
+- `from_date`
+- `to_date`
+- `start_date`
+- `end_date`
+- `filters`
+- `criteria`
+- `conditions`
+- `rules`
+- `predicate`
+- `where`
+- `spec`
+
+## 2.4 Structural SQL selector source candidates
+
+Search for:
+- `sort`
+- `sort_by`
+- `order_by`
+- `ordering`
+- `direction`
+- `field`
+- `fields`
+- `column`
+- `columns`
+- `select`
+- `projection`
+- `table`
+- `table_name`
+- `schema`
+- `database`
+- `partition`
+- `operator`
+- `op`
+- `comparator`
+- `join`
+- `group_by`
+- `having`
+- `limit`
+- `offset`
+- `page`
+- `page_size`
+- `cursor`
+- `procedure`
+- `procedure_name`
+
+## 2.5 Raw fragment and query template source candidates
+
+Search for:
+- `sql`
+- `raw_sql`
+- `query_sql`
+- `native_query`
+- `custom_query`
+- `report_sql`
+- `where_clause`
+- `order_clause`
+- `having_clause`
+- `join_clause`
+- `condition`
+- `expression`
+- `filter_expression`
+- `query_template`
+- `report_template`
+- `saved_query`
+- `dashboard_query`
+- f-strings containing SQL keywords
+- `.format(`
+- `%` formatting
+- string concatenation around `WHERE`, `ORDER BY`, `LIMIT`, `OFFSET`, `SELECT`, `FROM`, or `JOIN`
+- `" ".join(...)`
+
+## 2.6 ORM, query builder, and wrapper input candidates
+
+Search for source values passed into:
+- Django `.raw(...)`
+- Django `connection.cursor()`
+- Django `RawSQL`
+- Django `.extra(...)`
+- Django `.order_by(...)` with external strings
+- Django dynamic `.filter(**kwargs)` keys
+- SQLAlchemy `text(...)`
+- SQLAlchemy `.execute(...)`
+- SQLAlchemy `literal_column(...)`
+- SQLAlchemy `column(...)`
+- SQLAlchemy dynamic `order_by`
+- SQLAlchemy `from_statement`
+- SQLModel raw execution helpers
+- Peewee `SQL(...)`
+- Tortoise raw SQL helpers
+- repository/query service wrappers
+- report/query/export services
+- saved filter readers and query metadata loaders
+
+## 2.7 Downstream SQL relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- `cursor.execute`
+- `cursor.executemany`
+- `cursor.executescript`
+- `connection.execute`
+- `engine.execute`
+- `session.execute`
+- `text`
+- `RawSQL`
+- `.raw`
+- `.extra`
+- `literal_column`
+- `from_statement`
+- `pandas.read_sql`
+- `read_sql_query`
+- stored procedure callers
+- repository, report, export, analytics, or dashboard query helpers
+
+## 2.8 Python graph search recipes
+
+Useful combinations:
+
+```text
+@app.route/APIRouter + request.args/request.json filter/sort + repository/query helper
+APIView/ViewSet + request.query_params order_by/field + Django ORM/raw helper
+FastAPI Body/Query + where_clause/expression + SQLAlchemy text/session.execute
+Celery/shared_task + saved_filter/report_template + query builder/helper
+request data + dynamic filter(**kwargs) + external field names
+f-string/.format + request/stored field + WHERE/ORDER BY/LIMIT
+cursor.execute/session.execute + raw_sql/custom_query/report_sql source
+```
+
+---
+
+# 3. Python Source Patterns
 
 ## P-S1. Request-derived query value
 Example idea:
@@ -99,7 +311,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-S-SQL-1: DB-API query value source
 
@@ -135,9 +347,9 @@ Trace writer and reader paths and verify stored data is structured and revalidat
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
-## 4.1 Django and DRF source heuristics
+## 5.1 Django and DRF source heuristics
 Pay attention to:
 - `request.GET`
 - `request.POST`
@@ -148,7 +360,7 @@ Pay attention to:
 - `connection.cursor()`
 - report/export endpoints using manual SQL
 
-## 4.2 Flask and FastAPI source heuristics
+## 5.2 Flask and FastAPI source heuristics
 Pay attention to:
 - `request.args`
 - `request.form`
@@ -158,7 +370,7 @@ Pay attention to:
 - service-layer SQL builder functions
 - f-string or `.format(...)` query helpers
 
-## 4.3 SQLAlchemy source heuristics
+## 5.3 SQLAlchemy source heuristics
 Pay attention to:
 - `text(...)`
 - `.execute(...)`
@@ -168,7 +380,7 @@ Pay attention to:
 - mixed safe and raw statements
 - helper methods that accept string fragments
 
-## 4.4 Structural control source heuristics
+## 5.4 Structural control source heuristics
 Check whether the following are user-controlled:
 - sortable field
 - sort direction
@@ -180,7 +392,7 @@ Check whether the following are user-controlled:
 - select field list
 - union-capable fragments
 
-## 4.5 Stored and second-order source heuristics
+## 5.5 Stored and second-order source heuristics
 Pay attention to:
 - saved search rules
 - report templates
@@ -193,7 +405,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Python source as high-priority if:
 - the value is selected from a strict allowlist of safe columns, tables, operators, directions, or report templates,
@@ -210,7 +422,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Python source evidence includes:
 - route/view/worker/admin/import entry point,
@@ -227,7 +439,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Python Source Checklist
+# 8. Quick Python Source Checklist
 
 - Are request values used as query values, filter keys, operators, sort fields, or pagination controls?
 - Are table names, columns, selected fields, report fields, or schemas dynamic?

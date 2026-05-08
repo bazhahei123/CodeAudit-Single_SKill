@@ -2,7 +2,7 @@
 
 name: Access Control Source Check
 
-description: Use this skill to identify source points for access control audits, including backend routes, identity sources, role and permission inputs, object identifiers, tenant or organization scope inputs, business action and state inputs, client-controlled parameters, alternate entry points, and framework-specific source locations in Java, Python, and PHP applications.
+description: Use this skill to identify source points for access control audits, including backend routes, mobile/deep-link entries, identity sources, role and permission inputs, object identifiers, tenant or organization scope inputs, business action and state inputs, client-controlled parameters, alternate entry points, and framework-specific source locations in Java, Android, C#/.NET, C++, Python, and PHP applications.
 
 ---
 
@@ -40,6 +40,9 @@ Focus on source points in:
 - APIs
 - GraphQL resolvers
 - RPC methods
+- Android exported components, deep links, WebView bridges, Binder/AIDL handlers, and mobile API entry points
+- ASP.NET / .NET controllers, Razor Pages, minimal APIs, SignalR hubs, gRPC services, and Azure Functions
+- C++ HTTP handlers, RPC handlers, CGI/FastCGI entry points, IPC handlers, native service boundaries, and plugin callbacks
 - middleware
 - filters
 - interceptors
@@ -96,6 +99,9 @@ Before auditing, identify the primary implementation language and major framewor
 Then load the matching reference file from `references/`:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
 
@@ -112,8 +118,47 @@ If the language cannot be determined confidently, state the uncertainty and use 
 - Use reference files as source discovery guidance, not as proof that a vulnerability exists.
 - Use `references/common-cases.md` for shared source concepts and general source classifications.
 - Use the language-specific file for framework source locations, common parameter patterns, and language-specific case templates.
+- Use the high-coverage candidate inventories in each reference as graph-search seed lists for entry points, client-controlled fields, server-trusted identity fields, object identifiers, tenant scopes, role/permission values, and business actions.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
+
+---
+
+# Graph / Taint Source Discovery Workflow
+
+When the audit uses a graph database, code index, or taint-tracking pipeline, seed discovery with candidate groups instead of relying on one exact source name.
+
+## Candidate group A: entry points
+
+Search for code locations that receive externally influenced input:
+- HTTP route annotations, route tables, controller methods, view functions, minimal APIs, servlet mappings, and legacy scripts
+- GraphQL queries and mutations
+- RPC, gRPC, SOAP, WCF, Thrift, RSocket, message, and WebSocket handlers
+- Android activities, services, broadcast receivers, content providers, deep links, exported components, and JavaScript bridge methods
+- background jobs, queue consumers, webhook handlers, import processors, and mobile/API variants that can be triggered by users or partners
+
+## Candidate group B: authority-bearing values
+
+Search for values that can influence access-control decisions:
+- identity: `user`, `user_id`, `uid`, `account_id`, `member_id`, `principal`, `subject`, `sub`, `actor`
+- role and permission: `role`, `roles`, `permission`, `permissions`, `scope`, `scopes`, `is_admin`, `admin`, `privilege`, `entitlement`
+- object identity: `id`, `object_id`, `order_id`, `invoice_id`, `file_id`, `project_id`, `document_id`, `resource_id`
+- tenant scope: `tenant_id`, `org_id`, `organization_id`, `company_id`, `workspace_id`, `team_id`, `department_id`, `account_id`
+- action and state: `action`, `operation`, `status`, `state`, `stage`, `approve`, `publish`, `delete`, `export`, `refund`, `transfer`, `disable`, `reset`
+
+## Candidate group C: source origin classification
+
+For each candidate, classify the origin:
+- client-controlled: path, query, body, form, header, cookie, GraphQL variable, RPC argument, Intent extra, deep-link parameter, IPC payload, uploaded row, webhook payload
+- server-trusted: verified session, framework principal, validated token claim, authenticated request context, membership loaded from database, policy engine result
+- mixed or unclear: helper output, middleware attribute, request-scoped context, decoded token before verification evidence, cached context with hidden population logic
+
+## Candidate group D: downstream relevance
+
+Keep only candidates that reach access-control-relevant targets:
+- protected object lookup, update, delete, export, share, approve, refund, publish, reset, transfer, or disable
+- policy, role, permission, ownership, tenant, membership, or workflow-state decision
+- repository or query filter selecting by object, owner, tenant, account, workspace, role, or state
 
 ---
 

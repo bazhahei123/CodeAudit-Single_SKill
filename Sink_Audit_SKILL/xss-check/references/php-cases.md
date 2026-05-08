@@ -56,7 +56,154 @@ Look for:
 
 ---
 
-# 2. PHP XSS Anti-Patterns
+# 2. High-Coverage PHP XSS Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, rendering context, sink behavior, and missing context-appropriate controls.
+
+## 2.1 Web, framework, and request entry candidates
+Search for:
+- `Route::get`
+- `Route::post`
+- `Route::put`
+- `Route::patch`
+- `Route::delete`
+- `Route::any`
+- `Route::match`
+- `Controller`
+- `__invoke`
+- `Request $request`
+- `$request->input`
+- `$request->get`
+- `$request->query`
+- `$request->post`
+- `$request->all`
+- `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `php://input`
+- `#[Route]`
+- `@Route`
+- `AbstractController`
+- `Action`
+- `preview`
+- `comment`
+- `profile`
+- `message`
+- `admin`
+
+## 2.2 Template, response, and manual HTML sink candidates
+Search for:
+- `{!!`
+- `!!}`
+- `{{`
+- `Blade::render`
+- `view(`
+- `View::make`
+- `response(`
+- `Response(`
+- `new Response`
+- `echo`
+- `print`
+- `printf`
+- `<?=`
+- `<?php echo`
+- `html`
+- `safeHtml`
+- `rawHtml`
+- `Twig`
+- `|raw`
+- `autoescape false`
+- `Markup`
+- `HtmlString`
+- `new HtmlString`
+- `Stringable`
+- `JsonResponse` embedded in HTML review
+
+## 2.3 Rich text, markdown, sanitizer, and script/URL candidates
+Search for:
+- `Markdown`
+- `Parsedown`
+- `CommonMark`
+- `league/commonmark`
+- `HTMLPurifier`
+- `purify`
+- `strip_tags`
+- `htmlspecialchars`
+- `e(`
+- `body_html`
+- `content_html`
+- `WYSIWYG`
+- `href`
+- `src`
+- `javascript:`
+- `onclick`
+- `onerror`
+- `script`
+- `json_encode`
+- `Js::from`
+- `@json`
+
+## 2.4 Stored content and privileged render candidates
+Search for:
+- `Comment`
+- `Post`
+- `Article`
+- `Profile`
+- `Ticket`
+- `Message`
+- `Notification`
+- `CMS`
+- `Nova`
+- `Filament`
+- `Backpack`
+- `moderation`
+- `dashboard`
+- `admin`
+- `email preview`
+- `report`
+
+## 2.5 Required-control candidates
+Search near sinks for:
+- escaped Blade `{{ }}`
+- no `{!! !!}`
+- Twig autoescape
+- no `|raw`
+- `htmlspecialchars`
+- `ENT_QUOTES`
+- `ENT_SUBSTITUTE`
+- `e(`
+- `Js::from`
+- `json_encode`
+- `JSON_HEX_TAG`
+- `JSON_HEX_AMP`
+- `JSON_HEX_APOS`
+- `JSON_HEX_QUOT`
+- `HTMLPurifier`
+- allowed tags
+- allowed attributes
+- URL scheme allowlist
+- `Content-Security-Policy`
+
+## 2.6 PHP graph search recipes
+Useful combinations:
+
+```text
+Route::get + echo $_GET
+$request->input + {!! !!}
+Controller + new HtmlString
+Blade::render + user content
+Twig |raw + stored content
+Parsedown + raw Blade output
+comment.body + {!! !!}
+admin dashboard + user-generated content + raw
+json_encode missing HEX flags + script block
+HTMLPurifier missing + rich text render
+```
+
+---
+
+# 3. PHP XSS Anti-Patterns
 
 ### A1. Blade raw output
 ```php
@@ -93,7 +240,7 @@ Unsafe string assembly may bypass template protections.
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-XSS-1: Raw Blade rendering
 
@@ -127,7 +274,7 @@ Use context-appropriate escaping instead of direct raw output.
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 Blade heuristics
 Pay attention to:

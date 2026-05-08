@@ -56,7 +56,222 @@ Look for:
 
 ---
 
-# 2. Java SSRF Anti-Patterns
+# 2. High-Coverage Java SSRF Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, final request target, sink behavior, and missing destination controls.
+
+## 2.1 HTTP, controller, and request entry candidates
+Search for:
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@PatchMapping`
+- `@DeleteMapping`
+- `@RequestBody`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestHeader`
+- `@CookieValue`
+- `@ModelAttribute`
+- `HttpServletRequest`
+- `doGet`
+- `doPost`
+- `doPut`
+- `doDelete`
+- `Filter`
+- `HandlerInterceptor`
+- `OncePerRequestFilter`
+- `webhook`
+- `callback`
+- `preview`
+- `fetch`
+- `import`
+- `download`
+- `avatar`
+- `image`
+- `feed`
+- `metadata`
+
+## 2.2 RPC, GraphQL, message, job, and admin entries
+Search for:
+- `@Path`
+- `@GET`
+- `@POST`
+- `@QueryParam`
+- `@FormParam`
+- `@GraphQlController`
+- `@QueryMapping`
+- `@MutationMapping`
+- `@MessageMapping`
+- `@GrpcService`
+- `BindableService`
+- `StreamObserver`
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `MessageListener`
+- `onMessage`
+- `@Scheduled`
+- `QuartzJobBean`
+- `Tasklet`
+- `CommandLineRunner`
+- `ApplicationRunner`
+- `admin`
+- `diagnostic`
+- `connectivityTest`
+- `webhookTest`
+- `replay`
+
+## 2.3 Request target construction candidates
+Search for:
+- `String url`
+- `String uri`
+- `String host`
+- `String endpoint`
+- `URI.create`
+- `new URI`
+- `new URL`
+- `UriComponentsBuilder`
+- `UriBuilder`
+- `UriBuilderFactory`
+- `DefaultUriBuilderFactory`
+- `URLDecoder.decode`
+- `Base64.getDecoder`
+- `InetAddress.getByName`
+- `InetAddress.getAllByName`
+- `URI.resolve`
+- `URL.toURI`
+- `getHost`
+- `getAuthority`
+- `getScheme`
+- `getPort`
+- `callbackUrl`
+- `webhookUrl`
+- `imageUrl`
+- `feedUrl`
+- `metadataUrl`
+- `endpointOverride`
+- `proxy`
+
+## 2.4 Java HTTP, URL, and socket sink candidates
+Search for:
+- `RestTemplate.getForObject`
+- `RestTemplate.getForEntity`
+- `RestTemplate.postForObject`
+- `RestTemplate.exchange`
+- `RestTemplate.execute`
+- `WebClient.create`
+- `WebClient.get`
+- `WebClient.post`
+- `retrieve`
+- `exchangeToMono`
+- `HttpURLConnection`
+- `URLConnection.openConnection`
+- `URL.openStream`
+- `java.net.http.HttpClient`
+- `HttpRequest.newBuilder`
+- `HttpClient.send`
+- `HttpClient.sendAsync`
+- `Apache HttpClient`
+- `HttpClients.createDefault`
+- `CloseableHttpClient.execute`
+- `OkHttpClient`
+- `Request.Builder.url`
+- `Call.execute`
+- `AsyncHttpClient`
+- `Socket`
+- `SSLSocket`
+
+## 2.5 Parser, renderer, cloud SDK, and indirect fetch sink candidates
+Search for:
+- `Jsoup.connect`
+- `DocumentBuilderFactory`
+- `SAXParserFactory`
+- `TransformerFactory`
+- `XMLInputFactory`
+- `ImageIO.read`
+- `PDDocument.load`
+- `OpenGraph`
+- `metadata fetch`
+- `S3Client.endpointOverride`
+- `AwsClientBuilder.endpointOverride`
+- `AmazonS3ClientBuilder.withEndpointConfiguration`
+- `WebDriver.get`
+- `ChromeDriver.get`
+- `Playwright`
+- `HtmlUnit`
+- `crawler`
+- `screenshot`
+- `feed parser`
+- `Rome`
+
+## 2.6 Redirect, DNS, proxy, and protocol candidates
+Search for:
+- `followRedirects`
+- `HttpClient.Redirect.ALWAYS`
+- `setInstanceFollowRedirects`
+- `LaxRedirectStrategy`
+- `RedirectStrategy`
+- `setRedirectsEnabled`
+- `Proxy`
+- `ProxySelector`
+- `setProxy`
+- `NO_PROXY`
+- `HostnameVerifier`
+- `Dns`
+- `OkHttpClient.Builder.dns`
+- `file://`
+- `ftp://`
+- `gopher://`
+- `jar:`
+
+## 2.7 Required-control candidates
+Search near sinks for:
+- `allowlist`
+- `allowedHosts`
+- `allowedSchemes`
+- `URI.getScheme`
+- `URI.getHost`
+- `InetAddress`
+- `isLoopbackAddress`
+- `isAnyLocalAddress`
+- `isLinkLocalAddress`
+- `isSiteLocalAddress`
+- `isMulticastAddress`
+- `169.254.169.254`
+- `metadata.google.internal`
+- `localhost`
+- `127.0.0.1`
+- `::1`
+- redirect disabled
+- redirect revalidation
+- final resolved IP check
+- DNS pinning
+- timeout
+- max body size
+
+## 2.8 Java graph search recipes
+Useful combinations:
+
+```text
+@PostMapping + RestTemplate.exchange
+@RequestParam + URI.create + WebClient
+@GetMapping + URL.openStream
+webhook + callbackUrl + HttpClient.send
+@KafkaListener + stored URL + RestTemplate
+HttpClient.Redirect.ALWAYS + user URL
+UriComponentsBuilder + request parameter + WebClient
+S3 endpointOverride + request/stored value
+Jsoup.connect + preview URL
+ImageIO.read + URL
+```
+
+---
+
+# 3. Java SSRF Anti-Patterns
 
 ### A1. Direct request to attacker-controlled URL
 ```java
@@ -105,7 +320,7 @@ Stored callback URLs remain dangerous if attacker influence exists and no revali
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-SSRF-1: Direct fetcher SSRF
 
@@ -152,7 +367,7 @@ Verify whether stored URLs are revalidated before use.
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
 ## 4.1 Client API heuristics
 Pay attention to:

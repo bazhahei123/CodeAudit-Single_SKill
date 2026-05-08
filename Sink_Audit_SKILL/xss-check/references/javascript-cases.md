@@ -92,11 +92,158 @@ Questions:
 
 ---
 
-# 2. JavaScript / TypeScript XSS Anti-Patterns
+# 2. High-Coverage JavaScript / TypeScript XSS Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, browser rendering context, sink behavior, and missing controls.
+
+## 2.1 Browser and client-side source candidates
+Search for:
+- `location.search`
+- `location.hash`
+- `location.href`
+- `document.URL`
+- `document.documentURI`
+- `document.referrer`
+- `window.name`
+- `postMessage`
+- `message` event
+- `event.data`
+- `localStorage`
+- `sessionStorage`
+- `IndexedDB`
+- `BroadcastChannel`
+- `URLSearchParams`
+- `new URL`
+- `history.state`
+- `route.params`
+- `query`
+- `params`
+- `props`
+- API response fields such as `body`, `html`, `content`, `description`, `message`, `title`, `displayName`
+
+## 2.2 DOM HTML and script execution sink candidates
+Search for:
+- `innerHTML`
+- `outerHTML`
+- `insertAdjacentHTML`
+- `document.write`
+- `document.writeln`
+- `Range.createContextualFragment`
+- `DOMParser.parseFromString`
+- `template.innerHTML`
+- `iframe.srcdoc`
+- `setAttribute`
+- `href =`
+- `src =`
+- `location =`
+- `window.open`
+- `eval`
+- `new Function`
+- `setTimeout(`
+- `setInterval(`
+- `script.text`
+- `script.textContent`
+- `appendChild(script`
+
+## 2.3 Framework raw-render sink candidates
+Search for:
+- `dangerouslySetInnerHTML`
+- `__html`
+- `v-html`
+- `bypassSecurityTrustHtml`
+- `bypassSecurityTrustScript`
+- `bypassSecurityTrustUrl`
+- `bypassSecurityTrustResourceUrl`
+- `DomSanitizer`
+- `{@html`
+- `{@render`
+- `htmlSafe`
+- `Ember.String.htmlSafe`
+- `SafeString`
+- `triple-stash`
+- `{{{`
+- `lit-html unsafeHTML`
+- `unsafeSVG`
+- `htmlLiteral`
+- `solid-js innerHTML`
+- `preact dangerouslySetInnerHTML`
+- `Alpine x-html`
+- `htmx swap:innerHTML`
+
+## 2.4 Rich text, markdown, sanitizer, and template candidates
+Search for:
+- `marked`
+- `markdown-it`
+- `showdown`
+- `remark`
+- `rehype`
+- `mdx`
+- `sanitize-html`
+- `DOMPurify`
+- `purify.sanitize`
+- `trustedTypes`
+- `createPolicy`
+- `Quill`
+- `Draft.js`
+- `ProseMirror`
+- `TipTap`
+- `TinyMCE`
+- `CKEditor`
+- `preview`
+- `renderMarkdown`
+- `renderHtml`
+- `safeHtml`
+- `sanitize`
+- `allowTags`
+- `allowedAttributes`
+
+## 2.5 Required-control candidates
+Search near sinks for:
+- `textContent`
+- `innerText`
+- `createTextNode`
+- React normal text rendering
+- Vue interpolation
+- Angular normal binding
+- `DOMPurify.sanitize`
+- strict sanitizer config
+- `sanitizeHtml`
+- `trustedTypes.createPolicy`
+- `TrustedHTML`
+- `CSP`
+- `Content-Security-Policy`
+- URL scheme allowlist
+- `encodeURIComponent`
+- safe JSON serialization
+- no `dangerouslySetInnerHTML`
+- no `v-html`
+- no bypass security trust
+- preview/final render consistency
+
+## 2.6 JavaScript graph search recipes
+Useful combinations:
+
+```text
+location.search + innerHTML
+location.hash + insertAdjacentHTML
+postMessage + event.data + innerHTML
+API response body + dangerouslySetInnerHTML
+stored comment HTML + v-html
+marked.parse + innerHTML
+markdown-it + v-html
+DOMPurify missing + raw render
+bypassSecurityTrustHtml + API content
+iframe.srcdoc + user content
+setAttribute href + javascript:
+```
+
+---
+
+# 3. JavaScript / TypeScript XSS Anti-Patterns
 
 These are high-risk signals. They are not automatic proof of a vulnerability, but they should trigger deeper review.
 
-## 2.1 Dangerous DOM sink anti-patterns
+## 3.1 Dangerous DOM sink anti-patterns
 
 ### A1. `innerHTML` with attacker-controlled content
 ```javascript
@@ -136,7 +283,7 @@ What to verify:
 
 ---
 
-## 2.2 Framework raw-render anti-patterns
+## 3.2 Framework raw-render anti-patterns
 
 ### A4. React `dangerouslySetInnerHTML`
 ```jsx
@@ -190,7 +337,7 @@ What to verify:
 
 ---
 
-## 2.3 Rich content and markdown anti-patterns
+## 3.3 Rich content and markdown anti-patterns
 
 ### A8. Markdown rendered directly to HTML and inserted
 ```javascript
@@ -222,7 +369,7 @@ What to verify:
 
 ---
 
-## 2.4 Client-side source-to-sink anti-patterns
+## 3.4 Client-side source-to-sink anti-patterns
 
 ### A10. URL fragment or query data into DOM sink
 ```javascript
@@ -270,7 +417,7 @@ What to verify:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 Use these as reasoning patterns, not as direct proof.
 

@@ -64,7 +64,227 @@ Look for:
 
 ---
 
-# 2. PHP Path Traversal Anti-Patterns
+# 2. High-Coverage PHP Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, path construction behavior, file sink behavior, and missing containment controls.
+
+## 2.1 Web, framework, and request entry candidates
+Search for:
+- `Route::get`
+- `Route::post`
+- `Route::put`
+- `Route::patch`
+- `Route::delete`
+- `Route::any`
+- `Route::match`
+- `Route::resource`
+- `Route::apiResource`
+- `Controller`
+- `__invoke`
+- `Request $request`
+- `$request->input`
+- `$request->get`
+- `$request->query`
+- `$request->post`
+- `$request->all`
+- `$request->file`
+- `$request->cookie`
+- `$request->header`
+- `$request->getContent`
+- `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `$_FILES`
+- `php://input`
+- `#[Route]`
+- `@Route`
+- `AbstractController`
+- `Action`
+- `Middleware`
+- `Kernel`
+
+## 2.2 Queue, command, webhook, import, export, and admin entries
+Search for:
+- `ShouldQueue`
+- `handle`
+- `Job`
+- `Listener`
+- `EventSubscriber`
+- `Command`
+- `Console`
+- `schedule`
+- `webhook`
+- `callback`
+- `import`
+- `export`
+- `upload`
+- `download`
+- `preview`
+- `delete`
+- `cleanup`
+- `backup`
+- `restore`
+- `replay`
+- `Storage::`
+- `File::`
+- `Cache::get`
+- `Session::get`
+- `$redis->get`
+
+## 2.3 Path construction and transformation candidates
+Search for:
+- `$baseDir .`
+- `$path .`
+- `DIRECTORY_SEPARATOR`
+- `realpath`
+- `dirname`
+- `basename`
+- `pathinfo`
+- `str_replace('../'`
+- `str_replace('..'`
+- `preg_replace`
+- `ltrim`
+- `rtrim`
+- `trim`
+- `parse_url`
+- `urldecode`
+- `rawurldecode`
+- `base64_decode`
+- `Storage::path`
+- `storage_path`
+- `base_path`
+- `public_path`
+- `resource_path`
+- `app_path`
+- `config_path`
+- `UploadedFile::getClientOriginalName`
+- `getClientOriginalName`
+- `getClientOriginalExtension`
+- `hashName`
+
+## 2.4 File read, preview, download, include, and resource-load sink candidates
+Search for:
+- `file_get_contents`
+- `fopen`
+- `readfile`
+- `fpassthru`
+- `SplFileObject`
+- `file`
+- `stat`
+- `filesize`
+- `mime_content_type`
+- `getimagesize`
+- `exif_read_data`
+- `response()->download`
+- `response()->file`
+- `BinaryFileResponse`
+- `StreamedResponse`
+- `Storage::get`
+- `Storage::download`
+- `Storage::response`
+- `File::get`
+- `include`
+- `include_once`
+- `require`
+- `require_once`
+- `view`
+- `View::make`
+
+## 2.5 File write, upload-save, copy, move, delete, and metadata sink candidates
+Search for:
+- `file_put_contents`
+- `fwrite`
+- `touch`
+- `unlink`
+- `rename`
+- `copy`
+- `mkdir`
+- `rmdir`
+- `chmod`
+- `chown`
+- `move_uploaded_file`
+- `$file->move`
+- `$file->storeAs`
+- `$file->store`
+- `Storage::put`
+- `Storage::copy`
+- `Storage::move`
+- `Storage::delete`
+- `Storage::makeDirectory`
+- `Storage::deleteDirectory`
+- `File::put`
+- `File::copy`
+- `File::move`
+- `File::delete`
+- `File::cleanDirectory`
+- `File::deleteDirectory`
+
+## 2.6 Archive extraction and compressed file candidates
+Search for:
+- `ZipArchive`
+- `ZipArchive::extractTo`
+- `getNameIndex`
+- `statIndex`
+- `PharData`
+- `Phar`
+- `RarArchive`
+- `gzopen`
+- `gzread`
+- `tar`
+- `extract`
+- `unzip`
+- `untar`
+- `Archive`
+- `Symfony\\Component\\Finder`
+
+## 2.7 Required-control candidates
+Search near sinks for:
+- `realpath`
+- `strpos($path, $baseDir) === 0`
+- `str_starts_with`
+- `basename`
+- `pathinfo`
+- `hashName`
+- `Str::uuid`
+- `Str::random`
+- `Storage::disk`
+- `allowedExtensions`
+- `allowedMimes`
+- `mimes:`
+- `mimetypes:`
+- `validate`
+- `Validator`
+- `Rule::in`
+- `allowlist`
+- `deny`
+- `reject`
+- `is_link`
+- `readlink`
+- `stream_resolve_include_path`
+- `open_basedir`
+- `LOCK_EX`
+
+## 2.8 PHP graph search recipes
+Useful combinations:
+
+```text
+Route::get + response()->download
+$request->input + file_get_contents
+$_GET + readfile
+$_FILES + move_uploaded_file
+getClientOriginalName + storeAs
+Storage::path + File::get
+Route::delete + Storage::delete
+Command handle + unlink
+ZipArchive::extractTo
+include + request parameter
+realpath + strpos prefix check
+```
+
+---
+
+# 3. PHP Path Traversal Anti-Patterns
 
 ### A1. Direct read path from request
 ```php
@@ -111,7 +331,7 @@ Archive entries may escape the intended extraction root.
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-PATH-1: Arbitrary read via concatenated path
 
@@ -155,7 +375,7 @@ Verify extraction-root containment, entry validation, and overwrite behavior.
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 File API heuristics
 Pay attention to:

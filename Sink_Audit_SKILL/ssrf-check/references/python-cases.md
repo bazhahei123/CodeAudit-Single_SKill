@@ -56,7 +56,208 @@ Look for:
 
 ---
 
-# 2. Python SSRF Anti-Patterns
+# 2. High-Coverage Python SSRF Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, final request target, sink behavior, and missing destination controls.
+
+## 2.1 Web, API, and request entry candidates
+Search for:
+- `@app.route`
+- `@blueprint.route`
+- `@bp.route`
+- `Flask`
+- `request.args`
+- `request.form`
+- `request.values`
+- `request.get_json`
+- `request.cookies`
+- `request.headers`
+- `@api_view`
+- `APIView`
+- `ViewSet`
+- `ModelViewSet`
+- `GenericAPIView`
+- `path(`
+- `re_path(`
+- `View`
+- `dispatch`
+- `get`
+- `post`
+- `@app.get`
+- `@app.post`
+- `FastAPI`
+- `APIRouter`
+- `Query`
+- `Body`
+- `Request`
+- `GraphQLView`
+- `Mutation`
+
+## 2.2 Worker, message, admin, preview, and import entries
+Search for:
+- `@shared_task`
+- `@app.task`
+- `Celery`
+- `dramatiq.actor`
+- `rq.job`
+- `BaseCommand`
+- `handle`
+- `KafkaConsumer`
+- `basic_consume`
+- `on_message`
+- `webhook`
+- `callback`
+- `preview`
+- `fetch`
+- `import`
+- `download`
+- `avatar`
+- `image`
+- `feed`
+- `metadata`
+- `crawler`
+- `screenshot`
+- `admin`
+- `diagnostic`
+- `replay`
+
+## 2.3 Request target construction candidates
+Search for:
+- `url`
+- `uri`
+- `host`
+- `hostname`
+- `endpoint`
+- `callback_url`
+- `webhook_url`
+- `image_url`
+- `feed_url`
+- `metadata_url`
+- `preview_url`
+- `base_url`
+- `endpoint_url`
+- `urljoin`
+- `urlparse`
+- `urllib.parse`
+- `unquote`
+- `socket.gethostbyname`
+- `socket.getaddrinfo`
+- `ipaddress.ip_address`
+- `base64.b64decode`
+- `redirect`
+- `proxy`
+
+## 2.4 Python HTTP, URL, socket, and async sink candidates
+Search for:
+- `requests.get`
+- `requests.post`
+- `requests.put`
+- `requests.request`
+- `requests.Session`
+- `session.get`
+- `session.post`
+- `httpx.get`
+- `httpx.post`
+- `httpx.request`
+- `httpx.Client`
+- `httpx.AsyncClient`
+- `urllib.request.urlopen`
+- `urllib.request.Request`
+- `aiohttp.ClientSession`
+- `session.request`
+- `session.get`
+- `tornado.httpclient.AsyncHTTPClient`
+- `treq.get`
+- `pycurl`
+- `socket.create_connection`
+- `socket.connect`
+- `ftplib.FTP`
+- `smtplib.SMTP`
+
+## 2.5 Parser, renderer, cloud SDK, and indirect fetch sink candidates
+Search for:
+- `BeautifulSoup`
+- `feedparser.parse`
+- `PIL.Image.open`
+- `lxml.etree.parse`
+- `xml.etree.ElementTree.parse`
+- `weasyprint.HTML`
+- `pdfkit.from_url`
+- `imgkit.from_url`
+- `selenium.webdriver`
+- `driver.get`
+- `playwright`
+- `page.goto`
+- `boto3.client`
+- `endpoint_url`
+- `botocore.config.Config`
+- `OpenGraph`
+- `metadata fetch`
+- `screenshot`
+- `crawler`
+
+## 2.6 Redirect, DNS, proxy, and protocol candidates
+Search for:
+- `allow_redirects`
+- `follow_redirects`
+- `max_redirects`
+- `proxies`
+- `trust_env`
+- `NO_PROXY`
+- `HTTP_PROXY`
+- `HTTPS_PROXY`
+- `verify=False`
+- `socket.getaddrinfo`
+- `gethostbyname`
+- `ipaddress`
+- `file://`
+- `ftp://`
+- `gopher://`
+- `dict://`
+
+## 2.7 Required-control candidates
+Search near sinks for:
+- `allowlist`
+- `allowed_hosts`
+- `allowed_schemes`
+- `urlparse(url).scheme`
+- `urlparse(url).hostname`
+- `ipaddress.ip_address`
+- `is_private`
+- `is_loopback`
+- `is_link_local`
+- `is_multicast`
+- `169.254.169.254`
+- `metadata.google.internal`
+- `localhost`
+- `127.0.0.1`
+- `::1`
+- `allow_redirects=False`
+- redirect revalidation
+- final IP check
+- DNS pinning
+- `timeout=`
+- `stream=True` review
+
+## 2.8 Python graph search recipes
+Useful combinations:
+
+```text
+@app.route + requests.get
+request.args + httpx.get
+FastAPI + urllib.request.urlopen
+APIView + callback_url + requests.post
+@shared_task + stored URL + httpx
+allow_redirects=True + user URL
+urljoin + request parameter + requests
+boto3.client + endpoint_url
+weasyprint.HTML + user URL
+driver.get + preview URL
+```
+
+---
+
+# 3. Python SSRF Anti-Patterns
 
 ### A1. Direct request to attacker-controlled URL
 ```python
@@ -103,7 +304,7 @@ Stored URLs remain dangerous if attacker influence exists and no revalidation oc
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-SSRF-1: Direct fetch SSRF
 
@@ -149,7 +350,7 @@ Verify whether stored URLs are revalidated before use.
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
 ## 4.1 Client API heuristics
 Pay attention to:

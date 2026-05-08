@@ -1,6 +1,6 @@
 ---
 name: Unsafe Deserialization Check
-description: Use this skill to audit application code for unsafe deserialization risks, including untrusted input reaching deserialization sinks, unsafe object restoration, dangerous magic or lifecycle method triggers, framework or library misuse, integrity boundary failures, and inconsistent deserialization controls across routes, jobs, and data-processing layers.
+description: Use this skill to audit Java, Android, C#/.NET, C++, Python, and PHP application code for unsafe deserialization risks, including untrusted input reaching deserialization sinks, unsafe object restoration, dangerous magic or lifecycle method triggers, framework or library misuse, integrity boundary failures, and inconsistent deserialization controls across routes, jobs, IPC, RPC, mobile components, and data-processing layers.
 ---
 
 # Unsafe Deserialization Check
@@ -36,6 +36,9 @@ Focus on deserialization-related logic in:
 - APIs
 - GraphQL resolvers
 - RPC methods
+- Android exported components, deep links, WebView bridges, and IPC handlers
+- ASP.NET / .NET endpoints, SignalR hubs, WCF services, Azure Functions, and queue consumers
+- C++ HTTP/RPC/IPC handlers, native message consumers, and binary protocol parsers
 - service-layer object restoration logic
 - serializer / deserializer helpers
 - binary or object decoding code
@@ -87,11 +90,19 @@ Always load:
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
-- JavaScript / TypeScript -> `references/javascript-cases.md` if available
 
 If the project contains multiple languages, prioritize the language and framework that implement the actual deserialization or object-restoration logic.
+
+For graph-database or taint-tracking workflows, use the language reference candidate inventories as search seeds:
+- entry candidates, such as route annotations, controllers, handlers, exported components, RPC methods, message consumers, jobs, and import tools,
+- deserialization sink candidates, such as native object restore APIs, unsafe loaders, polymorphic mappers, object graph decoders, binary archives, session/cache restore helpers, and framework wrappers,
+- trigger candidates, such as magic methods, lifecycle callbacks, custom reconstruction handlers, type resolvers, gadget-like classes, and post-restore trust boundaries,
+- required-control candidates, such as type allowlists, safe loaders, integrity checks, signing/MAC verification, schema validation, class binders, and trusted-origin checks.
 
 Do not rely only on transport-layer or format names; focus on where object restoration, type restoration, or dangerous post-deserialization behavior actually occurs.
 
@@ -103,7 +114,7 @@ If the language cannot be determined confidently, state the uncertainty and use 
 
 - Use reference files as audit guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared deserialization concepts, trust-boundary rules, anti-patterns, false-positive controls, and finding standards.
-- Language-specific reference files define framework control points, dangerous APIs, common implementation mistakes, and language-specific case patterns.
+- Language-specific reference files define framework entry candidates, dangerous sink API candidates, trigger candidates, required controls, common implementation mistakes, and language-specific case patterns.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
 
@@ -134,6 +145,9 @@ Direction: Verify whether attacker-controlled data can be stored and later resto
 # High-Priority Audit Targets
 
 Prioritize these targets first when present:
+- public route/controller annotations and HTTP handler registration
+- RPC, GraphQL, WebSocket, webhook, queue, job, and import entry points
+- Android exported activity/service/receiver/provider paths, deep links, WebView JavaScript bridges, and Binder/AIDL IPC handlers
 - request-body object parsing paths
 - session, cookie, and token restoration logic
 - file import and metadata processing

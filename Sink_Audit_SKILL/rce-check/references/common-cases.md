@@ -77,15 +77,235 @@ A finding is often only meaningful when the execution context is clear.
 Prioritize these attack surfaces first:
 
 - admin and operational tools
+- public route/controller annotations and HTTP handler registration
+- GraphQL mutation or resolver handlers that trigger tools, scripts, reports, or jobs
+- RPC, gRPC, SOAP, WCF, Thrift, Binder, DBus, or internal protocol methods that launch processes or evaluate expressions
+- WebSocket and message-frame handlers carrying command, script, task, or tool selectors
 - diagnostics or network utility features
 - file conversion and media processing workflows
 - import/export paths
 - OCR, PDF, office, image, archive, or document helpers
 - wrapper services for shell/process execution
 - queue consumers and background tasks
+- webhook, callback, replay, and reconciliation handlers that run external tools
+- mobile exported component, deep-link, WebView bridge, SDK callback, or IPC entry points
+- native service socket, pipe, IPC, or custom binary protocol handlers that launch tools
 - script-runner or automation features
 - expression or template evaluation helpers
 - legacy helpers and alternate execution paths
+
+---
+
+# 2.1 Candidate search groups for graph workflows
+
+When a graph database cannot start from a single universal sink, build candidate sets from four groups and intersect them.
+
+### Entry candidates
+Search for externally reachable or semi-trusted execution points:
+- controller
+- route
+- handler
+- endpoint
+- resolver
+- mutation
+- action
+- servlet
+- filter
+- interceptor
+- middleware
+- webhook
+- callback
+- listener
+- consumer
+- subscriber
+- receiver
+- worker
+- job
+- scheduler
+- admin
+- ops
+- debug
+- diagnostics
+- ping
+- traceroute
+- nslookup
+- curl
+- wget
+- import
+- export
+- convert
+- render
+- preview
+- generate
+- scan
+- OCR
+- PDF
+- office
+- media
+- archive
+- backup
+- restore
+- replay
+- script
+- task
+- command
+- shell
+- terminal
+- IPC
+- RPC
+- WebSocket
+- deep link
+- exported
+- bridge
+
+### Execution sink candidates
+Search for code, process, shell, interpreter, or external tool execution:
+- exec
+- execute
+- run
+- start
+- spawn
+- system
+- shell
+- command
+- cmd
+- process
+- ProcessBuilder
+- Runtime.exec
+- subprocess
+- popen
+- proc_open
+- eval
+- exec code
+- compile
+- script
+- interpreter
+- expression
+- template eval
+- rule eval
+- dynamic import
+- class load
+- assembly load
+- library load
+- plugin load
+- reflection invoke
+- powershell
+- bash
+- sh -c
+- cmd /c
+- python -c
+- node -e
+- php -r
+- groovy
+- perl
+- ruby
+- lua
+- ffmpeg
+- imagemagick
+- convert
+- ghostscript
+- libreoffice
+- pandoc
+- tar
+- zip
+- 7z
+- git
+- ssh
+- curl
+- wget
+- ping
+- nslookup
+
+### Command construction candidates
+Search for untrusted values influencing executable strings, argv arrays, tool names, flags, scripts, or environment:
+- command template
+- cmdline
+- toolName
+- executable
+- binary
+- scriptPath
+- script
+- args
+- argv
+- option
+- flag
+- mode
+- format
+- profile
+- preset
+- file path
+- environment
+- working directory
+- concatenation
+- interpolation
+- formatted string
+- join args
+- split command
+- quote
+- escape
+- sanitize
+- base64 decode
+- URL decode
+- stored task
+- scheduled task
+- retry command
+- replay command
+
+### Required-control candidates
+Search near candidate sinks for controls:
+- fixed command
+- command allowlist
+- tool allowlist
+- option allowlist
+- allowed commands
+- allowed tools
+- allowed args
+- argv array
+- shell disabled
+- shell=false
+- UseShellExecute=false
+- no shell
+- validate
+- reject
+- enum
+- schema
+- DTO
+- timeout
+- kill
+- resource limit
+- max output
+- working directory allowlist
+- environment allowlist
+- sandbox
+- seccomp
+- chroot
+- container
+- non-root
+- least privilege
+- safe expression
+- restricted globals
+- script disabled
+- language subset
+- signature
+- trusted-only
+- audit log
+
+## 2.2 Generic graph search recipes
+
+Useful candidate recipes:
+
+```text
+<entry candidate> + <execution sink candidate>
+<admin/diagnostic/import/export/convert/render> + <process/shell sink>
+<request/body/header/cookie/file/job payload> + <command construction candidate>
+<toolName/args/option/script> + <run/exec/start/spawn>
+<eval/expression/template/rule> + <request/stored value>
+<queue/job/replay> + <shell/process/eval sink>
+<external tool> + <user-controlled path/option/preset>
+<candidate sink> without nearby <required-control candidate>
+<argv mode> + <user-controlled command/tool/option>
+<shell context> + <concatenation/interpolation/template>
+```
 
 ---
 

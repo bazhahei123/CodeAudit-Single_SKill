@@ -36,7 +36,183 @@ Source questions:
 
 ---
 
-# 2. Python Source Patterns
+# 2. High-Coverage Python Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows command construction, argv construction, shell interpretation, eval/exec, dynamic import, interpreter invocation, external tool execution, or stored/background execution relevance.
+
+## 2.1 Web, API, and request entry candidates
+
+- Django URL `path(...)`
+- Django `re_path(...)`
+- Django views
+- DRF `APIView`
+- DRF `ViewSet`
+- DRF `GenericViewSet`
+- DRF `ModelViewSet`
+- DRF `@api_view`
+- DRF `@action`
+- Flask `@app.route`
+- Flask `@blueprint.route`
+- FastAPI `@app.get`
+- FastAPI `@app.post`
+- FastAPI `@app.put`
+- FastAPI `@app.delete`
+- FastAPI `APIRouter`
+- Starlette `Route`
+- Tornado `RequestHandler`
+- GraphQL resolver
+- GraphQL mutation
+- gRPC servicer method
+- Celery task
+- RQ job
+- Dramatiq actor
+- webhook handler
+- admin command
+
+## 2.2 Request, task, and payload source candidates
+
+- `request.GET`
+- `request.POST`
+- `request.data`
+- `request.query_params`
+- `request.args`
+- `request.form`
+- `request.json`
+- `request.get_json()`
+- `request.headers`
+- `request.cookies`
+- FastAPI `Path`
+- FastAPI `Query`
+- FastAPI `Body`
+- `UploadFile.filename`
+- Celery task args
+- queue message body
+- Pydantic fields
+- GraphQL arguments
+
+## 2.3 Command, tool, script, and action selector candidates
+
+- `cmd`
+- `command`
+- `command_name`
+- `tool`
+- `tool_name`
+- `executable`
+- `program`
+- `binary`
+- `process`
+- `script`
+- `script_name`
+- `script_path`
+- `interpreter`
+- `runtime`
+- `engine`
+- `subcommand`
+- `action`
+- `operation`
+- `mode`
+- `runner`
+- `plugin`
+- `task_name`
+- `job_type`
+
+## 2.4 Argument, option, path, environment, and cwd candidates
+
+- `arg`
+- `args`
+- `argv`
+- `arguments`
+- `option`
+- `options`
+- `flag`
+- `flags`
+- `target`
+- `host`
+- `ip`
+- `domain`
+- `url`
+- `file`
+- `filename`
+- `path`
+- `input`
+- `output`
+- `config`
+- `env`
+- `environment`
+- `cwd`
+- `work_dir`
+- `working_dir`
+- `stdin`
+- `payload`
+- `timeout`
+- `profile`
+
+## 2.5 Shell, eval, dynamic import, and script candidates
+
+- `shell`
+- `shell_cmd`
+- `shell_command`
+- `command_line`
+- `command_template`
+- `f-string`
+- `.format`
+- `template`
+- `script_body`
+- `source_code`
+- `code`
+- `expression`
+- `expr`
+- `formula`
+- `rule`
+- `eval_input`
+- `debug_code`
+- `module`
+- `module_name`
+- `callable`
+- `function_name`
+- `import_path`
+
+## 2.6 Downstream execution mapping candidates
+
+- `subprocess.run`
+- `subprocess.call`
+- `subprocess.Popen`
+- `subprocess.check_output`
+- `subprocess.check_call`
+- `os.system`
+- `os.popen`
+- `commands.getoutput`
+- `pty.spawn`
+- `asyncio.create_subprocess_exec`
+- `asyncio.create_subprocess_shell`
+- `shell=True`
+- `eval`
+- `exec`
+- `compile`
+- `__import__`
+- `importlib.import_module`
+- `getattr`
+- `jinja2.Template`
+- external tool wrappers
+- `ffmpeg`
+- `convert`
+- `pandoc`
+- `wkhtmltopdf`
+
+## 2.7 Python graph search recipes
+
+```text
+route/view/@app.post + request args/body cmd/tool/action + subprocess/os.system
+request.data + args/options/file/path + subprocess list argv
+f-string/format/template + command_template/shell_command + shell=True/os.system
+eval/exec/compile/importlib + expression/code/module/callable + request/stored value
+Celery/RQ/Dramatiq + task args/queue payload + subprocess/wrapper
+env/cwd/stdin/config + request/task/stored value + subprocess.Popen
+```
+
+---
+
+# 3. Python Source Patterns
 
 ## P-S1. Request-derived command argument
 Example idea:
@@ -90,7 +266,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-S-CMD-1: Subprocess argument source
 
@@ -126,7 +302,7 @@ Trace writer and worker paths and verify second-order execution controls.
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
 ## 4.1 Request and upload source heuristics
 Pay attention to:
@@ -175,7 +351,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Python source as high-priority if:
 - the value is selected from a strict allowlist of safe commands, subcommands, or options,
@@ -193,7 +369,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Python source evidence includes:
 - route/view/worker/admin/import entry point,
@@ -210,7 +386,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Python Source Checklist
+# 8. Quick Python Source Checklist
 
 - Are request values used as command arguments, flags, modes, or tool selectors?
 - Are command names, scripts, subcommands, interpreters, or tool choices dynamic?

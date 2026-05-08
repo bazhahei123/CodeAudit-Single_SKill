@@ -1,6 +1,6 @@
 ---
 name: SQL Injection Check
-description: Use this skill to audit application code for SQL injection risks, including unsafe query construction, raw SQL execution, ORM misuse, stored procedure misuse, second-order SQL injection, and inconsistent input handling across routes, methods, and data-access layers.
+description: Use this skill to audit Java, Android, C#/.NET, C++, Python, and PHP application code for SQL injection risks, including unsafe query construction, raw SQL execution, ORM/query-builder misuse, stored procedure misuse, structural SQL control, second-order SQL injection, and inconsistent input handling across routes, jobs, IPC, RPC, mobile components, and data-access layers.
 ---
 
 # SQL Injection Check
@@ -35,6 +35,9 @@ Focus on SQL-related logic in:
 - APIs
 - GraphQL resolvers
 - RPC methods
+- Android exported components, content providers, deep links, WebView bridges, SDK callbacks, and local SQLite/Room access
+- ASP.NET / .NET endpoints, SignalR hubs, WCF services, Azure Functions, and queue consumers
+- C++ HTTP/RPC/IPC handlers, native message consumers, and database client wrappers
 - service-layer query builders
 - repository or DAO methods
 - ORM query helpers
@@ -85,22 +88,31 @@ Before auditing, identify the primary backend language and major framework.
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-sql-cases.md`
+- Android -> `references/android-sql-cases.md`
+- C# / .NET -> `references/csharp-sql-cases.md`
+- C++ / native services -> `references/cpp-sql-cases.md`
 - Python -> `references/python-sql-cases.md`
 - PHP -> `references/php-sql-cases.md`
 
 If a shared SQL reference exists, also load:
 - `references/common-cases.md`
 
-If the project contains multiple languages, prioritize the language that implements the actual backend SQL execution logic.
+If the project contains multiple languages, prioritize the language that implements the actual backend or local SQL execution logic.
 
-Do not rely on frontend language references when SQL construction and execution happen on the backend.
+For graph-database or taint-tracking workflows, use the language reference candidate inventories as search seeds:
+- entry candidates, such as route annotations, controllers, handlers, exported components, RPC methods, message consumers, jobs, admin query tools, reports, and import/export actions,
+- query construction candidates, such as concatenation, interpolation, format strings, raw fragments, dynamic WHERE/ORDER/LIMIT/OFFSET, table/column names, saved filters, and query template builders,
+- query execution sink candidates, such as raw SQL APIs, DB cursors, ORM raw helpers, query-builder raw methods, stored procedure calls, native query APIs, and database client wrappers,
+- required-control candidates, such as bound parameters, prepared statements, typed query builders, structural allowlists, fixed server-side mappings, safe ORM filters, stored-procedure parameter binding, and revalidation of stored query fragments.
+
+Do not rely on frontend language references when SQL construction and execution happen on the backend. For Android, only use Android SQL references when the app itself constructs or executes SQLite/Room/ContentProvider SQL or passes SQL-like selectors to local storage APIs.
 
 If the language cannot be determined confidently, state the uncertainty and use only clearly identified backend evidence.
 
 ## Reference usage rules
 
 - Use reference files as audit guidance, not as proof that a vulnerability exists.
-- Use the language-specific file for framework control points, common implementation mistakes, and language-specific case patterns.
+- Use the language-specific file for framework entry candidates, query construction candidates, dangerous SQL sink API candidates, required controls, common implementation mistakes, and language-specific case patterns.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
 
@@ -131,6 +143,9 @@ Direction: Verify whether previously stored user input can later influence SQL e
 # High-Priority Audit Targets
 
 Prioritize these targets first when present:
+- public route/controller annotations and HTTP handler registration
+- RPC, GraphQL, WebSocket, webhook, queue, job, import/export, and admin query entry points
+- Android exported activity/service/receiver/provider paths, content providers, deep links, WebView bridges, SDK callbacks, and local database access
 - login and authentication queries
 - search, filter, and sort endpoints
 - export and reporting functionality

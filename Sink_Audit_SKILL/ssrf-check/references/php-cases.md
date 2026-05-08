@@ -56,7 +56,199 @@ Look for:
 
 ---
 
-# 2. PHP SSRF Anti-Patterns
+# 2. High-Coverage PHP SSRF Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, final request target, sink behavior, and missing destination controls.
+
+## 2.1 Web, framework, and request entry candidates
+Search for:
+- `Route::get`
+- `Route::post`
+- `Route::put`
+- `Route::patch`
+- `Route::delete`
+- `Route::any`
+- `Route::match`
+- `Controller`
+- `__invoke`
+- `Request $request`
+- `$request->input`
+- `$request->get`
+- `$request->query`
+- `$request->post`
+- `$request->all`
+- `$request->cookie`
+- `$request->header`
+- `$request->getContent`
+- `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `php://input`
+- `#[Route]`
+- `@Route`
+- `AbstractController`
+- `Action`
+
+## 2.2 Queue, command, webhook, preview, and admin entries
+Search for:
+- `ShouldQueue`
+- `handle`
+- `Job`
+- `Listener`
+- `EventSubscriber`
+- `Command`
+- `Console`
+- `schedule`
+- `webhook`
+- `callback`
+- `preview`
+- `fetch`
+- `import`
+- `download`
+- `avatar`
+- `image`
+- `feed`
+- `metadata`
+- `crawler`
+- `screenshot`
+- `admin`
+- `diagnostic`
+- `replay`
+
+## 2.3 Request target construction candidates
+Search for:
+- `$url`
+- `$uri`
+- `$host`
+- `$hostname`
+- `$endpoint`
+- `$callbackUrl`
+- `$webhookUrl`
+- `$imageUrl`
+- `$feedUrl`
+- `$metadataUrl`
+- `$previewUrl`
+- `$baseUrl`
+- `parse_url`
+- `urldecode`
+- `rawurldecode`
+- `base64_decode`
+- `http_build_query`
+- `filter_var`
+- `gethostbyname`
+- `dns_get_record`
+- `inet_pton`
+- `redirect`
+- `proxy`
+
+## 2.4 PHP HTTP, URL, cURL, and socket sink candidates
+Search for:
+- `curl_init`
+- `curl_exec`
+- `curl_setopt`
+- `CURLOPT_URL`
+- `file_get_contents`
+- `fopen`
+- `readfile`
+- `get_headers`
+- `GuzzleHttp\\Client`
+- `$client->request`
+- `$client->get`
+- `$client->post`
+- `Http::get`
+- `Http::post`
+- `Http::send`
+- `Symfony\\Contracts\\HttpClient\\HttpClientInterface`
+- `HttpClient::create`
+- `stream_socket_client`
+- `fsockopen`
+- `pfsockopen`
+- `SoapClient`
+- `SimpleXMLElement`
+
+## 2.5 Parser, renderer, cloud SDK, and indirect fetch sink candidates
+Search for:
+- `DOMDocument::load`
+- `simplexml_load_file`
+- `XMLReader::open`
+- `imagecreatefromstring`
+- `imagecreatefromjpeg`
+- `getimagesize`
+- `exif_read_data`
+- `Intervention\\Image`
+- `OpenGraph`
+- `Embed\\Embed`
+- `Browsershot`
+- `wkhtmltopdf`
+- `AWS SDK`
+- `endpoint`
+- `endpoint_provider`
+- `S3Client`
+- `screenshot`
+- `crawler`
+- `feed parser`
+
+## 2.6 Redirect, DNS, proxy, and protocol candidates
+Search for:
+- `CURLOPT_FOLLOWLOCATION`
+- `allow_redirects`
+- `max`
+- `CURLOPT_PROTOCOLS`
+- `CURLOPT_REDIR_PROTOCOLS`
+- `CURLOPT_PROXY`
+- `proxy`
+- `NO_PROXY`
+- `gethostbyname`
+- `dns_get_record`
+- `file://`
+- `ftp://`
+- `gopher://`
+- `dict://`
+- `phar://`
+
+## 2.7 Required-control candidates
+Search near sinks for:
+- `allowlist`
+- `allowedHosts`
+- `allowedSchemes`
+- `parse_url($url, PHP_URL_SCHEME)`
+- `parse_url($url, PHP_URL_HOST)`
+- `FILTER_VALIDATE_URL`
+- `inet_pton`
+- private IP check
+- loopback check
+- link-local check
+- `169.254.169.254`
+- `metadata.google.internal`
+- `localhost`
+- `127.0.0.1`
+- `::1`
+- `CURLOPT_FOLLOWLOCATION, false`
+- redirect revalidation
+- `CURLOPT_PROTOCOLS`
+- `CURLOPT_CONNECTTIMEOUT`
+- `CURLOPT_TIMEOUT`
+
+## 2.8 PHP graph search recipes
+Useful combinations:
+
+```text
+Route::post + curl_init
+$request->input + file_get_contents
+$_GET + CURLOPT_URL
+Controller + GuzzleHttp Client request
+ShouldQueue + stored URL + Http::get
+CURLOPT_FOLLOWLOCATION + user URL
+parse_url host check + curl_exec
+S3Client endpoint + request/stored value
+DOMDocument::load + user URL
+get_headers + callback URL
+```
+
+---
+
+# 3. PHP SSRF Anti-Patterns
 
 ### A1. Direct request to attacker-controlled URL
 ```php
@@ -106,7 +298,7 @@ Stored URLs remain dangerous if attacker influence exists and no revalidation oc
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-SSRF-1: Direct fetch SSRF
 
@@ -154,7 +346,7 @@ Verify whether stored URLs are revalidated before use.
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 Client API heuristics
 Pay attention to:

@@ -117,7 +117,94 @@ Source questions:
 
 ---
 
-# 2. Python Source Patterns and Blind Spots
+# 2. High-Coverage Python Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows an authorization-relevant path such as protected object access, privileged action, tenant boundary, policy check, or workflow transition.
+
+## 2.1 Web, router, and API entry candidates
+
+- Django URL patterns: `path(...)`, `re_path(...)`, `include(...)`
+- Django views: function views, class-based views, `View`, `TemplateView`, `DetailView`, `UpdateView`, `DeleteView`
+- DRF classes: `APIView`, `ViewSet`, `GenericViewSet`, `ModelViewSet`, `ReadOnlyModelViewSet`, `GenericAPIView`
+- DRF decorators: `@api_view`, `@action`, `permission_classes`, `authentication_classes`
+- Flask routes: `@app.route`, `@blueprint.route`, `MethodView`, `Resource`
+- FastAPI routes: `@app.get`, `@app.post`, `@app.put`, `@app.delete`, `@app.patch`, `APIRouter`, `router.add_api_route`
+- Starlette routes: `Route`, `Mount`, `HTTPEndpoint`, `WebSocketEndpoint`
+- Tornado handlers: `RequestHandler`, `get`, `post`, `put`, `delete`, `patch`
+- Pyramid/Falcon/Sanic routes and resources
+- admin views, AJAX handlers, mobile API routers, legacy endpoint functions
+
+## 2.2 Request binding and client-controlled source candidates
+
+- Django `request.GET`, `request.POST`, `request.body`, `request.COOKIES`, `request.headers`, `request.FILES`
+- DRF `request.data`, `request.query_params`, `request.parser_context`, serializer `validated_data`, serializer `initial_data`
+- Flask `request.args`, `request.form`, `request.json`, `request.get_json()`, `request.values`, `request.headers`, `request.cookies`, `request.files`
+- FastAPI path/query/body parameters, `Path`, `Query`, `Body`, `Header`, `Cookie`, `Form`, `File`, Pydantic model fields
+- Starlette `request.path_params`, `request.query_params`, `await request.json()`, `await request.form()`
+- GraphQL arguments, resolver `info.context`, RPC request objects, WebSocket JSON messages
+- fields named `id`, `ids`, `user_id`, `account_id`, `owner_id`, `tenant_id`, `org_id`, `role`, `permission`, `scope`, `action`, `status`, `state`
+- batch lists such as `ids`, `user_ids`, `file_ids`, `order_ids`, `project_ids`, `selected_ids`
+
+## 2.3 Authentication identity source candidates
+
+- Django/DRF `request.user`
+- Flask-Login `current_user`
+- FastAPI dependencies such as `Depends(get_current_user)`, `Security(...)`, `OAuth2PasswordBearer`
+- Starlette/FastAPI `request.user`, `request.state.user`, `request.state.claims`
+- session values: `request.session`, Flask `session`
+- JWT claims: `sub`, `user_id`, `uid`, `tenant_id`, `scope`, `roles`
+- custom helpers: `get_current_user`, `current_user`, `login_user`, `get_user`, `get_principal`, `UserContext`, `TenantContext`
+- middleware-populated values: `g.user`, `g.tenant`, `request.state.tenant`, `request.tenant`, thread-local/contextvars
+
+## 2.4 Role, permission, policy, and authority candidates
+
+- Django decorators: `@login_required`, `@permission_required`, `@user_passes_test`, `LoginRequiredMixin`, `PermissionRequiredMixin`, `UserPassesTestMixin`
+- Django auth APIs: `has_perm`, `has_perms`, `is_staff`, `is_superuser`, `groups`, `user_permissions`
+- DRF `permission_classes`, `IsAuthenticated`, `IsAdminUser`, `DjangoModelPermissions`, `DjangoObjectPermissions`, custom `BasePermission`
+- Flask decorators and helpers: `login_required`, `roles_required`, `admin_required`, `permission_required`, `current_user.can(...)`
+- FastAPI dependencies: `Depends(require_role)`, `Depends(require_permission)`, `Security(scopes=...)`
+- policy helpers: `can_access`, `can_read`, `can_write`, `can_delete`, `is_owner`, `is_tenant_member`, `check_permission`, `require_scope`
+- access-control libraries: Casbin, Oso, django-guardian, Flask-Principal
+
+## 2.5 Object, tenant, ORM, and repository source candidates
+
+- object IDs: `id`, `pk`, `user_id`, `owner_id`, `account_id`, `order_id`, `invoice_id`, `file_id`, `project_id`, `document_id`, `resource_id`, `payment_id`
+- tenant scopes: `tenant_id`, `org_id`, `organization_id`, `company_id`, `workspace_id`, `team_id`, `department_id`, `account_id`
+- Django ORM: `get(...)`, `filter(...)`, `get_object_or_404(...)`, `select_related`, `prefetch_related`
+- DRF hooks: `get_queryset`, `get_object`, `perform_create`, `perform_update`, `perform_destroy`
+- SQLAlchemy: `query.get`, `session.get`, `filter`, `filter_by`, `where`, `delete`, `update`
+- repository/service methods: `get_by_id`, `find_by_id`, `delete_by_id`, `get_for_user`, `get_for_tenant`, `export_for_org`
+- batch operations: `__in`, `in_`, list fields, bulk update/delete/export/share/approve
+
+## 2.6 GraphQL, RPC, message, and async entry candidates
+
+- Graphene, Strawberry, Ariadne, Tartiflette resolvers, mutations, and input objects
+- gRPC servicer methods and protobuf request fields
+- Celery tasks, RQ jobs, Dramatiq actors, Huey tasks, APScheduler jobs when payloads originate from user-triggered actions
+- Kafka, RabbitMQ, Redis stream, SQS, and Pub/Sub consumers
+- WebSocket handlers in Channels, FastAPI, Starlette, Flask-SocketIO, Tornado
+- webhook handlers and third-party callback endpoints carrying user or tenant identifiers
+
+## 2.7 Business action and workflow candidates
+
+- function, route, or task names containing `approve`, `reject`, `publish`, `unpublish`, `archive`, `restore`, `delete`, `disable`, `enable`, `lock`, `unlock`, `reset`, `refund`, `void`, `cancel`, `transfer`, `assign`, `share`, `export`, `download`, `invite`, `promote`, `demote`, `grant`, `revoke`
+- request/Pydantic/serializer fields named `action`, `operation`, `status`, `state`, `stage`, `transition`, `target_state`, `target_status`
+- enum values and constants ending in `Action`, `Status`, `State`, `Role`, `Permission`, `Scope`
+- service calls such as `approve_order`, `publish_post`, `disable_user`, `delete_project`, `export_report`, `refund_payment`, `transfer_owner`, `change_role`, `grant_permission`
+
+## 2.8 Python graph search recipes
+
+```text
+route decorator/ViewSet/@action + path/query/body/serializer field + object/service/query call
+request.user/current_user/Depends(get_current_user) + object id/tenant id + policy/repository call
+permission_classes/has_perm/require_role + id/tenant_id/action/status + protected operation
+GraphQL mutation/resolver + arguments id/tenant_id/action + service method
+Celery/job/consumer + payload user_id/tenant_id/object_id + protected action
+```
+
+---
+
+# 3. Python Source Patterns and Blind Spots
 
 These are high-priority source signals. They are not automatic proof of a vulnerability.
 
@@ -307,7 +394,7 @@ What to verify next:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 Use these as source reasoning patterns, not as direct proof.
 
@@ -415,7 +502,7 @@ The requested state transition may affect authorization-sensitive workflow.
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
 ## 4.1 Django / DRF heuristics
 Pay attention to:
@@ -486,7 +573,7 @@ Audit questions:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Python source as high-priority if:
 - the value does not reach access-control-relevant logic,
@@ -504,7 +591,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Python source evidence includes:
 - URL pattern, route decorator, viewset action, or resolver,
@@ -522,7 +609,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Python Source Checklist
+# 8. Quick Python Source Checklist
 
 - Are object IDs read from path, query, body, serializer, or Pydantic inputs?
 - Are `user_id`, `tenant_id`, `org_id`, or `role` accepted from request input?

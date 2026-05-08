@@ -35,7 +35,212 @@ Source questions:
 
 ---
 
-# 2. Java Source Patterns
+# 2. High-Coverage Java XSS Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows browser-visible output, browser-interpreted HTML, template data, script data, attribute values, URL values, rich text, markdown, sanitizer input/output, trusted HTML wrappers, API content, or alternate render path relevance.
+
+## 2.1 HTTP, controller, and request entry candidates
+
+Search for:
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@PatchMapping`
+- `@DeleteMapping`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestBody`
+- `@RequestHeader`
+- `@CookieValue`
+- `@ModelAttribute`
+- `MultipartFile`
+- `HttpServletRequest`
+- `ServletRequest`
+- `request.getParameter`
+- `request.getHeader`
+- `request.getAttribute`
+- `session.getAttribute`
+- `@GraphQlController`
+- `@QueryMapping`
+- `@MutationMapping`
+- JAX-RS `@Path`
+- JAX-RS `@GET`
+- JAX-RS `@POST`
+- JAX-RS `@QueryParam`
+- JAX-RS `@PathParam`
+
+## 2.2 RPC, message, job, render, and admin entries
+
+Search for:
+- `@GrpcService`
+- `StreamObserver`
+- `@MessageMapping`
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `@SqsListener`
+- `@Scheduled`
+- `@Async`
+- `CommandLineRunner`
+- `ApplicationRunner`
+- `@EventListener`
+- preview controller
+- CMS controller
+- admin controller
+- moderation controller
+- report controller
+- email renderer
+- notification renderer
+- import controller
+- export controller
+- queue worker rendering HTML
+
+## 2.3 Reflected and stored content source candidates
+
+Search for parameter, DTO, entity, model, map, or JSON fields named:
+- `q`
+- `query`
+- `search`
+- `keyword`
+- `term`
+- `message`
+- `error`
+- `reason`
+- `title`
+- `name`
+- `displayName`
+- `nickname`
+- `username`
+- `label`
+- `description`
+- `summary`
+- `content`
+- `body`
+- `text`
+- `comment`
+- `reply`
+- `review`
+- `profile`
+- `bio`
+- `signature`
+- `ticket`
+- `notification`
+- `announcement`
+- `article`
+- `post`
+- `cms`
+
+## 2.4 Template, view, response, and API propagation candidates
+
+Search for source values passed into:
+- `Model.addAttribute`
+- `ModelMap.addAttribute`
+- `ModelAndView.addObject`
+- `RedirectAttributes.addAttribute`
+- `request.setAttribute`
+- `session.setAttribute`
+- `View`
+- `ModelAndView`
+- `ResponseEntity`
+- `HttpServletResponse.getWriter`
+- `PrintWriter`
+- `StringBuilder html`
+- `StringBuffer html`
+- `String.format`
+- REST response DTO fields
+- GraphQL response fields
+- email template models
+- report template models
+- notification template models
+
+## 2.5 Raw HTML, trusted wrapper, and template-context candidates
+
+Search for:
+- `html`
+- `rawHtml`
+- `safeHtml`
+- `trustedHtml`
+- `bodyHtml`
+- `contentHtml`
+- `messageHtml`
+- `rendered`
+- `markdown`
+- `richText`
+- `wysiwyg`
+- `template`
+- `script`
+- `href`
+- `src`
+- `style`
+- `onclick`
+- `th:utext`
+- JSP `<%=`
+- JSP scriptlet output
+- FreeMarker `?no_esc`
+- FreeMarker `noautoesc`
+- custom raw HTML helpers
+- `SafeHtml`
+- sanitizer output
+
+## 2.6 Rich text, markdown, sanitizer, and cross-layer candidates
+
+Search for source values near:
+- markdown renderer
+- CommonMark
+- flexmark
+- `Jsoup.clean`
+- OWASP Java HTML Sanitizer
+- AntiSamy
+- WYSIWYG editor content
+- preview renderer
+- final renderer
+- admin renderer
+- email/web preview renderer
+- API field consumed by frontend
+- frontend component prop
+- hydrated JSON
+- script data bootstrap
+
+## 2.7 Downstream rendering relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- JSP output
+- Thymeleaf model usage
+- FreeMarker template usage
+- servlet response writing
+- HTML response builders
+- `th:text`
+- `th:utext`
+- template attributes
+- inline script templates
+- URL attribute templates
+- raw HTML helpers
+- markdown-to-HTML renderers
+- sanitizer wrappers
+- JSON API serializers
+- frontend consumers
+
+## 2.8 Java graph search recipes
+
+Useful combinations:
+
+```text
+@GetMapping/@PostMapping + @RequestParam/@RequestBody q/message + Model.addAttribute
+@Controller + ModelAndView/View + html/body/content source
+@RestController + bodyHtml/contentHtml/rendered API field + frontend consumer
+@KafkaListener/@Scheduled + stored comment/notification + email/report renderer
+markdown/CommonMark/flexmark + stored body + model/template/raw HTML
+Jsoup.clean/OWASP sanitizer + safeHtml/trustedHtml + th:utext/raw helper
+StringBuilder/String.format + request/stored field + text/html/response writer
+request.setAttribute/session.setAttribute + JSP/FreeMarker/Thymeleaf render path
+```
+
+---
+
+# 3. Java Source Patterns
 
 ## J-S1. Request-derived template source
 Example idea:
@@ -99,7 +304,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-S-XSS-1: Model attribute source
 
@@ -135,9 +340,9 @@ Verify context-aware serialization and URL scheme controls.
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
-## 4.1 Spring and servlet source heuristics
+## 5.1 Spring and servlet source heuristics
 Pay attention to:
 - `@Controller` and view-returning routes
 - `@RequestParam`, `@PathVariable`, and `@RequestBody`
@@ -147,7 +352,7 @@ Pay attention to:
 - manual `HttpServletResponse` writing
 - preview, CMS, profile, comment, ticket, and admin routes
 
-## 4.2 JSP source heuristics
+## 5.2 JSP source heuristics
 Pay attention to:
 - request parameters or attributes used in JSP
 - `<%= ... %>` output
@@ -155,7 +360,7 @@ Pay attention to:
 - raw script or attribute insertion
 - values passed into custom JSP tags
 
-## 4.3 Thymeleaf and FreeMarker source heuristics
+## 5.3 Thymeleaf and FreeMarker source heuristics
 Pay attention to:
 - `th:text` vs `th:utext`
 - inline JavaScript rendering
@@ -164,7 +369,7 @@ Pay attention to:
 - no-escape directives
 - preview or CMS views
 
-## 4.4 Rich-content source heuristics
+## 5.4 Rich-content source heuristics
 Pay attention to:
 - markdown renderers
 - WYSIWYG HTML fields
@@ -173,7 +378,7 @@ Pay attention to:
 - preview vs final render paths
 - user view vs admin/moderation view
 
-## 4.5 API-to-frontend source heuristics
+## 5.5 API-to-frontend source heuristics
 Pay attention to:
 - JSON fields carrying `html`, `content`, `body`, `message`, `description`, or `rendered` values
 - REST/GraphQL responses consumed by frontend components
@@ -181,7 +386,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Java source as high-priority if:
 - the value is fixed in trusted code,
@@ -198,7 +403,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Java source evidence includes:
 - route/controller/worker/admin/import/preview entry point,
@@ -215,7 +420,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Java Source Checklist
+# 8. Quick Java Source Checklist
 
 - Are request values added to templates, views, HTML responses, scripts, attributes, or URLs?
 - Are stored comments, profiles, tickets, CMS content, markdown, or rich text later rendered?

@@ -37,7 +37,221 @@ Source questions:
 
 ---
 
-# 2. Java Source Patterns
+# 2. High-Coverage Java SSRF Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when code shows request-target construction, URL parsing, URL recomposition, host/scheme/port/path selection, redirect behavior, DNS-sensitive target choice, proxy/client options, stored callback replay, renderer imports, or outbound request wrapper relevance.
+
+## 2.1 HTTP, controller, and request entry candidates
+
+Search for:
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@PatchMapping`
+- `@DeleteMapping`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestBody`
+- `@RequestHeader`
+- `@CookieValue`
+- `@ModelAttribute`
+- `MultipartFile`
+- `HttpServletRequest`
+- `ServletRequest`
+- `request.getParameter`
+- `request.getHeader`
+- `@GraphQlController`
+- `@QueryMapping`
+- `@MutationMapping`
+- `@SchemaMapping`
+- JAX-RS `@Path`
+- JAX-RS `@GET`
+- JAX-RS `@POST`
+- JAX-RS `@QueryParam`
+- JAX-RS `@PathParam`
+
+## 2.2 RPC, message, job, webhook, preview, and admin entries
+
+Search for:
+- `@GrpcService`
+- `StreamObserver`
+- `@MessageMapping`
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `@SqsListener`
+- `@Scheduled`
+- `@Async`
+- Spring Batch `ItemReader`
+- Spring Batch `ItemProcessor`
+- `CommandLineRunner`
+- `ApplicationRunner`
+- `@EventListener`
+- webhook controllers
+- callback controllers
+- preview controllers
+- import controllers
+- export controllers
+- renderer controllers
+- screenshot services
+- crawler services
+- metadata services
+- admin connectivity tests
+- replay handlers
+
+## 2.3 Direct target and URL source candidates
+
+Search for parameter, DTO, entity, map, or JSON fields named:
+- `url`
+- `uri`
+- `target`
+- `targetUrl`
+- `requestUrl`
+- `remoteUrl`
+- `externalUrl`
+- `callback`
+- `callbackUrl`
+- `webhook`
+- `webhookUrl`
+- `redirectUrl`
+- `returnUrl`
+- `previewUrl`
+- `imageUrl`
+- `avatarUrl`
+- `fileUrl`
+- `downloadUrl`
+- `importUrl`
+- `feedUrl`
+- `sitemapUrl`
+- `metadataUrl`
+- `openGraphUrl`
+- `endpoint`
+- `baseUrl`
+- `serviceUrl`
+- `providerUrl`
+- `tenantUrl`
+- `integrationUrl`
+
+## 2.4 Partial destination, protocol, and client-option candidates
+
+Search for:
+- `host`
+- `hostname`
+- `domain`
+- `ip`
+- `address`
+- `serviceName`
+- `scheme`
+- `protocol`
+- `port`
+- `path`
+- `route`
+- `query`
+- `resource`
+- `objectKey`
+- `endpointOverride`
+- `proxyHost`
+- `proxyUrl`
+- `proxy`
+- `noProxy`
+- `redirect`
+- `followRedirects`
+- `allowRedirects`
+- `timeout`
+- `ssl`
+- `tls`
+- `verifyHostname`
+
+## 2.5 URL construction, parser, and normalization candidates
+
+Search for source values near:
+- `URI.create`
+- `new URI`
+- `new URL`
+- `URLDecoder.decode`
+- `Base64.getDecoder`
+- `IDN.toASCII`
+- `UriComponentsBuilder`
+- `UriComponentsBuilder.fromUriString`
+- `UriComponentsBuilder.fromHttpUrl`
+- `UriBuilder`
+- `HttpUrl.parse`
+- `HttpUrl.Builder`
+- `StringBuilder`
+- `String.format`
+- `MessageFormat.format`
+- string concatenation around `http://`, `https://`, host, port, path, or query
+- `InetAddress.getByName`
+- `InetAddress.getAllByName`
+- DNS resolver wrappers
+
+## 2.6 Stored, callback, and indirect fetch source candidates
+
+Search for:
+- webhook registration records
+- callback target records
+- integration endpoint records
+- tenant endpoint settings
+- provider endpoint settings
+- saved crawler targets
+- URL preview records
+- import job URLs
+- retry or replay payloads
+- queue payload URLs
+- remote image or avatar URLs
+- OpenGraph metadata URLs
+- feed or sitemap URLs
+- PDF/HTML/Markdown renderer inputs
+- browser automation preview URLs
+- cloud SDK endpoint overrides
+- S3 or storage service endpoint settings
+
+## 2.7 Downstream SSRF relevance mapping candidates
+
+After finding a source candidate, trace toward:
+- `RestTemplate`
+- `RestTemplate.getForObject`
+- `RestTemplate.exchange`
+- `WebClient`
+- `WebClient.create`
+- Java `HttpClient`
+- `HttpRequest.newBuilder`
+- `HttpClient.send`
+- `HttpClient.sendAsync`
+- `HttpURLConnection`
+- `URL.openConnection`
+- `URL.openStream`
+- Apache HttpClient
+- `CloseableHttpClient.execute`
+- OkHttp `Request.Builder.url`
+- `OkHttpClient`
+- `AsyncHttpClient`
+- `Jsoup.connect`
+- Selenium or Playwright navigation
+- cloud SDK endpoint override builders
+- shared outbound request wrappers
+
+## 2.8 Java graph search recipes
+
+Useful combinations:
+
+```text
+@GetMapping/@PostMapping + @RequestParam/@RequestBody url/host + URI.create/new URL
+@RestController + callbackUrl/webhookUrl/previewUrl + RestTemplate/WebClient/HttpClient
+@RequestBody + endpoint/baseUrl/providerUrl + UriComponentsBuilder/client wrapper
+@KafkaListener/@Scheduled + stored URL/callback + outbound wrapper
+@QueryMapping/@MutationMapping + imageUrl/feedUrl/importUrl + fetch/preview/import helper
+StringBuilder/String.format + request/stored host/path + HTTP client
+HttpClient.Redirect.ALWAYS/followRedirects + request/stored URL
+InetAddress/DNS resolver + host source + fetch wrapper
+```
+
+---
+
+# 3. Java Source Patterns
 
 ## J-S1. Request-derived URL source
 Example idea:
@@ -102,7 +316,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-S-SSRF-1: Direct URL source
 
@@ -138,9 +352,9 @@ Inspect library configuration and resource loading restrictions.
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
-## 4.1 Spring route and DTO source heuristics
+## 5.1 Spring route and DTO source heuristics
 Pay attention to:
 - `@RequestParam`
 - `@PathVariable`
@@ -150,7 +364,7 @@ Pay attention to:
 - GraphQL resolver arguments
 - webhook, preview, import, render, and admin route parameters
 
-## 4.2 URL and URI construction source heuristics
+## 5.2 URL and URI construction source heuristics
 Pay attention to:
 - `URI.create(...)`
 - `new URL(...)`
@@ -160,7 +374,7 @@ Pay attention to:
 - callback and preview target assembly
 - provider or tenant endpoint mapping
 
-## 4.3 Client API source heuristics
+## 5.3 Client API source heuristics
 Pay attention to:
 - `RestTemplate`
 - `WebClient`
@@ -170,7 +384,7 @@ Pay attention to:
 - OkHttp
 - shared outbound request wrappers
 
-## 4.4 Redirect, DNS, and proxy source heuristics
+## 5.4 Redirect, DNS, and proxy source heuristics
 Pay attention to:
 - automatic redirect configuration
 - custom redirect handling
@@ -178,7 +392,7 @@ Pay attention to:
 - DNS resolution and IP range checks
 - wrapper defaults hidden in shared HTTP clients
 
-## 4.5 Indirect and stored source heuristics
+## 5.5 Indirect and stored source heuristics
 Pay attention to:
 - OpenGraph and metadata preview
 - image/file remote loaders
@@ -189,7 +403,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Java source as high-priority if:
 - the value is selected from a strict allowlist of safe fixed endpoints,
@@ -207,7 +421,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Java source evidence includes:
 - route/controller/worker/admin/import/render entry point,
@@ -224,7 +438,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Java Source Checklist
+# 8. Quick Java Source Checklist
 
 - Are request values used as full URLs, callback targets, hosts, ports, paths, schemes, or remote resource references?
 - Can request or stored values name localhost, loopback, link-local, private-network, cloud metadata, or internal service targets?

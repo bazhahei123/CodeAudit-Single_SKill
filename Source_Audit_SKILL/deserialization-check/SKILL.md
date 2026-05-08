@@ -1,6 +1,6 @@
 ---
 name: Unsafe Deserialization Source Check
-description: Use this skill to identify source points for unsafe deserialization audits, including serialized payloads, encoded blobs, uploaded files, cookies, sessions, cache values, queue messages, stored metadata, polymorphic type fields, object restoration inputs, and framework-specific deserialization source locations in Java, Python, and PHP applications.
+description: Use this skill to identify source points for unsafe deserialization audits, including serialized payloads, encoded blobs, uploaded files, cookies, sessions, cache values, queue messages, stored metadata, polymorphic type fields, object restoration inputs, mobile/IPC/RPC payloads, and framework-specific deserialization source locations in Java, Android, C#/.NET, C++, Python, and PHP applications.
 ---
 
 # Unsafe Deserialization Source Check
@@ -37,6 +37,9 @@ Focus on deserialization source points in:
 - APIs
 - GraphQL resolvers
 - RPC methods
+- Android exported components, deep links, WebView bridges, Binder/AIDL handlers, content providers, WorkManager jobs, and SDK callbacks that receive serialized or object-restoration-relevant data
+- ASP.NET / .NET controllers, minimal APIs, SignalR hubs, gRPC services, WCF services, Azure Functions, queue consumers, and worker inputs
+- C++ HTTP/RPC/IPC/native service handlers, CGI/FastCGI entry points, plugin callbacks, custom protocol frames, and native message consumers
 - request body parsing
 - uploaded file and metadata processing
 - serializer / deserializer helpers
@@ -96,10 +99,17 @@ Always load:
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
 
 If the project contains multiple languages, prioritize the language and framework that implement the actual deserialization or object-restoration logic.
+
+For Android, prioritize mobile boundaries that can introduce serialized extras, deep-link parameters, WebView bridge arguments, IPC parcels, content-provider blobs, WorkManager input data, or backend payloads that later reach object restoration.
+
+For C#/.NET and C++, prioritize server, RPC, IPC, queue, worker, cache/session, binary protocol, and data-access layers that receive object blobs, type metadata, encoded payloads, or stored serialized state.
 
 Do not rely only on transport-layer or format names; focus on where object restoration, type restoration, or dangerous post-deserialization behavior may receive input.
 
@@ -112,8 +122,58 @@ If the language cannot be determined confidently, state the uncertainty and use 
 - Use reference files as source discovery guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared deserialization source concepts, propagation patterns, trust boundaries, false-positive controls, and source output standards.
 - Language-specific reference files define framework source locations, dangerous source shapes, language-specific type metadata, and follow-up checks.
+- Use the high-coverage candidate inventories in each reference as graph-search seed lists for entry points, payload fields, encoded/wrapped values, type metadata, stored second-order sources, and external message sources.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
+
+---
+
+# Graph / Taint Source Discovery Workflow
+
+When the audit uses a graph database, code property graph, semantic index, or taint-tracking pipeline, seed discovery with candidate groups instead of relying on one exact source name.
+
+## Candidate group A: entry points
+
+Search for code locations that receive serialized or object-restoration-relevant data:
+- HTTP route annotations, route tables, controller methods, handlers, servlet mappings, minimal APIs, and legacy scripts
+- GraphQL resolvers and mutations
+- RPC, gRPC, WCF, SOAP, Thrift, RSocket, WebSocket, queue, worker, and message handlers
+- Android activities, services, broadcast receivers, content providers, deep links, WebView bridge methods, Binder/AIDL handlers, and WorkManager jobs
+- C++ HTTP/RPC/IPC handlers, binary protocol decoders, native plugin callbacks, CGI/FastCGI handlers, and admin import/replay tools
+
+## Candidate group B: serialized payload and wrapper names
+
+Search for values likely to carry serialized or encoded data:
+- `payload`, `data`, `body`, `message`, `blob`, `bytes`, `raw`, `content`, `object`, `state`, `session`, `token`, `cookie`
+- `serialized`, `serializedData`, `objectData`, `pickle`, `marshal`, `yaml`, `xml`, `phar`, `binary`, `proto`, `parcel`
+- `base64`, `b64`, `gzip`, `zip`, `deflate`, `compressed`, `encoded`, `encrypted`, `signed`, `mac`, `signature`
+- uploaded `file`, `archive`, `metadata`, `template`, `config`, `import`, `backup`, `snapshot`
+
+## Candidate group C: type and object restoration names
+
+Search for fields that can influence restored type or object graph:
+- `type`, `@type`, `_type`, `$type`, `class`, `className`, `objectType`, `objectClass`, `targetType`, `kind`, `discriminator`
+- `module`, `callable`, `factory`, `method`, `handler`, `callback`, `constructor`, `gadget`
+- YAML tags, XML class attributes, PHP serialized class names, Java polymorphic metadata, Python pickle reduction data, .NET `$type`, C++ factory/type registry keys
+
+## Candidate group D: stored and external source surfaces
+
+Search for second-order or weakly trusted origins:
+- cache/Redis/Memcached/session values
+- database fields containing blobs, metadata, filters, templates, preferences, serialized state, or import records
+- queue message bodies, webhook payloads, provider events, internal service responses, RPC frames, replay/admin imports
+- object storage files, uploaded archives, backup files, saved configs, mobile local stores, IPC payloads
+
+## Candidate group E: downstream relevance mapping
+
+Keep only candidates that can be connected to deserialization-relevant behavior:
+- native object restoration
+- object mapper or polymorphic type binding
+- unsafe YAML/XML/binary loader
+- cache/session restore helper
+- queue/RPC/protocol decoder
+- file metadata or Phar-like object metadata processing
+- magic method, lifecycle hook, restore callback, or post-restore trusted business logic
 
 ---
 

@@ -41,7 +41,176 @@ Source questions:
 
 ---
 
-# 2. PHP Source Patterns
+# 2. High-Coverage PHP Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows file path construction, resource selection, archive extraction, upload/export destination, include/template loading, or file operation relevance.
+
+## 2.1 Web, API, and request entry candidates
+
+- Laravel `Route::get`
+- Laravel `Route::post`
+- Laravel `Route::put`
+- Laravel `Route::patch`
+- Laravel `Route::delete`
+- Laravel controllers
+- Laravel form requests
+- Symfony `#[Route]`
+- Symfony `@Route`
+- Symfony controller actions
+- ThinkPHP controllers
+- Yii controllers
+- CodeIgniter controllers
+- raw PHP scripts
+- AJAX endpoints
+- webhook handlers
+- admin import tools
+- `$request->input(...)`
+- `$request->query(...)`
+- `$request->post(...)`
+- `$request->get(...)`
+- `$request->header(...)`
+- `$request->cookie(...)`
+- `$request->file(...)`
+- `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_FILES`
+- `php://input`
+
+## 2.2 Path-like field and selector candidates
+
+- `file`
+- `filename`
+- `file_name`
+- `path`
+- `file_path`
+- `dir`
+- `directory`
+- `folder`
+- `resource`
+- `template`
+- `view`
+- `theme`
+- `locale`
+- `language`
+- `report`
+- `config`
+- `log`
+- `storage_key`
+- `disk`
+- `bucket`
+- `prefix`
+- `uri`
+- `url`
+- `download`
+- `preview`
+- `export`
+- `destination`
+- `target`
+- `cleanup_target`
+
+## 2.3 Upload, metadata, and archive candidates
+
+- `UploadedFile`
+- `getClientOriginalName`
+- `getClientOriginalExtension`
+- `getClientMimeType`
+- `$_FILES['name']`
+- `$_FILES['tmp_name']`
+- `move_uploaded_file`
+- `Content-Disposition`
+- `ZipArchive`
+- `getNameIndex`
+- `statIndex`
+- `extractTo`
+- archive member names
+- manifest paths
+- import file paths
+- backup file paths
+- restore file paths
+
+## 2.4 Path construction and transform candidates
+
+- `realpath`
+- `basename`
+- `dirname`
+- `pathinfo`
+- `urldecode`
+- `rawurldecode`
+- `str_replace`
+- `preg_replace`
+- `trim`
+- `ltrim`
+- `rtrim`
+- `DIRECTORY_SEPARATOR`
+- `storage_path`
+- `public_path`
+- `base_path`
+- `resource_path`
+- `app_path`
+- `Storage::path`
+- `Storage::disk`
+- `Symfony Filesystem`
+- `SplFileInfo`
+
+## 2.5 Stored, queue, and second-order candidates
+
+- database path columns
+- Eloquent file metadata
+- Symfony entity file path
+- cache values
+- session values
+- Redis values
+- queue job payloads
+- failed jobs
+- export paths
+- cleanup targets
+- delete targets
+- saved reports
+- saved templates
+- import records
+- object storage keys
+- S3 keys
+- media library paths
+
+## 2.6 Downstream mapping candidates
+
+- `file_get_contents`
+- `readfile`
+- `fopen`
+- `file`
+- `file_put_contents`
+- `unlink`
+- `rename`
+- `copy`
+- `mkdir`
+- `rmdir`
+- `include`
+- `require`
+- `include_once`
+- `require_once`
+- `Storage::get`
+- `Storage::put`
+- `Storage::download`
+- `Storage::delete`
+- `response()->download`
+- `BinaryFileResponse`
+- `ZipArchive::extractTo`
+
+## 2.7 PHP graph search recipes
+
+```text
+Route::get/controller + request input file/path/name + realpath/storage_path/file_get_contents
+UploadedFile/$_FILES + original filename/name + move_uploaded_file/Storage::put
+ZipArchive + getNameIndex/statIndex + extractTo
+queue/job/failed_jobs + path/file/export_path + unlink/rename/Storage::delete
+template/theme/locale/view + include/require/resource_path
+database file path/media path + stored path + download/read/cleanup
+```
+
+---
+
+# 3. PHP Source Patterns
 
 ## H-S1. Request-derived file or path value
 Example idea:
@@ -95,7 +264,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-S-PATH-1: Download/read path source
 
@@ -131,7 +300,7 @@ Verify extraction-root containment for every entry.
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 Request and upload source heuristics
 Pay attention to:
@@ -181,7 +350,7 @@ Check whether path source handling is consistent across:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a PHP source as high-priority if:
 - the value is selected from a strict allowlist of safe resource keys,
@@ -199,7 +368,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good PHP source evidence includes:
 - route/controller/script/worker/import entry point,
@@ -216,7 +385,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick PHP Source Checklist
+# 8. Quick PHP Source Checklist
 
 - Are request values used as filenames, resource keys, templates, or path fragments?
 - Are uploaded filenames or extensions used for save paths?

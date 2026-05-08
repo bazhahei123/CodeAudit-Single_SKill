@@ -37,7 +37,184 @@ Source questions:
 
 ---
 
-# 2. PHP Source Patterns
+# 2. High-Coverage PHP Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows serialized payload, object restoration, Phar-relevant path handling, stored blob, message decoding, or magic-method state relevance.
+
+## 2.1 Web, API, and request entry candidates
+
+- Laravel `Route::get`
+- Laravel `Route::post`
+- Laravel `Route::put`
+- Laravel `Route::patch`
+- Laravel `Route::delete`
+- Laravel `Route::match`
+- Laravel controllers
+- Laravel form requests
+- Symfony `#[Route]`
+- Symfony `@Route`
+- Symfony controller actions
+- ThinkPHP controllers
+- Yii controllers
+- CodeIgniter controllers
+- raw PHP scripts
+- AJAX endpoints
+- webhook handlers
+- admin import tools
+- `$request->input(...)`
+- `$request->get(...)`
+- `$request->post(...)`
+- `$request->query(...)`
+- `$request->header(...)`
+- `$request->cookie(...)`
+- `$_GET`
+- `$_POST`
+- `$_REQUEST`
+- `$_COOKIE`
+- `php://input`
+- uploaded files
+
+## 2.2 Serialized payload and wrapper source candidates
+
+- `payload`
+- `data`
+- `body`
+- `message`
+- `blob`
+- `raw`
+- `content`
+- `serialized`
+- `serialized_data`
+- `object_data`
+- `serialize`
+- `base64`
+- `b64`
+- `gzdecode`
+- `gzinflate`
+- `gzuncompress`
+- `zip`
+- `compressed`
+- `encoded`
+- `encrypted`
+- `signed`
+- `cookie`
+- `session`
+- `token`
+- `metadata`
+- `template`
+- `config`
+- `import_file`
+- `backup`
+- `snapshot`
+- `phar`
+
+## 2.3 PHP class, magic-method, and type candidates
+
+- `O:`
+- `C:`
+- `__PHP_Incomplete_Class`
+- `class`
+- `className`
+- `object`
+- `objectClass`
+- `type`
+- `handler`
+- `callback`
+- `method`
+- `factory`
+- `__wakeup`
+- `__destruct`
+- `__toString`
+- `__call`
+- `__get`
+- `__set`
+- `__invoke`
+- `Serializable`
+- `__serialize`
+- `__unserialize`
+
+## 2.4 Stored, cache, session, and second-order candidates
+
+- Laravel session values
+- Symfony session values
+- raw `$_SESSION`
+- cookies
+- Redis values
+- Memcached values
+- cache entries
+- database text/blob fields
+- Eloquent cast fields
+- Doctrine serialized fields
+- queue payloads
+- job payloads
+- failed jobs
+- import records
+- saved filters
+- saved templates
+- saved configs
+- user preferences
+- uploaded archives
+- object storage paths
+- replay payloads
+
+## 2.5 File path and Phar-relevant source candidates
+
+- `file`
+- `filename`
+- `path`
+- `realpath`
+- `uri`
+- `url`
+- `archive`
+- `phar://`
+- uploaded filename
+- MIME metadata
+- image metadata
+- `file_exists`
+- `is_file`
+- `is_readable`
+- `getimagesize`
+- `exif_read_data`
+- `file_get_contents`
+- `fopen`
+- `copy`
+- `rename`
+- `unlink`
+- `ZipArchive`
+- `PharData`
+
+## 2.6 Restore and downstream mapping candidates
+
+- `unserialize`
+- `maybe_unserialize`
+- `igbinary_unserialize`
+- `session_decode`
+- `Serializable::unserialize`
+- `__unserialize`
+- `Phar`
+- `PharData`
+- queue unserializers
+- session serializers
+- cache serializers
+- custom `deserialize`
+- custom `restore`
+- custom `decode`
+- custom `hydrate`
+
+## 2.7 PHP graph search recipes
+
+```text
+Route::post/controller + request input/payload + base64/gzdecode/unserialize
+cookie/session + encoded blob + unserialize/session_decode
+cache/database/queue + serialized/blob + unserialize/custom restore
+uploaded path/filename/archive + phar/file operation + metadata processing
+serialized payload + __wakeup/__destruct/__toString property names
+job/failed_jobs/import + payload/data + unserialize
+```
+
+---
+
+# 3. PHP Source Patterns
 
 ## H-S1. Request-derived serialized string
 Example idea:
@@ -91,7 +268,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case H-S-DESER-1: Direct unserialize source
 
@@ -127,7 +304,7 @@ Verify wrapper restrictions, runtime behavior, and whether uploaded Phar metadat
 
 ---
 
-# 4. PHP-Specific Audit Heuristics
+# 5. PHP-Specific Audit Heuristics
 
 ## 4.1 `unserialize` source heuristics
 Pay attention to:
@@ -170,7 +347,7 @@ Check whether source handling is consistent across:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a PHP source as high-priority if:
 - the value never reaches `unserialize`, Phar-aware processing, or object restoration,
@@ -188,7 +365,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good PHP source evidence includes:
 - route, controller, script, import handler, or file operation entry point,
@@ -205,7 +382,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick PHP Source Checklist
+# 8. Quick PHP Source Checklist
 
 - Are request values, cookies, or sessions decoded and restored?
 - Are base64 values passed toward `unserialize` wrappers?

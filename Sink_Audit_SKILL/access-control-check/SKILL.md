@@ -2,7 +2,7 @@
 
 name: Access Control Check
 
-description: Use this skill to audit application code for access control weaknesses, including authentication boundary issues, function-level authorization flaws, object-level authorization flaws, business-context authorization gaps, client-side-only enforcement, and inconsistent permission checks across routes, methods, and layers.
+description: Use this skill to audit application code for access control weaknesses, including authentication boundary issues, function-level authorization flaws, object-level authorization flaws, business-context authorization gaps, client-side-only enforcement, inconsistent permission checks across routes, methods, and layers, and framework-specific access-control sink candidates in Java, Android, C++, C#, Python, and PHP applications.
 
 ---
 
@@ -49,6 +49,9 @@ Focus on access control logic in:
 - repository or query-layer scoping
 - tenant or organization boundary enforcement
 - business workflow restrictions related to authorization
+- Android exported components, deep links, content providers, broadcast receivers, services, and Binder/AIDL IPC
+- native or desktop/server handlers in C++ services, RPC layers, embedded admin interfaces, and local IPC
+- ASP.NET / .NET controllers, Razor Pages, minimal APIs, SignalR hubs, gRPC services, filters, policies, and data-access scoping
 
 ---
 
@@ -92,14 +95,19 @@ Before auditing, identify the primary implementation language and major framewor
 Then load the matching reference file from `references/`:
 
 - Java → `references/java-cases.md`
+- Android → `references/android-cases.md`
+- C++ → `references/cpp-cases.md`
+- C# / .NET → `references/csharp-cases.md`
 - Python → `references/python-cases.md`
 - PHP → `references/php-cases.md`
 
 Also load `references/common-cases.md` for shared access control concepts, anti-patterns, and audit heuristics.
 
-If the project contains multiple languages, prioritize the language that implements the actual backend authorization logic.
+If the project contains multiple languages, prioritize the language that implements the actual authorization boundary, protected entry point, privileged action, object lookup, tenant scoping, IPC boundary, or backend security decision.
 
 Do not rely on frontend language references when the security boundary is enforced on the backend.
+
+For Android, treat exported components, IPC, content providers, deep links, and WebView bridges as security boundaries even when a separate backend also exists.
 
 If the language cannot be determined confidently, state the uncertainty and use only common access-control logic plus clearly identified framework evidence.
 

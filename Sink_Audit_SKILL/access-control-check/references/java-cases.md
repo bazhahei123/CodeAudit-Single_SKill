@@ -121,6 +121,128 @@ Questions:
 - Is scope enforced in query time or only assumed elsewhere?
 - Is client-supplied `tenantId` trusted directly?
 
+## 1.7 High-coverage Java sink candidate inventory
+
+Use this list to seed searches for protected entry points and authorization sinks. A candidate is not proof of a bug; it is a place where missing or inconsistent access control matters.
+
+### Spring MVC / Spring Boot route candidates
+Look for:
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@DeleteMapping`
+- `@PatchMapping`
+- `@ModelAttribute`
+- `@ResponseBody`
+- `@RequestBody`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestHeader`
+- `@CookieValue`
+- `RouterFunction`
+- `RouterFunctions.route(...)`
+- `HandlerFunction`
+- `WebFlux.fn`
+- `@ControllerAdvice` handlers exposing actions or data
+- actuator endpoints exposed through `management.endpoints.web.exposure.include`
+
+### Java web framework route candidates
+Look for:
+- JAX-RS `@Path`
+- JAX-RS `@GET`, `@POST`, `@PUT`, `@DELETE`, `@PATCH`
+- `@Consumes`, `@Produces`
+- Servlet `@WebServlet`
+- `HttpServlet#doGet`
+- `HttpServlet#doPost`
+- `HttpServlet#doPut`
+- `HttpServlet#doDelete`
+- `Filter#doFilter`
+- `HandlerInterceptor#preHandle`
+- Struts actions
+- JSF managed beans and action methods
+- Play Framework routes and controllers
+- Micronaut `@Controller`, `@Get`, `@Post`, `@Put`, `@Delete`
+- Quarkus RESTEasy Reactive resources
+- Vert.x route handlers
+- Spark Java routes
+- Dropwizard resources
+
+### Authentication and session boundary candidates
+Look for:
+- `SecurityFilterChain`
+- `WebSecurityConfigurerAdapter`
+- `HttpSecurity`
+- `authorizeHttpRequests`
+- `authorizeRequests`
+- `requestMatchers`
+- `antMatchers`
+- `mvcMatchers`
+- `permitAll`
+- `anonymous`
+- `authenticated`
+- `fullyAuthenticated`
+- `hasRole`
+- `hasAuthority`
+- `oauth2ResourceServer`
+- `jwt`
+- `sessionManagement`
+- `csrf().disable()`
+- `OncePerRequestFilter`
+- `UsernamePasswordAuthenticationFilter`
+- `BasicAuthenticationFilter`
+- custom JWT/session/API-key filters
+
+### Function-level authorization candidates
+Look for:
+- `@PreAuthorize`
+- `@PostAuthorize`
+- `@PreFilter`
+- `@PostFilter`
+- `@Secured`
+- `@RolesAllowed`
+- `@DenyAll`
+- `@PermitAll`
+- `@Authenticated`
+- custom annotations such as `@AdminOnly`, `@RequiresPermission`, `@CheckPermission`
+- `AccessDecisionManager`
+- `AuthorizationManager`
+- `PermissionEvaluator`
+- `MethodSecurityExpressionHandler`
+- `securityService.can...`
+- `permissionService.has...`
+- `policy.can...`
+- `isAdmin`, `hasRole`, `hasPermission`, `canAccess`
+
+### Object-level and tenant authorization candidates
+Look for:
+- `findById(...)`
+- `getReferenceById(...)`
+- `findOne(...)`
+- `getOne(...)`
+- `existsById(...)`
+- `deleteById(...)`
+- `save(...)` after loading an object by external ID
+- repository methods missing `AndUserId`, `AndOwnerId`, `AndTenantId`, `AndOrgId`
+- `@Query` without owner or tenant predicate
+- MyBatis XML `<select>`, `<update>`, `<delete>` without scope predicates
+- QueryDSL / Specification / Criteria builders without trusted principal scope
+- tenant values from `@RequestParam`, `@RequestHeader`, or DTO instead of trusted context
+
+### RPC, messaging, and alternate entry candidates
+Look for:
+- GraphQL `@QueryMapping`, `@MutationMapping`, `@SchemaMapping`
+- graphql-java `DataFetcher`
+- gRPC `BindableService`
+- methods ending in `ImplBase`
+- RSocket `@MessageMapping`
+- WebSocket `@MessageMapping`, `@SubscribeMapping`, `@SendToUser`
+- STOMP handlers
+- Kafka/Rabbit/JMS listeners that trigger privileged actions
+- batch/job/admin endpoints triggered by HTTP or messages
+
 ---
 
 # 2. Java Access Control Anti-Patterns

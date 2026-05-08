@@ -59,7 +59,153 @@ Look for:
 
 ---
 
-# 2. Python XSS Anti-Patterns
+# 2. High-Coverage Python XSS Candidate Inventory
+
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, rendering context, sink behavior, and missing context-appropriate controls.
+
+## 2.1 Web, API, and request entry candidates
+Search for:
+- `@app.route`
+- `@blueprint.route`
+- `@bp.route`
+- `Flask`
+- `request.args`
+- `request.form`
+- `request.values`
+- `request.get_json`
+- `@api_view`
+- `APIView`
+- `ViewSet`
+- `ModelViewSet`
+- `GenericAPIView`
+- `path(`
+- `re_path(`
+- `View`
+- `dispatch`
+- `get`
+- `post`
+- `@app.get`
+- `@app.post`
+- `FastAPI`
+- `APIRouter`
+- `Request`
+- `GraphQLView`
+- `Mutation`
+- `admin`
+- `preview`
+- `comment`
+- `profile`
+- `message`
+
+## 2.2 Template, response, and manual HTML sink candidates
+Search for:
+- `render`
+- `render_template`
+- `render_template_string`
+- `TemplateResponse`
+- `Jinja2Templates`
+- `HTMLResponse`
+- `HttpResponse`
+- `StreamingHttpResponse`
+- `mark_safe`
+- `SafeString`
+- `SafeText`
+- `format_html` review
+- `Markup`
+- `MarkupSafe`
+- `|safe`
+- `autoescape false`
+- `{% autoescape off %}`
+- `{{`
+- `return f"<`
+- `return "<html`
+- `Response(content=`
+- `mimetype="text/html"`
+- `content_type="text/html"`
+
+## 2.3 Rich text, markdown, sanitizer, and script/URL candidates
+Search for:
+- `markdown.markdown`
+- `Markdown(`
+- `mistune`
+- `markdown2`
+- `bleach.clean`
+- `bleach.linkify`
+- `Cleaner`
+- `nh3.clean`
+- `html_sanitizer`
+- `WYSIWYG`
+- `body_html`
+- `content_html`
+- `json_script`
+- `|tojson`
+- `escapejs`
+- `urlize`
+- `href`
+- `src`
+- `javascript:`
+- `script`
+- `onclick`
+
+## 2.4 Stored content and privileged render candidates
+Search for:
+- `Comment`
+- `Post`
+- `Article`
+- `Profile`
+- `Ticket`
+- `Message`
+- `Notification`
+- `CMS`
+- `admin.ModelAdmin`
+- `list_display`
+- `readonly_fields`
+- `format_html`
+- `moderation`
+- `email preview`
+- `report`
+- `dashboard`
+
+## 2.5 Required-control candidates
+Search near sinks for:
+- Jinja autoescape
+- Django autoescape
+- no `|safe`
+- no `mark_safe`
+- `escape`
+- `conditional_escape`
+- `format_html`
+- `json_script`
+- `|tojson`
+- `escapejs`
+- `bleach.clean`
+- `nh3.clean`
+- `Cleaner(tags=`
+- allowed tags
+- allowed attributes
+- URL scheme allowlist
+- `html.escape`
+- `Content-Security-Policy`
+
+## 2.6 Python graph search recipes
+Useful combinations:
+
+```text
+@app.route + render_template_string
+request.args + HTMLResponse
+Django view + mark_safe
+TemplateResponse + |safe
+markdown.markdown + Markup
+comment.body + |safe
+admin view + user content + mark_safe
+render_template + script block + user value
+bleach.clean missing + rich text render
+API response + frontend raw sink
+```
+
+---
+
+# 3. Python XSS Anti-Patterns
 
 ### A1. Jinja / Django `safe` on untrusted content
 ```html
@@ -97,7 +243,7 @@ Context must be verified; plain HTML-safe assumptions may not hold for script re
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-XSS-1: Unsafe template bypass
 
@@ -132,7 +278,7 @@ Verify whether the markdown output is sanitized before being marked safe.
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
 ## 4.1 Django heuristics
 Pay attention to:

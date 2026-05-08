@@ -1,6 +1,6 @@
 ---
 name: Path Traversal Check
-description: Use this skill to audit application code for path traversal, arbitrary file access, unsafe file path handling, archive extraction traversal, local resource inclusion, and inconsistent path validation across routes, jobs, and file-processing layers.
+description: Use this skill to audit Java, Android, C#/.NET, C++, Python, and PHP application code for path traversal, arbitrary file read/write/delete/overwrite, unsafe file path handling, archive extraction traversal, local resource inclusion, and inconsistent path validation across routes, jobs, IPC, RPC, mobile components, and file-processing layers.
 ---
 
 # Path Traversal Check
@@ -35,6 +35,9 @@ Focus on file-path-related logic in:
 - handlers
 - APIs
 - GraphQL resolvers
+- Android exported components, deep links, WebView bridges, content providers, and IPC handlers
+- ASP.NET / .NET endpoints, SignalR hubs, WCF services, Azure Functions, and queue consumers
+- C++ HTTP/RPC/IPC handlers, native message consumers, and custom protocol parsers
 - service-layer file and resource helpers
 - download and preview handlers
 - upload destination logic
@@ -86,10 +89,19 @@ Always load:
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
 
 If the project contains multiple languages, prioritize the language and framework that implement the actual filesystem or local resource path handling logic.
+
+For graph-database or taint-tracking workflows, use the language reference candidate inventories as search seeds:
+- entry candidates, such as route annotations, controllers, handlers, exported components, RPC methods, message consumers, jobs, import tools, and file-management actions,
+- path construction candidates, such as joins, resolves, normalization, canonicalization, filename extraction, URL decoding, archive entry handling, and storage helper wrappers,
+- file-operation sink candidates, such as read, write, copy, move, rename, delete, include, template load, resource load, extraction, upload-save, and download-return APIs,
+- required-control candidates, such as resolved base-directory containment, allowlists, generated filenames, safe archive extraction, symlink controls, extension/MIME restrictions, and check/use consistency.
 
 Do not rely only on route names or parameter names; focus on where paths are actually built, normalized, resolved, or passed into file or resource sinks.
 
@@ -101,7 +113,7 @@ If the language cannot be determined confidently, state the uncertainty and use 
 
 - Use reference files as audit guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared path-handling concepts, anti-patterns, false-positive controls, and finding standards.
-- Language-specific reference files define framework control points, dangerous APIs, common implementation mistakes, and language-specific case patterns.
+- Language-specific reference files define framework entry candidates, path-construction candidates, dangerous file-operation sink API candidates, required controls, common implementation mistakes, and language-specific case patterns.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
 
@@ -132,6 +144,9 @@ Direction: Verify whether path handling is consistent and robust against canonic
 # High-Priority Audit Targets
 
 Prioritize these targets first when present:
+- public route/controller annotations and HTTP handler registration
+- RPC, GraphQL, WebSocket, webhook, queue, job, import, export, and admin file-management entry points
+- Android exported activity/service/receiver/provider paths, deep links, WebView bridges, share targets, and Binder/AIDL IPC handlers
 - file download and preview endpoints
 - log, report, config, and template readers
 - upload destination and export destination logic

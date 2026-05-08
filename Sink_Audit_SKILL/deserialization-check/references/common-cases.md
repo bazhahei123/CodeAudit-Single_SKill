@@ -88,16 +88,188 @@ Examples:
 Prioritize these attack surfaces first:
 
 - request-body object parsing
+- public route/controller annotations and HTTP handler registration
+- GraphQL mutation or resolver handlers
+- RPC, gRPC, SOAP, Thrift, Hessian, Dubbo, WCF, or internal protocol methods
+- WebSocket and message-frame handlers
 - file import and metadata processing
 - session and cookie restoration
 - cache reloads
 - message queue consumers
 - background jobs
+- webhook, callback, replay, and reconciliation handlers
+- mobile exported component, deep-link, WebView bridge, or IPC entry points
+- native service socket, pipe, DBus, Binder, or custom binary protocol handlers
 - internal RPC or binary protocol handlers
 - saved templates or stored blobs later restored
 - admin replay / import / debug tooling
 - legacy serializer helpers
 - framework serializer and object-mapper configuration
+
+## 2.1 Candidate search groups for graph workflows
+
+When a graph database cannot start from a single universal sink, build candidate sets from four groups and intersect them:
+
+### Entry candidates
+Search for externally reachable or semi-trusted execution points:
+- controller
+- route
+- handler
+- endpoint
+- resolver
+- mutation
+- action
+- servlet
+- filter
+- interceptor
+- middleware
+- webhook
+- callback
+- listener
+- consumer
+- subscriber
+- receiver
+- worker
+- job
+- scheduler
+- import
+- upload
+- replay
+- restore
+- sync
+- migration
+- admin
+- debug
+- IPC
+- RPC
+- WebSocket
+- deep link
+- exported
+- bridge
+
+### Deserialization sink candidates
+Search for object restoration and dynamic type reconstruction:
+- deserialize
+- unserialize
+- serialize
+- readObject
+- readUnshared
+- readExternal
+- load
+- loads
+- loadObject
+- restore
+- decode
+- decodeObject
+- fromBytes
+- fromBinary
+- fromXml
+- fromYaml
+- fromJson
+- readValue
+- readType
+- readClass
+- readParcelable
+- readSerializable
+- parseObject
+- parseArray
+- objectMapper
+- typeName
+- defaultTyping
+- autoType
+- polymorphic
+- className
+- typeResolver
+- binder
+- archive
+- unarchive
+- marshal
+- unmarshal
+- hydrate
+- inflate
+- reconstruct
+- rehydrate
+
+### Trigger candidates
+Search for methods or callbacks that may run during or after object restoration:
+- magic method
+- lifecycle callback
+- readResolve
+- readObject
+- readExternal
+- __wakeup
+- __destruct
+- __unserialize
+- __reduce__
+- __setstate__
+- OnDeserialized
+- ISerializable
+- Parcelable.Creator
+- createFromParcel
+- object hook
+- type hook
+- factory
+- registry
+- class loader
+- property setter
+- callback
+- invoke
+- execute
+- process
+- initialize
+- finalize
+- cleanup
+- close
+
+### Required-control candidates
+Search near candidate sinks for controls:
+- allowlist
+- whitelist
+- permitted
+- allowedClasses
+- classFilter
+- ObjectInputFilter
+- SerializationBinder
+- PolymorphicTypeValidator
+- safe_load
+- SafeLoader
+- trusted
+- signed
+- signature
+- HMAC
+- MAC
+- verify
+- validate
+- schema
+- DTO
+- primitive
+- knownTypes
+- typeMap
+- classMap
+- deny
+- reject
+- disable
+- exported=false
+- permission
+- classLoader
+- maxDepth
+- maxLength
+- sizeLimit
+- version
+
+## 2.2 Generic graph search recipes
+
+Useful candidate recipes:
+
+```text
+<entry candidate> + <deserialization sink candidate>
+<request/cookie/file/message/cache> + <deserialize/load/readObject/unserialize>
+<callback/job/consumer> + <object restore sink>
+<stored blob/cache/session> + <later restore sink>
+<polymorphic/type/className/@type> + <mapper/parser/loader>
+<candidate sink> without nearby <required-control candidate>
+<object restoration> + <magic/lifecycle trigger>
+```
 
 ---
 

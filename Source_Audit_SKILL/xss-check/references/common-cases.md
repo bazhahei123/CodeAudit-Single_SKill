@@ -219,6 +219,221 @@ Examples:
 Audit relevance:
 Equivalent content can be handled safely in one path and unsafely in another.
 
+## 3.7 High-coverage candidate inventory for graph search
+
+Use this inventory as a seed list for code search, graph queries, and taint source enumeration. A candidate name is not proof by itself; keep it only when code shows browser-visible output, browser-interpreted HTML, template data, script data, attribute values, URL values, rich text, markdown, sanitizer input/output, trusted HTML wrappers, frontend props, DOM data, WebView content, native HTML widgets, or alternate render path relevance.
+
+### Entry-point candidates
+
+Externally reachable or weakly trusted code surfaces that may introduce rendering-relevant values:
+- route
+- controller
+- handler
+- endpoint
+- resolver
+- mutation
+- RPC method
+- gRPC method
+- WebSocket handler
+- SignalR hub
+- EventSource handler
+- webhook handler
+- message consumer
+- queue consumer
+- scheduled job
+- worker
+- import job
+- preview job
+- render job
+- report job
+- email job
+- notification job
+- admin action
+- moderation action
+- Android exported component
+- deep link
+- WebView bridge
+- Binder or AIDL method
+- content provider
+- native IPC handler
+- frontend router
+- browser URL state
+
+### Reflected input candidates
+
+Values often reflected into pages, errors, previews, scripts, attributes, or components:
+- `q`
+- `query`
+- `search`
+- `keyword`
+- `term`
+- `message`
+- `msg`
+- `error`
+- `reason`
+- `title`
+- `name`
+- `displayName`
+- `nickname`
+- `username`
+- `email`
+- `label`
+- `description`
+- `summary`
+- `returnUrl`
+- `redirect`
+- `next`
+- `url`
+- `href`
+- `src`
+- `link`
+- `callback`
+- `preview`
+- `previewText`
+- `previewHtml`
+- `input`
+- `content`
+- `body`
+- `text`
+- `value`
+- uploaded filename
+- uploaded metadata
+- import row field
+
+### Stored content candidates
+
+User, tenant, partner, or admin-controlled values rendered later:
+- comment
+- reply
+- review
+- post
+- article
+- announcement
+- CMS block
+- page body
+- banner
+- profile
+- bio
+- signature
+- avatar
+- display name
+- organization name
+- tenant label
+- chat message
+- support ticket
+- moderation item
+- notification text
+- email body
+- report label
+- dashboard name
+- imported content
+- synced external data
+- webhook payload text
+- partner content
+- queue payload
+- saved preview
+
+### Template, API, and frontend propagation candidates
+
+Values crossing into rendering layers:
+- template model
+- view data
+- request attribute
+- response local
+- context dictionary
+- component prop
+- slot
+- children
+- render fragment
+- hydrated state
+- frontend store
+- route param
+- API response field
+- GraphQL response field
+- REST response DTO
+- WebSocket payload
+- `html`
+- `bodyHtml`
+- `contentHtml`
+- `messageHtml`
+- `safeHtml`
+- `trustedHtml`
+- `rawHtml`
+- `markdown`
+- `rendered`
+- `body`
+- `content`
+
+### Rich text, markdown, sanitizer, and trusted wrapper candidates
+
+Pipeline stages that may produce browser-interpreted markup:
+- markdown
+- WYSIWYG
+- rich text
+- editor content
+- preview content
+- HTML body
+- template content
+- sanitizer input
+- sanitizer output
+- DOMPurify output
+- Jsoup clean output
+- bleach output
+- HtmlSanitizer output
+- `safeHtml`
+- `trustedHtml`
+- `rawHtml`
+- `Markup`
+- `SafeString`
+- `HtmlString`
+- `MarkupString`
+- `IHtmlContent`
+- `Spanned`
+- `Spannable`
+- `TrustedHTML`
+
+### Render context and alternate path candidates
+
+Values used in higher-risk browser contexts or inconsistent paths:
+- inline script data
+- JSON bootstrapping
+- event handler value
+- `href`
+- `src`
+- `srcdoc`
+- `style`
+- `iframe`
+- `data-*`
+- URL attribute
+- CSS value
+- preview render
+- final render
+- admin render
+- user render
+- email preview
+- export preview
+- report HTML
+- notification HTML
+- mobile WebView render
+- native HTML widget
+- legacy renderer
+- raw response writer
+
+## 3.8 Generic graph query recipes
+
+Useful source-discovery combinations:
+
+```text
+<entry candidate> + <content/html/message field> + <template/model/render keyword>
+<stored content source> + <admin/user/report/email render path> + <raw/trusted/html keyword>
+<API response source> + <frontend prop/store/state> + <raw render or DOM keyword>
+<markdown/rich-text source> + <converter/sanitizer keyword> + <preview/final render path>
+<browser source> + <state/prop assignment> + <DOM/framework render keyword>
+<mobile/native entry> + <HTML/content source> + <WebView/native HTML render keyword>
+```
+
+When graph results are noisy, prioritize paths where the same value name or object field travels from an entry point or stored record into template variables, response builders, rich-text conversion, sanitizer output, raw/trusted wrappers, API payloads, frontend props, DOM insertion, WebView content, native HTML widgets, or alternate render paths.
+
 ---
 
 # 4. Rendering Context Source Types

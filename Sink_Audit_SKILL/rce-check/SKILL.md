@@ -1,6 +1,6 @@
 ---
 name: Command Execution Check
-description: Use this skill to audit application code for command injection, unsafe process execution, shell injection, argument or option injection, dangerous eval or expression execution, interpreter abuse, and inconsistent execution controls across routes, jobs, and helper layers.
+description: Use this skill to audit Java, Android, C#/.NET, C++, Python, and PHP application code for command injection, unsafe process execution, shell injection, argument or option injection, dangerous eval or expression execution, interpreter abuse, dynamic code loading, external-tool misuse, and inconsistent execution controls across routes, jobs, IPC, RPC, mobile components, and helper layers.
 ---
 
 # Command Execution Check
@@ -36,6 +36,9 @@ Focus on execution-related logic in:
 - APIs
 - GraphQL resolvers
 - RPC methods
+- Android exported components, deep links, WebView bridges, Binder/AIDL IPC handlers, and SDK callbacks
+- ASP.NET / .NET endpoints, SignalR hubs, WCF services, Azure Functions, and queue consumers
+- C++ HTTP/RPC/IPC handlers, native message consumers, and custom protocol handlers
 - service-layer command wrappers
 - process execution helpers
 - shell invocation code
@@ -88,11 +91,19 @@ Always load:
 Then load the matching language-specific reference file from `references/`:
 
 - Java -> `references/java-cases.md`
+- Android -> `references/android-cases.md`
+- C# / .NET -> `references/csharp-cases.md`
+- C++ / native services -> `references/cpp-cases.md`
 - Python -> `references/python-cases.md`
 - PHP -> `references/php-cases.md`
-- JavaScript / TypeScript -> `references/javascript-cases.md` if available
 
 If the project contains multiple languages, prioritize the language and framework that implement the actual execution boundary.
+
+For graph-database or taint-tracking workflows, use the language reference candidate inventories as search seeds:
+- entry candidates, such as route annotations, controllers, handlers, exported components, RPC methods, message consumers, jobs, admin tools, and import/export actions,
+- execution sink candidates, such as process APIs, shell wrappers, interpreter invocations, eval/exec APIs, expression engines, dynamic code loading, native library loading, and external tool wrappers,
+- argument and command-construction candidates, such as concatenation, interpolation, command templates, dynamic tool names, option fields, script fragments, file paths, environment variables, and wrapper helper parameters,
+- required-control candidates, such as fixed command names, argv arrays, shell avoidance, command/tool allowlists, strict option allowlists, safe expression subsets, sandboxing, timeout/resource limits, and trusted-only execution contracts.
 
 Do not rely only on wrapper names or task names; focus on where commands, scripts, expressions, interpreters, or external tools are actually invoked.
 
@@ -104,7 +115,7 @@ If the language cannot be determined confidently, state the uncertainty and use 
 
 - Use reference files as audit guidance, not as proof that a vulnerability exists.
 - `references/common-cases.md` defines shared execution-boundary concepts, anti-patterns, false-positive controls, and finding standards.
-- Language-specific reference files define framework control points, dangerous APIs, common implementation mistakes, and language-specific case patterns.
+- Language-specific reference files define framework entry candidates, dangerous execution sink API candidates, command/argument construction candidates, required controls, common implementation mistakes, and language-specific case patterns.
 - Do not report an issue solely because it resembles a reference case.
 - Prefer real code evidence over case similarity.
 
@@ -135,6 +146,9 @@ Direction: Verify whether attacker-controlled data can be stored and later used 
 # High-Priority Audit Targets
 
 Prioritize these targets first when present:
+- public route/controller annotations and HTTP handler registration
+- RPC, GraphQL, WebSocket, webhook, queue, job, import/export, and admin operation entry points
+- Android exported activity/service/receiver/provider paths, deep links, WebView JavaScript bridges, SDK callbacks, and Binder/AIDL IPC handlers
 - admin tools and operational endpoints
 - shell or process wrapper services
 - import/export and conversion workflows

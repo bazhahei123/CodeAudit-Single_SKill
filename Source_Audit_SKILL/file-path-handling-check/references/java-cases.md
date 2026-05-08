@@ -38,7 +38,178 @@ Source questions:
 
 ---
 
-# 2. Java Source Patterns
+# 2. High-Coverage Java Source Candidate Inventory
+
+Use these candidate lists to seed graph queries and text searches. Keep a candidate only when the code shows file path construction, resource selection, archive extraction, upload/export destination, or file operation relevance.
+
+## 2.1 HTTP, controller, and request entry candidates
+
+- `@RestController`
+- `@Controller`
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@DeleteMapping`
+- `@PatchMapping`
+- `@RequestParam`
+- `@PathVariable`
+- `@RequestBody`
+- `@RequestHeader`
+- `@CookieValue`
+- `@RequestPart`
+- `MultipartFile`
+- `MultipartFile.getOriginalFilename`
+- `HttpServletRequest`
+- `ServletInputStream`
+- `Part.getSubmittedFileName`
+- `@WebServlet`
+- `doGet`
+- `doPost`
+- `RouterFunction`
+- `ServerRequest`
+
+## 2.2 Path-like field and parameter candidates
+
+- `file`
+- `filename`
+- `fileName`
+- `path`
+- `filePath`
+- `dir`
+- `directory`
+- `folder`
+- `resource`
+- `resourceName`
+- `template`
+- `templateName`
+- `view`
+- `theme`
+- `locale`
+- `report`
+- `config`
+- `log`
+- `key`
+- `storageKey`
+- `objectKey`
+- `prefix`
+- `bucket`
+- `uri`
+- `url`
+- `download`
+- `preview`
+- `export`
+- `destination`
+- `target`
+- `cleanupTarget`
+
+## 2.3 Path construction and transform candidates
+
+- `Paths.get`
+- `Path.of`
+- `resolve`
+- `resolveSibling`
+- `normalize`
+- `toAbsolutePath`
+- `toRealPath`
+- `File`
+- `new File`
+- `getCanonicalPath`
+- `getCanonicalFile`
+- `URLDecoder.decode`
+- `StringUtils.cleanPath`
+- `FilenameUtils.normalize`
+- `FilenameUtils.getName`
+- `FilenameUtils.getExtension`
+- `PathMatcher`
+- `baseDir`
+- `uploadDir`
+- `downloadDir`
+- `tempDir`
+- `extractDir`
+- `storagePath`
+
+## 2.4 Upload, archive, and import source candidates
+
+- `MultipartFile.getOriginalFilename`
+- `Part.getSubmittedFileName`
+- `Content-Disposition`
+- `ZipInputStream`
+- `ZipFile`
+- `ZipEntry.getName`
+- `JarEntry.getName`
+- `TarArchiveInputStream`
+- `TarArchiveEntry.getName`
+- `ArchiveInputStream`
+- `ArchiveEntry.getName`
+- `entry.getName`
+- `manifest`
+- `manifestPath`
+- `importFile`
+- `backupFile`
+- `restoreFile`
+- `extractPath`
+- `destinationPath`
+
+## 2.5 Stored, queue, and second-order source candidates
+
+- database path columns
+- `@Lob` metadata
+- `FileRecord`
+- `FileMetadata`
+- `ReportFile`
+- `ExportJob`
+- `JobDataMap`
+- `ExecutionContext`
+- `RedisTemplate`
+- `CacheManager`
+- `HttpSession`
+- `@KafkaListener`
+- `@RabbitListener`
+- `@JmsListener`
+- `Message`
+- `ConsumerRecord`
+- `payload.path`
+- `payload.fileName`
+- `cleanupTarget`
+- `deleteTarget`
+- `exportPath`
+
+## 2.6 Downstream mapping candidates
+
+- `Files.readAllBytes`
+- `Files.readString`
+- `Files.newInputStream`
+- `Files.write`
+- `Files.copy`
+- `Files.move`
+- `Files.delete`
+- `Files.createTempFile`
+- `Files.createDirectories`
+- `FileInputStream`
+- `FileOutputStream`
+- `ResourceLoader.getResource`
+- `FileSystemResource`
+- `ClassPathResource`
+- `UrlResource`
+- `TemplateResolver`
+- `response.addHeader`
+- `Content-Disposition`
+
+## 2.7 Java graph search recipes
+
+```text
+@GetMapping/@PostMapping + @RequestParam/@PathVariable file/path/name + Paths.get/resolve
+@RequestPart/MultipartFile + getOriginalFilename + transferTo/Files.copy
+ZipEntry/TarArchiveEntry + getName + resolve/extract/write
+@KafkaListener/@RabbitListener + payload.path/fileName + Files.delete/Files.move
+ResourceLoader/ClassPathResource/FileSystemResource + template/resource/theme + getResource/load
+database FileRecord/ExportJob + stored path/exportPath + read/delete/cleanup
+```
+
+---
+
+# 3. Java Source Patterns
 
 ## J-S1. Request-derived filename or path
 Example idea:
@@ -92,7 +263,7 @@ Follow-up:
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case J-S-PATH-1: Download path source
 
@@ -128,7 +299,7 @@ Verify destructive operations use the same strong containment rules as reads.
 
 ---
 
-# 4. Java-Specific Audit Heuristics
+# 5. Java-Specific Audit Heuristics
 
 ## 4.1 Request and DTO source heuristics
 Pay attention to:
@@ -177,7 +348,7 @@ Pay attention to:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not mark a Java source as high-priority if:
 - the value is selected from a strict allowlist of safe resource keys,
@@ -195,7 +366,7 @@ Use `Suspected source` or `Not enough evidence` if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Good Java source evidence includes:
 - route/controller/worker/import entry point,
@@ -212,7 +383,7 @@ Good source evidence answers:
 
 ---
 
-# 7. Quick Java Source Checklist
+# 8. Quick Java Source Checklist
 
 - Are request values used as filenames, resource keys, or path fragments?
 - Is `MultipartFile.getOriginalFilename()` used for save or later paths?

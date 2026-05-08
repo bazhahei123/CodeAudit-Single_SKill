@@ -68,9 +68,206 @@ Look for:
 
 ---
 
-# 2. Python SQL Injection Anti-Patterns
+# 2. High-Coverage Python SQL Candidate Inventory
 
-## 2.1 Raw DB-API Anti-Patterns
+Use these candidates as search seeds for graph-database or taint-tracking workflows. A match is not a finding by itself; confirm attacker influence, query construction behavior, sink execution, and missing binding or structural controls.
+
+## 2.1 Web, API, and request entry candidates
+Search for:
+- `@app.route`
+- `@blueprint.route`
+- `@bp.route`
+- `Flask`
+- `request.args`
+- `request.form`
+- `request.values`
+- `request.get_json`
+- `request.cookies`
+- `request.headers`
+- `@api_view`
+- `APIView`
+- `ViewSet`
+- `ModelViewSet`
+- `GenericAPIView`
+- `path(`
+- `re_path(`
+- `View`
+- `dispatch`
+- `get`
+- `post`
+- `put`
+- `patch`
+- `delete`
+- `@app.get`
+- `@app.post`
+- `FastAPI`
+- `APIRouter`
+- `Query`
+- `Path`
+- `Body`
+- `Request`
+- `GraphQLView`
+- `Mutation`
+
+## 2.2 Worker, message, admin, report, and export entries
+Search for:
+- `@shared_task`
+- `@app.task`
+- `Celery`
+- `dramatiq.actor`
+- `rq.job`
+- `BaseCommand`
+- `handle`
+- `KafkaConsumer`
+- `basic_consume`
+- `on_message`
+- `admin`
+- `dashboard`
+- `analytics`
+- `report`
+- `export`
+- `search`
+- `filter`
+- `sort`
+- `saved_filter`
+- `report_template`
+- `run_report`
+- `generate_export`
+
+## 2.3 Query construction and structural fragment candidates
+Search for:
+- `sql`
+- `query`
+- `statement`
+- `where_clause`
+- `condition`
+- `filter_clause`
+- `order_by`
+- `sort`
+- `sort_field`
+- `sort_direction`
+- `column`
+- `table`
+- `operator`
+- `limit`
+- `offset`
+- `f"select`
+- `f" SELECT`
+- `.format(`
+- `%`
+- `" +`
+- `" ".join`
+- `text(f`
+- `raw(`
+- `literal_column`
+- `column(`
+- `table(`
+- `desc(`
+- `asc(`
+- `saved_filter`
+- `custom_query`
+- `report_sql`
+
+## 2.4 DB-API and raw cursor sink candidates
+Search for:
+- `cursor.execute`
+- `cursor.executemany`
+- `cursor.executescript`
+- `connection.execute`
+- `conn.execute`
+- `db.execute`
+- `engine.execute`
+- `execute_query`
+- `run_query`
+- `raw_query`
+- `psycopg2`
+- `psycopg`
+- `pymysql`
+- `MySQLdb`
+- `mysql.connector`
+- `sqlite3`
+- `aiosqlite`
+- `asyncpg`
+- `pyodbc`
+- `cx_Oracle`
+- `oracledb`
+- `mssql`
+
+## 2.5 Django, SQLAlchemy, and ORM raw sink candidates
+Search for:
+- `objects.raw`
+- `.raw(`
+- `RawSQL`
+- `extra(`
+- `.extra`
+- `connection.cursor`
+- `django.db.connection`
+- `QuerySet.order_by`
+- `annotate`
+- `Func`
+- `SQLAlchemy`
+- `text(`
+- `.execute(`
+- `session.execute`
+- `select`
+- `literal_column`
+- `column`
+- `table`
+- `from_statement`
+- `order_by(text`
+- `filter(text`
+- `where(text`
+- `bindparam`
+- `sqlalchemy.sql`
+- `tortoise.raw`
+- `peewee.SQL`
+
+## 2.6 Required-control candidates
+Search near sinks for:
+- `%s` placeholder with parameter tuple/list
+- `?` placeholder with parameter tuple/list
+- `:name` bind parameter
+- `bindparam`
+- `params=`
+- `execute(sql, params)`
+- `RawSQL(..., params)`
+- `text(...).bindparams`
+- ORM `.filter`
+- `Q(`
+- `safe_order_fields`
+- `allowed_sort_fields`
+- `allowed_columns`
+- `allowed_tables`
+- `Enum`
+- `Literal`
+- `choices`
+- `re.fullmatch`
+- `validate_sort`
+- `schema`
+- `pydantic`
+
+## 2.7 Python graph search recipes
+Useful combinations:
+
+```text
+@app.route + cursor.execute
+request.args + f"select
+FastAPI + text(f
+APIView + objects.raw
+ViewSet + connection.cursor
+@shared_task + raw SQL
+order_by + request parameter
+literal_column + request parameter
+saved_filter + where_clause + execute
+report_template + session.execute
+cursor.executescript + request
+```
+
+---
+
+# 3. Python SQL Injection Anti-Patterns
+
+## 3.1 Raw DB-API Anti-Patterns
 
 ### A1. Concatenated SQL in `execute`
 ```python
@@ -84,7 +281,7 @@ sql = f"select * from orders where status = '{status}'"
 cursor.execute(sql)
 ```
 
-## 2.2 Structural Injection Anti-Patterns
+## 3.2 Structural Injection Anti-Patterns
 
 ### A3. User-controlled ORDER BY
 ```python
@@ -98,7 +295,7 @@ sql = "select * from invoice where " + condition
 cursor.execute(sql)
 ```
 
-## 2.3 Django / ORM Misuse Anti-Patterns
+## 3.3 Django / ORM Misuse Anti-Patterns
 
 ### A5. Django `.raw(...)` with interpolation
 ```python
@@ -111,7 +308,7 @@ User.objects.raw(query)
 cursor.execute("select * from orders where id = " + order_id)
 ```
 
-## 2.4 SQLAlchemy / Text Anti-Patterns
+## 3.4 SQLAlchemy / Text Anti-Patterns
 
 ### A7. Unsafe `text(...)` usage
 ```python
@@ -125,7 +322,7 @@ stmt = text("select * from logs order by " + sort + " limit :limit")
 db.execute(stmt, {"limit": limit})
 ```
 
-## 2.5 Second-Order Anti-Patterns
+## 3.5 Second-Order Anti-Patterns
 
 ### A9. Stored filter reused in SQL
 ```python
@@ -142,7 +339,7 @@ cursor.execute(sql, [record_id])
 
 ---
 
-# 3. Case Templates
+# 4. Case Templates
 
 ## Case P-SQL-1: Raw Execute Injection
 
@@ -184,7 +381,7 @@ cursor.execute(sql)
 
 ---
 
-# 4. Python-Specific Audit Heuristics
+# 5. Python-Specific Audit Heuristics
 
 ## 4.1 Django / DRF heuristics
 Pay attention to:
@@ -230,7 +427,7 @@ Check whether SQL safety is consistent across:
 
 ---
 
-# 5. False-Positive Controls
+# 6. False-Positive Controls
 
 Do not report a vulnerability as confirmed if:
 - the input is provably constant or server-controlled,
@@ -241,7 +438,7 @@ Do not report a vulnerability as confirmed if:
 
 ---
 
-# 6. What Good Evidence Looks Like
+# 7. What Good Evidence Looks Like
 
 Strong evidence usually includes:
 - the exact entry point
@@ -253,7 +450,7 @@ Strong evidence usually includes:
 
 ---
 
-# 7. Quick Python SQL Audit Checklist
+# 8. Quick Python SQL Audit Checklist
 
 - Do request inputs reach cursor execution, raw SQL, or ORM raw helpers?
 - Are queries built with concatenation, f-strings, format strings, or raw fragments?
